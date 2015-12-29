@@ -2,6 +2,21 @@ apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
 android {
+    signingConfigs {
+// release keystore not ready yet
+//        release {
+//            keyAlias 'release'
+//            keyPassword 'keystore-password'
+//            storeFile file('../travelers-diary_release.keystore')
+//            storePassword 'keystore-password'
+//        }
+        debug {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('../travelers-diary_debug.keystore')
+            storePassword 'android'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
