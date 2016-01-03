@@ -6,21 +6,21 @@ import java.util.ArrayList;
  * Created by itrifonov on 31.12.2015.
  */
 public class Travel {
-    private int id;
-    private long start;
-    private long stop;
+    private long start; //time stamp
+    private long stop; //time stamp
     private String title;
     private String description;
     private ArrayList<TodoItem> reminder;
     private ArrayList<Waypoint> waypoints;
     private ArrayList<TrackPoint> track;
+    private boolean active;
 
     public Travel() {
     }
 
-    public Travel(int id, long start, long stop, String title, String description,
-                  ArrayList<TodoItem> reminder, ArrayList<Waypoint> waypoints, ArrayList<TrackPoint> track) {
-        this.id = id;
+    public Travel(long start, long stop, String title, String description,
+                  ArrayList<TodoItem> reminder, ArrayList<Waypoint> waypoints,
+                  ArrayList<TrackPoint> track, boolean active) {
         this.start = start;
         this.stop = stop;
         this.title = title;
@@ -28,14 +28,7 @@ public class Travel {
         this.reminder = reminder;
         this.waypoints = waypoints;
         this.track = track;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.active = active;
     }
 
     public long getStart() {
@@ -92,5 +85,13 @@ public class Travel {
 
     public void setTrack(ArrayList<TrackPoint> track) {
         this.track = track;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

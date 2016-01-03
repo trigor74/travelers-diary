@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by itrifonov on 30.12.2015.
  */
 public class DiaryNote {
-    private int travelId;
+    private String travelKey;
     private long time;
     private String title;
     private String text;
@@ -15,15 +15,14 @@ public class DiaryNote {
     private ArrayList<String> photos;
     private ArrayList<String> audios;
     private ArrayList<String> videos;
-    private ArrayList<String> tags;
 
     public DiaryNote() {
     }
 
-    public DiaryNote(int travelId, long time, String title, String text, LocationPoint location,
-                     WeatherInfo weather, ArrayList<String> photos, ArrayList<String> audios, ArrayList<String> videos,
-                     ArrayList<String> tags) {
-        this.travelId = travelId;
+    public DiaryNote(String travelKey, long time, String title, String text, LocationPoint location,
+                     WeatherInfo weather, ArrayList<String> photos, ArrayList<String> audios,
+                     ArrayList<String> videos) {
+        this.travelKey = travelKey;
         this.time = time;
         this.title = title;
         this.text = text;
@@ -32,15 +31,14 @@ public class DiaryNote {
         this.photos = photos;
         this.audios = audios;
         this.videos = videos;
-        this.tags = tags;
     }
 
-    public int getTravelId() {
-        return travelId;
+    public String getTravelKey() {
+        return travelKey;
     }
 
-    public void setTravelId(int travelId) {
-        this.travelId = travelId;
+    public void setTravelKey(String travelKey) {
+        this.travelKey = travelKey;
     }
 
     public long getTime() {
@@ -105,13 +103,5 @@ public class DiaryNote {
 
     public void setVideos(ArrayList<String> videos) {
         this.videos = videos;
-    }
-
-    public ArrayList<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(ArrayList<String> tags) {
-        this.tags = tags;
     }
 }

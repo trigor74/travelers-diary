@@ -10,6 +10,7 @@ public class LocationPoint {
 
     public LocationPoint() {
     }
+
     public LocationPoint(double latitude, double longitude, double altitude) {
         this.latitude = latitude;
         this.longitude = longitude;

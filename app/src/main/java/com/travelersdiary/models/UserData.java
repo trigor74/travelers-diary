@@ -1,32 +1,22 @@
 package com.travelersdiary.models;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by itrifonov on 31.12.2015.
  */
 public class UserData {
-    private ArrayList<TodoItem> reminder;
     private ArrayList<DiaryNote> diary;
-    private ArrayList<Travel> travels;
-    private ArrayList<TagListItem> tags;
+    private HashMap<String, Travel> travels; // Key = UUID.randomUUID()
 
     public UserData() {
     }
 
-    public UserData(ArrayList<TodoItem> reminder, ArrayList<DiaryNote> diary, ArrayList<Travel> travels, ArrayList<TagListItem> tags) {
-        this.reminder = reminder;
+    public UserData(ArrayList<DiaryNote> diary,
+                    HashMap<String, Travel> travels) {
         this.diary = diary;
         this.travels = travels;
-        this.tags = tags;
-    }
-
-    public ArrayList<TodoItem> getReminder() {
-        return reminder;
-    }
-
-    public void setReminder(ArrayList<TodoItem> reminder) {
-        this.reminder = reminder;
     }
 
     public ArrayList<DiaryNote> getDiary() {
@@ -37,19 +27,11 @@ public class UserData {
         this.diary = diary;
     }
 
-    public ArrayList<Travel> getTravels() {
+    public HashMap<String, Travel> getTravels() {
         return travels;
     }
 
-    public void setTravels(ArrayList<Travel> travels) {
+    public void setTravels(HashMap<String, Travel> travels) {
         this.travels = travels;
-    }
-
-    public ArrayList<TagListItem> getTags() {
-        return tags;
-    }
-
-    public void setTags(ArrayList<TagListItem> tags) {
-        this.tags = tags;
     }
 }

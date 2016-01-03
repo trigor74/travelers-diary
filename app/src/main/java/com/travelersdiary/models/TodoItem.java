@@ -8,18 +8,30 @@ import java.util.ArrayList;
 public class TodoItem {
     private String title;
     private ArrayList<TodoTask> task;
-    private Boolean viewAsCheckboxes;
-    private Boolean completed;
-    // TODO: 30.12.2015 add remind at time and in a place
+    private boolean viewAsCheckboxes;
+    private boolean completed;
+    //Reminde at time
+    private long time;
+    private long interval;
+    //Remind in a point
+    private Waypoint waypoint;
+    private int distance;
+    private boolean repeat;
 
     public TodoItem() {
     }
 
-    public TodoItem(String title, ArrayList<TodoTask> task, Boolean viewAsCheckboxes, Boolean completed) {
+    public TodoItem(String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes, boolean completed,
+                    long time, long interval, Waypoint waypoint, int distance, boolean repeat) {
         this.title = title;
         this.task = task;
         this.viewAsCheckboxes = viewAsCheckboxes;
         this.completed = completed;
+        this.time = time;
+        this.interval = interval;
+        this.waypoint = waypoint;
+        this.distance = distance;
+        this.repeat = repeat;
     }
 
     public String getTitle() {
@@ -38,19 +50,59 @@ public class TodoItem {
         this.task = task;
     }
 
-    public Boolean getViewAsCheckboxes() {
+    public boolean isViewAsCheckboxes() {
         return viewAsCheckboxes;
     }
 
-    public void setViewAsCheckboxes(Boolean viewAsCheckboxes) {
+    public void setViewAsCheckboxes(boolean viewAsCheckboxes) {
         this.viewAsCheckboxes = viewAsCheckboxes;
     }
 
-    public Boolean getCompleted() {
+    public boolean isCompleted() {
         return completed;
     }
 
-    public void setCompleted(Boolean completed) {
+    public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    public void setInterval(long interval) {
+        this.interval = interval;
+    }
+
+    public Waypoint getWaypoint() {
+        return waypoint;
+    }
+
+    public void setWaypoint(Waypoint waypoint) {
+        this.waypoint = waypoint;
+    }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public boolean isRepeat() {
+        return repeat;
+    }
+
+    public void setRepeat(boolean repeat) {
+        this.repeat = repeat;
     }
 }
