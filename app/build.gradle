@@ -7,13 +7,13 @@ android {
 //        release {
 //            keyAlias 'release'
 //            keyPassword 'keystore-password'
-//            storeFile file('../travelers-diary_release.keystore')
+//            storeFile file('../../travelers-diary_release.keystore')
 //            storePassword 'keystore-password'
 //        }
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
-            storeFile file('../travelers-diary_debug.keystore')
+            storeFile file('../../travelers-diary_debug.keystore')
             storePassword 'android'
         }
     }
@@ -27,18 +27,24 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-
 
     apt 'com.squareup:otto:1.3.8'
     compile 'com.android.support:appcompat-v7:23.1.1'
