@@ -7,13 +7,13 @@ android {
 //        release {
 //            keyAlias 'release'
 //            keyPassword 'keystore-password'
-//            storeFile file('../travelers-diary_release.keystore')
+//            storeFile file('../../travelers-diary_release.keystore')
 //            storePassword 'keystore-password'
 //        }
         debug {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
-            storeFile file('../travelers-diary_debug.keystore')
+            storeFile file('../../travelers-diary_debug.keystore')
             storePassword 'android'
         }
     }
