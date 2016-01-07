@@ -55,4 +55,5 @@ dependencies {
     compile 'com.firebase:geofire:1.1.+'
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
+    compile 'com.google.android.gms:play-services:8.3.0'
 }
