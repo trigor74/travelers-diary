@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     signingConfigs {
@@ -53,4 +54,5 @@ dependencies {
     compile 'com.firebase:firebase-client-android:2.5.0+'
     compile 'com.firebase:geofire:1.1.+'
     compile 'com.google.code.gson:gson:2.4'
+    compile 'com.google.android.gms:play-services-auth:8.3.0'
 }
