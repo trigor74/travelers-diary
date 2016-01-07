@@ -23,16 +23,13 @@ import com.google.android.gms.plus.Plus;
 import com.travelersdiary.R;
 
 import java.io.IOException;
-import java.util.Map;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    @Bind(R.id.sign_in_button)
     SignInButton mGoogleLoginButton;
 
     private GoogleApiClient mGoogleApiClient;
@@ -50,6 +47,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
         ButterKnife.bind(this);
 
@@ -59,6 +57,8 @@ public class LoginActivity extends AppCompatActivity implements
                 .addApi(Plus.API)
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
+
+        mGoogleLoginButton = (SignInButton) findViewById(R.id.sign_in_button);
 
         mGoogleLoginButton.setSize(SignInButton.SIZE_STANDARD);
         mGoogleLoginButton.setOnClickListener(new View.OnClickListener() {
