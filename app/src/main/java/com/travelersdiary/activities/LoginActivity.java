@@ -3,6 +3,7 @@ package com.travelersdiary.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -43,13 +44,10 @@ public class LoginActivity extends AppCompatActivity implements
     private AuthData mAuthData;
     private Firebase.AuthStateListener mAuthStateListener;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        ButterKnife.bind(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -96,14 +94,11 @@ public class LoginActivity extends AppCompatActivity implements
             }
         };
         /* Check if the user is authenticated with Firebase already. If this is the case we can set the authenticated
-         * user and hide hide any login buttons */
+         * user and hide any login buttons */
         mFirebaseRef.addAuthStateListener(mAuthStateListener);
 
     }
 
-    /**
-     * Show errors to users
-     */
     private void showErrorDialog(String message) {
         new AlertDialog.Builder(this)
                 .setTitle("Error")
@@ -111,30 +106,6 @@ public class LoginActivity extends AppCompatActivity implements
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
-    }
-
-    /**
-     * Utility class for authentication results
-     */
-    private class AuthResultHandler implements Firebase.AuthResultHandler {
-
-        private final String provider;
-
-        public AuthResultHandler(String provider) {
-            this.provider = provider;
-        }
-
-        @Override
-        public void onAuthenticated(AuthData authData) {
-            mAuthProgressDialog.hide();
-            setAuthenticatedUser(authData);
-        }
-
-        @Override
-        public void onAuthenticationError(FirebaseError firebaseError) {
-            mAuthProgressDialog.hide();
-            showErrorDialog(firebaseError.toString());
-        }
     }
 
     /* A helper method to resolve the current ConnectionResult error. */
@@ -188,7 +159,19 @@ public class LoginActivity extends AppCompatActivity implements
                 mGoogleLoginClicked = false;
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
-                    mFirebaseRef.authWithOAuthToken("google", token, new AuthResultHandler("google"));
+                    mFirebaseRef.authWithOAuthToken("google", token, new Firebase.AuthResultHandler() {
+                        @Override
+                        public void onAuthenticated(AuthData authData) {
+                            mAuthProgressDialog.hide();
+                            setAuthenticatedUser(authData);
+                        }
+
+                        @Override
+                        public void onAuthenticationError(FirebaseError firebaseError) {
+                            mAuthProgressDialog.hide();
+                            showErrorDialog(firebaseError.toString());
+                        }
+                    });
                 } else if (errorMessage != null) {
                     mAuthProgressDialog.hide();
                     showErrorDialog(errorMessage);
@@ -207,12 +190,13 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         if (!mGoogleIntentInProgress) {
-            /* Store the ConnectionResult so that we can use it later when the user clicks on the Google+ login button */
+            /* Store the ConnectionResult so that we can use it later
+            when the user clicks on the Google+ login button */
             mGoogleConnectionResult = result;
 
             if (mGoogleLoginClicked) {
-                /* The user has already clicked login so we attempt to resolve all errors until the user is signed in,
-                 * or they cancel. */
+                /* The user has already clicked login so we attempt to resolve all errors
+                 until the user is signed in, or they cancel. */
                 resolveSignInError();
             }
         }
@@ -253,6 +237,7 @@ public class LoginActivity extends AppCompatActivity implements
             if (authData.getProvider().equals("google")) {
                 String name = (String) authData.getProviderData().get("displayName");
                 String email = (String) authData.getProviderData().get("email");
+                Uri profileImageURL = (Uri) authData.getProviderData().get("profileImageURL");
             } else {
                 // Invalid provider
             }
