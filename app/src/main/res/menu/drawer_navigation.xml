@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_travels"
+            android:icon="@drawable/ic_bag_black_24dp"
+            android:title="@string/travels_text" />
+        <item
+            android:id="@+id/nav_diary"
+            android:icon="@drawable/ic_book_black_24dp"
+            android:title="@string/diary_text" />
+        <item
+            android:id="@+id/nav_reminder"
+            android:icon="@drawable/ic_bell_black_24dp"
+            android:title="@string/reminder_text" />
+    </group>
+</menu>

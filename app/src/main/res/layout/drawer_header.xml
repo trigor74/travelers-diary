@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?><!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"--><!--android:layout_width="match_parent"--><!--android:layout_height="192dp"--><!--android:background="@drawable/default_cover_image"--><!--android:baselineAligned="false"--><!--android:gravity="bottom"--><!--android:orientation="vertical"--><!--android:padding="16dp"--><!--android:theme="@style/ThemeOverlay.AppCompat.Dark" />-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_header_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/profile_cover_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/navigation_drawer_header_height"
+        android:layout_gravity="top"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_cover_image" />
+
+    <LinearLayout
+        android:id="@+id/account_content_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start|left"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/navigation_drawer_bottom_padding"
+        android:paddingEnd="@dimen/navigation_drawer_end_padding"
+        android:paddingLeft="@dimen/navigation_drawer_start_padding"
+        android:paddingRight="@dimen/navigation_drawer_end_padding"
+        android:paddingStart="@dimen/navigation_drawer_start_padding"
+        android:paddingTop="@dimen/navigation_drawer_top_padding">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="@dimen/navigation_drawer_profile_image_size"
+            android:layout_height="@dimen/navigation_drawer_profile_image_size"
+            android:src="@drawable/default_profile_image"
+            app:civ_border_color="@color/white"
+            app:civ_border_overlay="true"
+            app:civ_border_width="6dp" />
+
+        <LinearLayout
+            android:id="@+id/account_info_layout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/navigation_drawer_subtitle_size"
+            android:gravity="bottom"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/account_name_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="Account Name"
+                android:textColor="@color/white"
+                android:textSize="@dimen/navigation_drawer_account_info_text_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/account_email_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="accountname@gmail.com"
+                android:textColor="@color/white"
+                android:textSize="@dimen/navigation_drawer_account_info_text_size" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -24,12 +24,15 @@ import com.travelersdiary.R;
 
 import java.io.IOException;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
+    @Bind(R.id.sign_in_button)
     SignInButton mGoogleLoginButton;
 
     private GoogleApiClient mGoogleApiClient;
@@ -58,25 +61,7 @@ public class LoginActivity extends AppCompatActivity implements
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
 
-        mGoogleLoginButton = (SignInButton) findViewById(R.id.sign_in_button);
-
         mGoogleLoginButton.setSize(SignInButton.SIZE_STANDARD);
-        mGoogleLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mGoogleLoginClicked = true;
-                if (!mGoogleApiClient.isConnecting()) {
-                    if (mGoogleConnectionResult != null) {
-                        resolveSignInError();
-                    } else if (mGoogleApiClient.isConnected()) {
-                        getGoogleOAuthTokenAndLogin();
-                    } else {
-                    /* connect API now */
-                        mGoogleApiClient.connect();
-                    }
-                }
-            }
-        });
 
         /* Create the Firebase ref that is used for all authentication with Firebase */
         mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url));
@@ -99,6 +84,21 @@ public class LoginActivity extends AppCompatActivity implements
          * user and hide hide any login buttons */
         mFirebaseRef.addAuthStateListener(mAuthStateListener);
 
+    }
+
+    @OnClick(R.id.sign_in_button)
+    public void signIn() {
+        mGoogleLoginClicked = true;
+        if (!mGoogleApiClient.isConnecting()) {
+            if (mGoogleConnectionResult != null) {
+                resolveSignInError();
+            } else if (mGoogleApiClient.isConnected()) {
+                getGoogleOAuthTokenAndLogin();
+            } else {
+                    /* connect API now */
+                mGoogleApiClient.connect();
+            }
+        }
     }
 
     /**

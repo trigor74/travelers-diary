@@ -36,13 +36,19 @@ public class TravelsListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //mTravelsList.setLayoutManager(new LinearLayoutManager(getContext()));
+//        mTravelsList.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mLayoutManager = new LinearLayoutManager(getContext());
         mTravelsList.setLayoutManager(mLayoutManager);
 
 //        mAdapter = new TravelsListAdapter(myDataset);
 //        mTravelsList.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 
 }

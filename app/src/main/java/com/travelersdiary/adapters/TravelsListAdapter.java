@@ -3,7 +3,8 @@ package com.travelersdiary.adapters;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+
+import butterknife.ButterKnife;
 
 public class TravelsListAdapter extends RecyclerView.Adapter<TravelsListAdapter.ViewHolder> {
 
@@ -21,11 +22,12 @@ public class TravelsListAdapter extends RecyclerView.Adapter<TravelsListAdapter.
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView textView;
+//        @Bind(R.id.text_view)
+//        TextView textView;
 
         public ViewHolder(View view) {
             super(view);
-//            this.textView = (TextView) view.findViewById(R.id.text_view);
+            ButterKnife.bind(this, view);
         }
     }
 
@@ -46,7 +48,7 @@ public class TravelsListAdapter extends RecyclerView.Adapter<TravelsListAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.textView.setText(mDataset[position]);
+//        holder.textView.setText(mDataset[position]);
 
     }
 

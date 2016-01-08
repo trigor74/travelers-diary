@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Traveler\'s Diary</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="travels_text">Travels</string>
+    <string name="diary_text">Diary</string>
+    <string name="reminder_text">Reminder</string>
 </resources>
