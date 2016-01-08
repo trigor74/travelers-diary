@@ -21,11 +21,10 @@ import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 
 import java.io.IOException;
-
-import butterknife.ButterKnife;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -77,7 +76,7 @@ public class LoginActivity extends AppCompatActivity implements
         });
 
         /* Create the Firebase ref that is used for all authentication with Firebase */
-        mFirebaseRef = new Firebase(getResources().getString(R.string.firebase_url));
+        mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         /* Setup the progress dialog that is displayed later when authenticating with Firebase */
         mAuthProgressDialog = new ProgressDialog(this);
@@ -96,9 +95,11 @@ public class LoginActivity extends AppCompatActivity implements
         /* Check if the user is authenticated with Firebase already. If this is the case we can set the authenticated
          * user and hide any login buttons */
         mFirebaseRef.addAuthStateListener(mAuthStateListener);
-
     }
 
+    /**
+     * Show errors to users
+     */
     private void showErrorDialog(String message) {
         new AlertDialog.Builder(this)
                 .setTitle("Error")
@@ -106,6 +107,21 @@ public class LoginActivity extends AppCompatActivity implements
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    private class AuthResultHandler implements Firebase.AuthResultHandler {
+
+        @Override
+        public void onAuthenticated(AuthData authData) {
+            mAuthProgressDialog.hide();
+            setAuthenticatedUser(authData);
+        }
+
+        @Override
+        public void onAuthenticationError(FirebaseError firebaseError) {
+            mAuthProgressDialog.hide();
+            showErrorDialog(firebaseError.toString());
+        }
     }
 
     /* A helper method to resolve the current ConnectionResult error. */
@@ -159,19 +175,7 @@ public class LoginActivity extends AppCompatActivity implements
                 mGoogleLoginClicked = false;
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
-                    mFirebaseRef.authWithOAuthToken("google", token, new Firebase.AuthResultHandler() {
-                        @Override
-                        public void onAuthenticated(AuthData authData) {
-                            mAuthProgressDialog.hide();
-                            setAuthenticatedUser(authData);
-                        }
-
-                        @Override
-                        public void onAuthenticationError(FirebaseError firebaseError) {
-                            mAuthProgressDialog.hide();
-                            showErrorDialog(firebaseError.toString());
-                        }
-                    });
+                    mFirebaseRef.authWithOAuthToken("google", token, new AuthResultHandler());
                 } else if (errorMessage != null) {
                     mAuthProgressDialog.hide();
                     showErrorDialog(errorMessage);
@@ -190,13 +194,12 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         if (!mGoogleIntentInProgress) {
-            /* Store the ConnectionResult so that we can use it later
-            when the user clicks on the Google+ login button */
+            /* Store the ConnectionResult so that we can use it later when the user clicks on the Google+ login button */
             mGoogleConnectionResult = result;
 
             if (mGoogleLoginClicked) {
-                /* The user has already clicked login so we attempt to resolve all errors
-                 until the user is signed in, or they cancel. */
+                /* The user has already clicked login so we attempt to resolve all errors until the user is signed in,
+                 * or they cancel. */
                 resolveSignInError();
             }
         }
