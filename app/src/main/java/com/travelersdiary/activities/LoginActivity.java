@@ -23,8 +23,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.Travel;
+import com.travelersdiary.models.UserData;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -241,6 +248,45 @@ public class LoginActivity extends AppCompatActivity implements
                 String name = (String) authData.getProviderData().get("displayName");
                 String email = (String) authData.getProviderData().get("email");
                 Uri profileImageURL = Uri.parse((String) authData.getProviderData().get("profileImageURL"));
+
+                /*
+                Map<String, String> map = new HashMap<String, String>();
+                map.put("displayName", name);
+                map.put("email", email);
+                map.put("profileImage", profileImageURL.toString());
+                mFirebaseRef.child("users").child(authData.getUid()).setValue(map);
+                */
+
+                UserData data = new UserData();
+
+                Travel travel = new Travel();
+                travel.setTitle("Uncategorized");
+                travel.setDescription("Default category");
+                Travel travel2 = new Travel();
+                travel2.setTitle("Travel to The London, GB");
+                travel2.setDescription("The first travel to the GB");
+                String travelUUID = UUID.randomUUID().toString();
+                HashMap<String, Travel> travels = new HashMap<String, Travel>();
+                travels.put("default", travel);
+                travels.put(travelUUID, travel2);
+
+                ArrayList<DiaryNote> diary = new ArrayList<>();
+                DiaryNote note = new DiaryNote();
+                note.setTravelKey("default");
+                note.setTitle("First note");
+                note.setText("Text of first note");
+                DiaryNote note2 = new DiaryNote();
+                note2.setTravelKey(travelUUID);
+                note2.setTitle("Second note");
+                note2.setText("Text of second note");
+                diary.add(note);
+                diary.add(note2);
+
+                data.setDiary(diary);
+                data.setTravels(travels);
+
+                mFirebaseRef.child("users").child(authData.getUid()).setValue(data);
+
             } else {
                 // Invalid provider
             }
