@@ -240,7 +240,7 @@ public class LoginActivity extends AppCompatActivity implements
             if (authData.getProvider().equals("google")) {
                 String name = (String) authData.getProviderData().get("displayName");
                 String email = (String) authData.getProviderData().get("email");
-                Uri profileImageURL = (Uri) authData.getProviderData().get("profileImageURL");
+                Uri profileImageURL = Uri.parse((String) authData.getProviderData().get("profileImageURL"));
             } else {
                 // Invalid provider
             }
