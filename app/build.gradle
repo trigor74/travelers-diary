@@ -40,6 +40,14 @@ android {
         }
     }
 
+    buildTypes.each {
+        // All keys defined in gradle.properties file
+        // Replace all keys with your keys
+        it.buildConfigField 'String', 'GOOGLE_API_KEY', GoogleApiKey
+        it.buildConfigField 'String', 'GOOGLE_ANDROID_CLIENT_ID', GoogleAndroidClientId
+        it.buildConfigField 'String', 'FIREBASE_ROOT_URL', FirebaseRootUrl
+    }
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE-FIREBASE.txt'
