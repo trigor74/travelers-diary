@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="google_android_client_id">835719391495-fi5oogk98g2vdaa58fnmi9mc4hoq06ks.apps.googleusercontent.com </string>
-    <string name="google_api_key">AIzaSyDDwckEU5xVDxcou9coHD0_wkZL_74Upx0</string>
-    <string name="firebase_url">https://resplendent-torch-7243.firebaseio.com</string>
-</resources>
