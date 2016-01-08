@@ -5,4 +5,5 @@
     <string name="travels_text">Travels</string>
     <string name="diary_text">Diary</string>
     <string name="reminder_text">Reminder</string>
+    <string name="map_text">Map</string>
 </resources>
