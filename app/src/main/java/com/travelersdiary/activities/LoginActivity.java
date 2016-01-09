@@ -6,9 +6,11 @@ import android.content.IntentSender;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
@@ -67,6 +69,8 @@ public class LoginActivity extends AppCompatActivity implements
                 .addApi(Plus.API)
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
+
+        ButterKnife.bind(this);
 
         mGoogleLoginButton.setSize(SignInButton.SIZE_STANDARD);
 
@@ -251,45 +255,6 @@ public class LoginActivity extends AppCompatActivity implements
                 String name = (String) authData.getProviderData().get("displayName");
                 String email = (String) authData.getProviderData().get("email");
                 Uri profileImageURL = Uri.parse((String) authData.getProviderData().get("profileImageURL"));
-
-                /*
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("displayName", name);
-                map.put("email", email);
-                map.put("profileImage", profileImageURL.toString());
-                mFirebaseRef.child("users").child(authData.getUid()).setValue(map);
-                */
-
-                UserData data = new UserData();
-
-                Travel travel = new Travel();
-                travel.setTitle("Uncategorized");
-                travel.setDescription("Default category");
-                Travel travel2 = new Travel();
-                travel2.setTitle("Travel to The London, GB");
-                travel2.setDescription("The first travel to the GB");
-                String travelUUID = UUID.randomUUID().toString();
-                HashMap<String, Travel> travels = new HashMap<String, Travel>();
-                travels.put("default", travel);
-                travels.put(travelUUID, travel2);
-
-                ArrayList<DiaryNote> diary = new ArrayList<>();
-                DiaryNote note = new DiaryNote();
-                note.setTravelKey("default");
-                note.setTitle("First note");
-                note.setText("Text of first note");
-                DiaryNote note2 = new DiaryNote();
-                note2.setTravelKey(travelUUID);
-                note2.setTitle("Second note");
-                note2.setText("Text of second note");
-                diary.add(note);
-                diary.add(note2);
-
-                data.setDiary(diary);
-                data.setTravels(travels);
-
-                mFirebaseRef.child("users").child(authData.getUid()).setValue(data);
-
             } else {
                 // Invalid provider
             }
@@ -298,5 +263,52 @@ public class LoginActivity extends AppCompatActivity implements
             mGoogleLoginButton.setVisibility(View.VISIBLE);
         }
         this.mAuthData = authData;
+    }
+
+    @OnClick(R.id.set_data)
+    public void OnClick(View v) {
+        Map<String, Travel> travels = new HashMap<String, Travel>();
+        Firebase userTravelsRef = mFirebaseRef.child("users").child(mAuthData.getUid()).child("travels");
+        Travel travel;
+        travel = new Travel();
+        travel.setTitle("Uncategorized");
+        travel.setDescription("Default category");
+        travel.setStart(-1);
+        travel.setStop(-1);
+        travel.setActive(true);
+        travels.put("default", travel);
+        userTravelsRef.setValue(travels);
+
+        for (int i = 0; i < 10; i++) {
+            travel = new Travel();
+            travel.setTitle("Travel #" + Integer.toString(i) + " title");
+            travel.setDescription("Travel #" + Integer.toString(i) + " description");
+            travel.setStart(System.currentTimeMillis());
+            travel.setStop(-1);
+            travel.setActive(false);
+            Firebase newTravelRef = userTravelsRef.push();
+            newTravelRef.setValue(travel);
+            travels.put(newTravelRef.getKey(), travel);
+        }
+
+        Map<String, DiaryNote> diary = new HashMap<>();
+
+        for (Map.Entry<String, Travel> entry : travels.entrySet()) {
+            String key = entry.getKey();
+            //Travel value = entry.getValue();
+            for (int i = 0; i < 10; i++) {
+                DiaryNote note = new DiaryNote();
+                note.setTravelId(key);
+                note.setTitle("The #" + Integer.toString(i) + " note");
+                note.setText("Text of the #" + Integer.toString(i) + " note");
+                long currentTime = System.currentTimeMillis();
+                note.setTime(currentTime);
+                String currentTimestamp = Long.toString(currentTime);
+                diary.put(currentTimestamp, note);
+            }
+        }
+
+        Firebase userDiaryRef = mFirebaseRef.child("users").child(mAuthData.getUid()).child("diary");
+        userDiaryRef.setValue(diary);
     }
 }

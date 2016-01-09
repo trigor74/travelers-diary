@@ -4,15 +4,25 @@ package com.travelersdiary.models;
  * Created by itrifonov on 30.12.2015.
  */
 public class Waypoint {
+    private String travelId;
     private String title;
     private LocationPoint location;
 
     public Waypoint() {
     }
 
-    public Waypoint(String title, LocationPoint location) {
+    public Waypoint(String travelId, String title, LocationPoint location) {
+        this.travelId = travelId;
         this.title = title;
         this.location = location;
+    }
+
+    public String getTravelId() {
+        return travelId;
+    }
+
+    public void setTravelId(String travelId) {
+        this.travelId = travelId;
     }
 
     public String getTitle() {

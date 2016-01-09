@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by itrifonov on 30.12.2015.
  */
 public class DiaryNote {
-    private String travelKey;
+    private String travelId;
     private long time;
     private String title;
     private String text;
@@ -19,10 +19,10 @@ public class DiaryNote {
     public DiaryNote() {
     }
 
-    public DiaryNote(String travelKey, long time, String title, String text, LocationPoint location,
+    public DiaryNote(String travelId, long time, String title, String text, LocationPoint location,
                      WeatherInfo weather, ArrayList<String> photos, ArrayList<String> audios,
                      ArrayList<String> videos) {
-        this.travelKey = travelKey;
+        this.travelId = travelId;
         this.time = time;
         this.title = title;
         this.text = text;
@@ -33,12 +33,12 @@ public class DiaryNote {
         this.videos = videos;
     }
 
-    public String getTravelKey() {
-        return travelKey;
+    public String getTravelId() {
+        return travelId;
     }
 
-    public void setTravelKey(String travelKey) {
-        this.travelKey = travelKey;
+    public void setTravelId(String travelId) {
+        this.travelId = travelId;
     }
 
     public long getTime() {

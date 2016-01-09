@@ -6,11 +6,12 @@ import java.util.ArrayList;
  * Created by itrifonov on 30.12.2015.
  */
 public class TodoItem {
+    private String travelId;
     private String title;
     private ArrayList<TodoTask> task;
     private boolean viewAsCheckboxes;
     private boolean completed;
-    //Reminde at time
+    //Remind at time
     private long time;
     private long interval;
     //Remind in a point
@@ -21,8 +22,10 @@ public class TodoItem {
     public TodoItem() {
     }
 
-    public TodoItem(String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes, boolean completed,
-                    long time, long interval, Waypoint waypoint, int distance, boolean repeat) {
+    public TodoItem(String travelId, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
+                    boolean completed, long time, long interval, Waypoint waypoint, int distance,
+                    boolean repeat) {
+        this.travelId = travelId;
         this.title = title;
         this.task = task;
         this.viewAsCheckboxes = viewAsCheckboxes;
@@ -32,6 +35,14 @@ public class TodoItem {
         this.waypoint = waypoint;
         this.distance = distance;
         this.repeat = repeat;
+    }
+
+    public String getTravelId() {
+        return travelId;
+    }
+
+    public void setTravelId(String travelId) {
+        this.travelId = travelId;
     }
 
     public String getTitle() {
