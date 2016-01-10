@@ -13,7 +13,6 @@ import com.travelersdiary.adapters.ViewPagerAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
@@ -92,11 +91,6 @@ public class MainActivity extends BaseActivity {
             default:
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @OnClick(R.id.test_button)
-    public void onTestButtonClick() {
-        startActivity(new Intent(this, TravelActivity.class));
     }
 
     @Override
