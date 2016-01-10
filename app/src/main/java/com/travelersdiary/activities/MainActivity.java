@@ -48,10 +48,6 @@ public class MainActivity extends BaseActivity {
         setupViewPager();
 
         openSelectedTab();
-
-        if (savedInstanceState == null) {
-            mNavigationView.getMenu().getItem(0).setChecked(true);
-        }
     }
 
     public void setupViewPager() {
@@ -103,12 +99,17 @@ public class MainActivity extends BaseActivity {
         startActivity(new Intent(this, TravelActivity.class));
     }
 
+    @Override
+    protected boolean useDrawerToggle() {
+        return true;
+    }
+
     private void openSelectedTab() {
         Intent intent = getIntent();
-        if (intent != null) {
-            int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
-            mViewPager.setCurrentItem(tabToOpen);
-        }
+        int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
+
+        mViewPager.setCurrentItem(tabToOpen);
+        mNavigationView.getMenu().getItem(tabToOpen).setChecked(true);
     }
 
 }

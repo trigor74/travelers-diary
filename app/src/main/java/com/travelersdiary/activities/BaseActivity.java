@@ -33,10 +33,15 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
     protected void setupNavigationView(Toolbar toolbar) {
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        if (useDrawerToggle()) {
+            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+            mDrawerLayout.setDrawerListener(mDrawerToggle);
+            mDrawerToggle.syncState();
+        }
+    }
 
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
+    protected boolean useDrawerToggle() {
+        return false;
     }
 
     @Override
