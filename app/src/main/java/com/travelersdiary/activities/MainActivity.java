@@ -122,15 +122,15 @@ public class MainActivity extends BaseActivity {
         switch (menuItem.getItemId()) {
             case R.id.nav_travels:
                 mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(0);
+                mTabLayout.getTabAt(0).select();
                 break;
             case R.id.nav_diary:
                 mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(1);
+                mTabLayout.getTabAt(1).select();
                 break;
             case R.id.nav_reminder:
                 mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(2);
+                mTabLayout.getTabAt(2).select();
                 break;
             default:
         }
