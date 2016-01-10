@@ -1,5 +1,6 @@
 package com.travelersdiary.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -32,6 +33,8 @@ public class TravelActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
+
+        setupNavigationView(mToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
@@ -70,13 +73,29 @@ public class TravelActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.nav_travels:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 0);
+                startActivity(intent);
+                break;
+            case R.id.nav_diary:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 1);
+                startActivity(intent);
+                break;
+            case R.id.nav_reminder:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
+                startActivity(intent);
+                break;
             default:
-                return super.onOptionsItemSelected(item);
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

@@ -20,7 +20,6 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
-
         mDrawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_base, null);
 
         FrameLayout activityContainer = (FrameLayout) mDrawerLayout.findViewById(R.id.activity_content);
@@ -33,7 +32,7 @@ public class BaseActivity extends AppCompatActivity implements NavigationView.On
 
     protected void setupNavigationView(Toolbar toolbar) {
         mNavigationView.setNavigationItemSelectedListener(this);
-        
+
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);

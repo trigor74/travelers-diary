@@ -1,5 +1,6 @@
 package com.travelersdiary.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -12,8 +13,11 @@ import com.travelersdiary.adapters.ViewPagerAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
+
+    public static final String KEY_TAB_POSITION = "TAB_POSITION";
 
     @Bind(R.id.main_activity_toolbar)
     Toolbar mToolbar;
@@ -42,6 +46,8 @@ public class MainActivity extends BaseActivity {
         }
 
         setupViewPager();
+
+        openSelectedTab();
 
         if (savedInstanceState == null) {
             mNavigationView.getMenu().getItem(0).setChecked(true);
@@ -90,6 +96,19 @@ public class MainActivity extends BaseActivity {
             default:
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @OnClick(R.id.test_button)
+    public void onTestButtonClick() {
+        startActivity(new Intent(this, TravelActivity.class));
+    }
+
+    private void openSelectedTab() {
+        Intent intent = getIntent();
+        if (intent != null) {
+            int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
+            mViewPager.setCurrentItem(tabToOpen);
+        }
     }
 
 }
