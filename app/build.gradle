@@ -83,4 +83,6 @@ dependencies {
 
     compile 'com.firebase:firebase-client-android:2.5.0+'
     compile 'com.firebase:geofire:1.1.+'
+
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }

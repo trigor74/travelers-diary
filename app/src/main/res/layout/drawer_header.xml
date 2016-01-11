@@ -43,7 +43,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/account_name_text"
+                android:id="@+id/account_name_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -55,7 +55,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/account_email_text"
+                android:id="@+id/account_email_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
