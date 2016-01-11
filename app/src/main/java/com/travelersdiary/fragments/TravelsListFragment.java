@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.travelersdiary.R;
+import com.travelersdiary.activities.TravelActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class TravelsListFragment extends Fragment {
 
@@ -49,6 +52,11 @@ public class TravelsListFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+    }
+
+    @OnClick(R.id.test_button)
+    public void onTestButtonClick() {
+        startActivity(new Intent(getActivity(), TravelActivity.class));
     }
 
 }

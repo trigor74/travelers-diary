@@ -9,6 +9,7 @@ import com.travelersdiary.R;
 import com.travelersdiary.activities.MainActivity;
 import com.travelersdiary.activities.TravelActivity;
 import com.travelersdiary.fragments.DiaryListFragment;
+import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
 
@@ -60,8 +61,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
                 if (mContext.getClass().equals(MainActivity.class)) {
                     return new ReminderListFragment();
                 } else if (mContext.getClass().equals(TravelActivity.class)) {
-                    //return new MapFragment();
-                    return new ReminderListFragment();
+                    return new MapFragment();
                 } else {
                     return null;
                 }

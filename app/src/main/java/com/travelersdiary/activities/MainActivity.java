@@ -1,13 +1,10 @@
 package com.travelersdiary.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
@@ -19,22 +16,16 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity {
 
+    public static final String KEY_TAB_POSITION = "TAB_POSITION";
+
     @Bind(R.id.main_activity_toolbar)
     Toolbar mToolbar;
-
-    @Bind(R.id.nav_view)
-    NavigationView mNavigationView;
-
-    @Bind(R.id.drawer)
-    DrawerLayout mDrawerLayout;
 
     @Bind(R.id.tab_layout)
     TabLayout mTabLayout;
 
     @Bind(R.id.view_pager)
     ViewPager mViewPager;
-
-    private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +36,7 @@ public class MainActivity extends BaseActivity {
 
         setSupportActionBar(mToolbar);
 
-        setupDrawerContent(mNavigationView);
-        mDrawerToggle = setupDrawerToggle();
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        setupNavigationView(mToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
@@ -56,39 +45,8 @@ public class MainActivity extends BaseActivity {
         }
 
         setupViewPager();
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        onDrawerItemSelected(menuItem);
-                        menuItem.setChecked(false);
-                        return true;
-                    }
-                });
-
-        navigationView.getMenu().getItem(0).setChecked(true);
-    }
-
-    private ActionBarDrawerToggle setupDrawerToggle() {
-        return new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open, R.string.drawer_close);
+        openSelectedTab();
     }
 
     public void setupViewPager() {
@@ -118,22 +76,34 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    public void onDrawerItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
             case R.id.nav_travels:
-                mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(0);
+                mTabLayout.getTabAt(0).select();
                 break;
             case R.id.nav_diary:
-                mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(1);
+                mTabLayout.getTabAt(1).select();
                 break;
             case R.id.nav_reminder:
-                mDrawerLayout.closeDrawers();
-                mViewPager.setCurrentItem(2);
+                mTabLayout.getTabAt(2).select();
                 break;
             default:
         }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected boolean useDrawerToggle() {
+        return true;
+    }
+
+    private void openSelectedTab() {
+        Intent intent = getIntent();
+        int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
+
+        mViewPager.setCurrentItem(tabToOpen);
+        mNavigationView.getMenu().getItem(tabToOpen).setChecked(true);
     }
 
 }
