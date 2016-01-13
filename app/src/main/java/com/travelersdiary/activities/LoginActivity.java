@@ -3,14 +3,12 @@ package com.travelersdiary.activities;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.net.Uri;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
 
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
@@ -25,20 +23,12 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
-import com.travelersdiary.models.DiaryNote;
-import com.travelersdiary.models.Travel;
-import com.travelersdiary.models.UserData;
 
 import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -47,21 +37,24 @@ public class LoginActivity extends AppCompatActivity implements
     @Bind(R.id.sign_in_button)
     SignInButton mGoogleLoginButton;
 
+    private static final int RC_GOOGLE_LOGIN = 65001;
     private GoogleApiClient mGoogleApiClient;
     private boolean mGoogleIntentInProgress;
     private boolean mGoogleLoginClicked;
     private ConnectionResult mGoogleConnectionResult;
-    private static final int RC_GOOGLE_LOGIN = 1;
-
     private Firebase mFirebaseRef;
-    private ProgressDialog mAuthProgressDialog;
-    private AuthData mAuthData;
     private Firebase.AuthStateListener mAuthStateListener;
+    private ProgressDialog mAuthProgressDialog;
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        ButterKnife.bind(this);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -70,14 +63,10 @@ public class LoginActivity extends AppCompatActivity implements
                 .addScope(Plus.SCOPE_PLUS_LOGIN)
                 .build();
 
-        ButterKnife.bind(this);
-
         mGoogleLoginButton.setSize(SignInButton.SIZE_STANDARD);
 
-        /* Create the Firebase ref that is used for all authentication with Firebase */
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
-        /* Setup the progress dialog that is displayed later when authenticating with Firebase */
         mAuthProgressDialog = new ProgressDialog(this);
         mAuthProgressDialog.setTitle("Loading");
         mAuthProgressDialog.setMessage("Authenticating with Firebase...");
@@ -87,17 +76,30 @@ public class LoginActivity extends AppCompatActivity implements
         mAuthStateListener = new Firebase.AuthStateListener() {
             @Override
             public void onAuthStateChanged(AuthData authData) {
-                mAuthProgressDialog.hide();
-                setAuthenticatedUser(authData);
+                mAuthProgressDialog.dismiss();
+                /**
+                 * If there is a valid session to be restored, start MainActivity.
+                 * No need to pass data via SharedPreferences because app
+                 * already holds userName/provider data from the latest session
+                 */
+                if (authData != null) {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                }
             }
         };
-        /* Check if the user is authenticated with Firebase already. If this is the case we can set the authenticated
-         * user and hide any login buttons */
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         mFirebaseRef.addAuthStateListener(mAuthStateListener);
     }
 
     @OnClick(R.id.sign_in_button)
-    public void signIn() {
+    public void googleSignIn() {
         mGoogleLoginClicked = true;
         if (!mGoogleApiClient.isConnecting()) {
             if (mGoogleConnectionResult != null) {
@@ -105,7 +107,6 @@ public class LoginActivity extends AppCompatActivity implements
             } else if (mGoogleApiClient.isConnected()) {
                 getGoogleOAuthTokenAndLogin();
             } else {
-                    /* connect API now */
                 mGoogleApiClient.connect();
             }
         }
@@ -134,7 +135,7 @@ public class LoginActivity extends AppCompatActivity implements
         @Override
         public void onAuthenticationError(FirebaseError firebaseError) {
             mAuthProgressDialog.hide();
-            showErrorDialog(firebaseError.toString());
+            showErrorDialog(firebaseError.getMessage());
         }
     }
 
@@ -189,7 +190,7 @@ public class LoginActivity extends AppCompatActivity implements
                 mGoogleLoginClicked = false;
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
-                    mFirebaseRef.authWithOAuthToken("google", token, new AuthResultHandler());
+                    mFirebaseRef.authWithOAuthToken(Constants.GOOGLE_PROVIDER, token, new AuthResultHandler());
                 } else if (errorMessage != null) {
                     mAuthProgressDialog.hide();
                     showErrorDialog(errorMessage);
@@ -201,7 +202,6 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(final Bundle bundle) {
-        /* Connected with Google API, use this to authenticate with Firebase */
         getGoogleOAuthTokenAndLogin();
     }
 
@@ -229,18 +229,16 @@ public class LoginActivity extends AppCompatActivity implements
         if (resultCode != RESULT_OK) {
             mGoogleLoginClicked = false;
         }
-
         mGoogleIntentInProgress = false;
-
         if (!mGoogleApiClient.isConnecting()) {
             mGoogleApiClient.connect();
         }
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
         mFirebaseRef.removeAuthStateListener(mAuthStateListener);
+        super.onPause();
     }
 
     /**
@@ -249,66 +247,28 @@ public class LoginActivity extends AppCompatActivity implements
     private void setAuthenticatedUser(AuthData authData) {
         if (authData != null) {
             /* Hide all the login buttons */
-            mGoogleLoginButton.setVisibility(View.GONE);
-            /* show a provider specific status text */
-            if (authData.getProvider().equals("google")) {
+            //mGoogleLoginButton.setVisibility(View.GONE);
+            /* If user has logged in with Google provider */
+            if (authData.getProvider().equals(Constants.GOOGLE_PROVIDER)) {
+                mSharedPreferences.edit().putString(Constants.KEY_PROVIDER, authData.getProvider()).apply();
+                mSharedPreferences.edit().putString(Constants.KEY_USER_UID, authData.getUid()).apply();
                 String name = (String) authData.getProviderData().get("displayName");
+                mSharedPreferences.edit().putString(Constants.KEY_DISPLAY_NAME, name).apply();
                 String email = (String) authData.getProviderData().get("email");
-                Uri profileImageURL = Uri.parse((String) authData.getProviderData().get("profileImageURL"));
+                mSharedPreferences.edit().putString(Constants.KEY_EMAIL, email).apply();
+                String profileImageURL = (String) authData.getProviderData().get("profileImageURL");
+                mSharedPreferences.edit().putString(Constants.KEY_PROFILE_IMAGE, profileImageURL).apply();
             } else {
-                // Invalid provider
+                showErrorDialog("Invalid login provider: " + authData.getProvider());
             }
         } else {
             /* No authenticated user show all the login buttons */
-            mGoogleLoginButton.setVisibility(View.VISIBLE);
+            //mGoogleLoginButton.setVisibility(View.VISIBLE);
         }
-        this.mAuthData = authData;
-    }
-
-    @OnClick(R.id.set_data)
-    public void OnClick(View v) {
-        Map<String, Travel> travels = new HashMap<String, Travel>();
-        Firebase userTravelsRef = mFirebaseRef.child("users").child(mAuthData.getUid()).child("travels");
-        Travel travel;
-        travel = new Travel();
-        travel.setTitle("Uncategorized");
-        travel.setDescription("Default category");
-        travel.setStart(-1);
-        travel.setStop(-1);
-        travel.setActive(true);
-        travels.put("default", travel);
-        userTravelsRef.setValue(travels);
-
-        for (int i = 0; i < 10; i++) {
-            travel = new Travel();
-            travel.setTitle("Travel #" + Integer.toString(i) + " title");
-            travel.setDescription("Travel #" + Integer.toString(i) + " description");
-            travel.setStart(System.currentTimeMillis());
-            travel.setStop(-1);
-            travel.setActive(false);
-            Firebase newTravelRef = userTravelsRef.push();
-            newTravelRef.setValue(travel);
-            travels.put(newTravelRef.getKey(), travel);
-        }
-
-        Map<String, DiaryNote> diary = new HashMap<>();
-
-        for (Map.Entry<String, Travel> entry : travels.entrySet()) {
-            String key = entry.getKey();
-            //Travel value = entry.getValue();
-            for (int i = 0; i < 10; i++) {
-                DiaryNote note = new DiaryNote();
-                note.setTravelId(key);
-                note.setTitle("The #" + Integer.toString(i) + " note");
-                note.setText("Text of the #" + Integer.toString(i) + " note");
-                long currentTime = System.currentTimeMillis();
-                note.setTime(currentTime);
-                String currentTimestamp = Long.toString(currentTime);
-                diary.put(currentTimestamp, note);
-            }
-        }
-
-        Firebase userDiaryRef = mFirebaseRef.child("users").child(mAuthData.getUid()).child("diary");
-        userDiaryRef.setValue(diary);
+        /* Go to main activity */
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
