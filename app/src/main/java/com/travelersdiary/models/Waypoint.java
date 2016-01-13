@@ -6,6 +6,7 @@ package com.travelersdiary.models;
 public class Waypoint {
     private String title;
     private LocationPoint location;
+    private String id;
 
     public Waypoint() {
     }
@@ -29,5 +30,13 @@ public class Waypoint {
 
     public void setLocation(LocationPoint location) {
         this.location = location;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
