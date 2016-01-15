@@ -10,8 +10,10 @@ public final class Constants {
 
     // google
     public static final String GOOGLE_API_KEY = BuildConfig.GOOGLE_API_KEY;
+    public static final String GOOGLE_API_SERVER_KEY = BuildConfig.GOOGLE_API_SERVER_KEY;
     public static final String GOOGLE_ANDROID_CLIENT_ID = BuildConfig.GOOGLE_ANDROID_CLIENT_ID;
     public static final String GOOGLE_PROVIDER = "google";
+    public static final String GOOGLE_ID = "id";
     public static final String GOOGLE_EMAIL = "email";
     public static final String GOOGLE_DISPLAY_NAME = "displayName";
     public static final String GOOGLE_PROFILE_IMAGE = "profileImageURL";
@@ -22,4 +24,5 @@ public final class Constants {
     public static final String KEY_EMAIL = "EMAIL";
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
+    public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
 }

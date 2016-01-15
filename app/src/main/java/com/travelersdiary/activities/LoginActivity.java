@@ -24,11 +24,17 @@ import com.google.android.gms.plus.Plus;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -38,12 +44,18 @@ public class LoginActivity extends AppCompatActivity implements
     SignInButton mGoogleLoginButton;
 
     private static final int RC_GOOGLE_LOGIN = 65001;
+
+    private final OkHttpClient mClient = new OkHttpClient();
+
     private GoogleApiClient mGoogleApiClient;
+    private ConnectionResult mGoogleConnectionResult;
+
     private boolean mGoogleIntentInProgress;
     private boolean mGoogleLoginClicked;
-    private ConnectionResult mGoogleConnectionResult;
+
     private Firebase mFirebaseRef;
     private Firebase.AuthStateListener mAuthStateListener;
+
     private ProgressDialog mAuthProgressDialog;
     private SharedPreferences mSharedPreferences;
 
@@ -157,15 +169,20 @@ public class LoginActivity extends AppCompatActivity implements
     private void getGoogleOAuthTokenAndLogin() {
         mAuthProgressDialog.show();
         /* Get OAuth token in Background */
-        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
+        AsyncTask<Void, Void, HashMap<String, String>> task = new AsyncTask<Void, Void, HashMap<String, String>>() {
             String errorMessage = null;
 
             @Override
-            protected String doInBackground(Void... params) {
+            protected HashMap<String, String> doInBackground(Void... params) {
                 String token = null;
+                String id = null;
+                String coverUrl = null;
+
+                HashMap<String, String> result = new HashMap<>();
 
                 try {
                     String scope = String.format("oauth2:email %s", Scopes.PLUS_LOGIN);
+                    id = GoogleAuthUtil.getAccountId(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient));
                     token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
                 } catch (IOException transientEx) {
                     /* Network or server error */
@@ -182,12 +199,29 @@ public class LoginActivity extends AppCompatActivity implements
                      * Google Play services is installed. */
                     errorMessage = "Error authenticating with Google: " + authEx.getMessage();
                 }
-                return token;
+
+                try {
+                    coverUrl = getCoverImageUrl(id);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                result.put("token", token);
+                result.put("coverUrl", coverUrl);
+
+                return result;
             }
 
             @Override
-            protected void onPostExecute(String token) {
+            protected void onPostExecute(HashMap<String, String> result) {
                 mGoogleLoginClicked = false;
+                String token = result.get("token");
+                String coverUrl = result.get("coverUrl");
+
+                if (coverUrl != null) {
+                    mSharedPreferences.edit().putString(Constants.KEY_COVER_IMAGE, coverUrl).apply();
+                }
+
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
                     mFirebaseRef.authWithOAuthToken(Constants.GOOGLE_PROVIDER, token, new AuthResultHandler());
@@ -198,6 +232,22 @@ public class LoginActivity extends AppCompatActivity implements
             }
         };
         task.execute();
+    }
+
+    public String getCoverImageUrl(String id) throws Exception {
+        String coverJsonUrl = "https://www.googleapis.com/plus/v1/people/" + id +
+                "?fields=cover%2FcoverPhoto%2Furl&key=" + Constants.GOOGLE_API_SERVER_KEY;
+        Request request = new Request.Builder()
+                .url(coverJsonUrl)
+                .build();
+
+        Response response = mClient.newCall(request).execute();
+        if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+        String jsonData = response.body().string();
+        JSONObject jsonObject = new JSONObject(jsonData);
+
+        return jsonObject.getJSONObject("cover").getJSONObject("coverPhoto").getString("url");
     }
 
     @Override
@@ -252,11 +302,14 @@ public class LoginActivity extends AppCompatActivity implements
             if (authData.getProvider().equals(Constants.GOOGLE_PROVIDER)) {
                 mSharedPreferences.edit().putString(Constants.KEY_PROVIDER, authData.getProvider()).apply();
                 mSharedPreferences.edit().putString(Constants.KEY_USER_UID, authData.getUid()).apply();
-                String name = (String) authData.getProviderData().get("displayName");
+
+                String name = (String) authData.getProviderData().get(Constants.GOOGLE_DISPLAY_NAME);
                 mSharedPreferences.edit().putString(Constants.KEY_DISPLAY_NAME, name).apply();
-                String email = (String) authData.getProviderData().get("email");
+
+                String email = (String) authData.getProviderData().get(Constants.GOOGLE_EMAIL);
                 mSharedPreferences.edit().putString(Constants.KEY_EMAIL, email).apply();
-                String profileImageURL = (String) authData.getProviderData().get("profileImageURL");
+
+                String profileImageURL = (String) authData.getProviderData().get(Constants.GOOGLE_PROFILE_IMAGE);
                 mSharedPreferences.edit().putString(Constants.KEY_PROFILE_IMAGE, profileImageURL).apply();
             } else {
                 showErrorDialog("Invalid login provider: " + authData.getProvider());
@@ -271,4 +324,5 @@ public class LoginActivity extends AppCompatActivity implements
         startActivity(intent);
         finish();
     }
+
 }

@@ -29,17 +29,11 @@ public class BaseActivity extends AppCompatActivity implements
     protected NavigationView mNavigationView;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private Firebase.AuthStateListener mAuthListener;
+
     private Firebase mFirebaseRef;
+    private Firebase.AuthStateListener mAuthListener;
+
     private SharedPreferences mSharedPreferences;
-
-    private ImageView mProfileImage;
-    private TextView mAccountName;
-    private TextView mAccountEmail;
-
-    private String mUserProfileImage;
-    private String mUserName;
-    private String mUserEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +43,6 @@ public class BaseActivity extends AppCompatActivity implements
         // for example
         String provider = mSharedPreferences.getString(Constants.KEY_PROVIDER, null);
         String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
-        mUserEmail = mSharedPreferences.getString(Constants.KEY_EMAIL, null);
-        mUserName = mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null);
-        mUserProfileImage = mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null);
 
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
@@ -94,13 +85,15 @@ public class BaseActivity extends AppCompatActivity implements
         }
 
         View headerView = mNavigationView.getHeaderView(0);
-        mProfileImage = (ImageView) headerView.findViewById(R.id.profile_image);
-        mAccountName = (TextView) headerView.findViewById(R.id.account_name_text_view);
-        mAccountEmail = (TextView) headerView.findViewById(R.id.account_email_text_view);
+        ImageView mCoverImage = (ImageView) headerView.findViewById(R.id.profile_cover_image);
+        ImageView mProfileImage = (ImageView) headerView.findViewById(R.id.profile_image);
+        TextView mAccountName = (TextView) headerView.findViewById(R.id.account_name_text_view);
+        TextView mAccountEmail = (TextView) headerView.findViewById(R.id.account_email_text_view);
 
-        Picasso.with(this).load(mUserProfileImage).into(mProfileImage);
-        mAccountName.setText(mUserName);
-        mAccountEmail.setText(mUserEmail);
+        Picasso.with(this).load(mSharedPreferences.getString(Constants.KEY_COVER_IMAGE, null)).into(mCoverImage);
+        Picasso.with(this).load(mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null)).into(mProfileImage);
+        mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
+        mAccountEmail.setText(mSharedPreferences.getString(Constants.KEY_EMAIL, null));
     }
 
     protected boolean useDrawerToggle() {
@@ -110,7 +103,6 @@ public class BaseActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         mDrawerLayout.closeDrawer(GravityCompat.START);
-
         return onOptionsItemSelected(menuItem);
     }
 

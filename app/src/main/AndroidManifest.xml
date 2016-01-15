@@ -17,7 +17,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
 
-        <activity android:name=".activities.LoginActivity">
+        <activity
+            android:name=".activities.LoginActivity"
+            android:theme="@style/AppTheme.FullScreen">
             <!--<intent-filter>-->
             <!--<action android:name="android.intent.action.MAIN" />-->
 
