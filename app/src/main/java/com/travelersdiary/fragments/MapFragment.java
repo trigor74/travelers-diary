@@ -128,5 +128,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
 
 }
