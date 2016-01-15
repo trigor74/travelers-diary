@@ -5,7 +5,7 @@ package com.travelersdiary;
  */
 
 public final class Constants {
-    // firwbase
+    // firebase
     public static final String FIREBASE_URL = BuildConfig.FIREBASE_ROOT_URL;
 
     // google

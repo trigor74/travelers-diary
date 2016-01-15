@@ -30,10 +30,7 @@
             android:id="@+id/profile_image"
             android:layout_width="@dimen/navigation_drawer_profile_image_size"
             android:layout_height="@dimen/navigation_drawer_profile_image_size"
-            android:src="@drawable/default_profile_image"
-            app:civ_border_color="@color/white"
-            app:civ_border_overlay="true"
-            app:civ_border_width="6dp" />
+            android:src="@drawable/default_profile_image" />
 
         <LinearLayout
             android:id="@+id/account_info_layout"

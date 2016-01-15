@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity implements
                 String token = null;
 
                 try {
-                    String scope = String.format("oauth2:%s", Scopes.PLUS_LOGIN);
+                    String scope = String.format("oauth2:email %s", Scopes.PLUS_LOGIN);
                     token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
                 } catch (IOException transientEx) {
                     /* Network or server error */

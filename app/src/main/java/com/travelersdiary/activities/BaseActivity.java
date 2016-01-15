@@ -3,7 +3,6 @@ package com.travelersdiary.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
 import android.support.design.widget.NavigationView;
@@ -13,10 +12,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
+import com.squareup.picasso.Picasso;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 
@@ -30,6 +33,14 @@ public class BaseActivity extends AppCompatActivity implements
     private Firebase mFirebaseRef;
     private SharedPreferences mSharedPreferences;
 
+    private ImageView mProfileImage;
+    private TextView mAccountName;
+    private TextView mAccountEmail;
+
+    private String mUserProfileImage;
+    private String mUserName;
+    private String mUserEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,9 +49,9 @@ public class BaseActivity extends AppCompatActivity implements
         // for example
         String provider = mSharedPreferences.getString(Constants.KEY_PROVIDER, null);
         String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
-        String userEmail = mSharedPreferences.getString(Constants.KEY_EMAIL, null);
-        String userName = mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null);
-        String userProfileImage = mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null);
+        mUserEmail = mSharedPreferences.getString(Constants.KEY_EMAIL, null);
+        mUserName = mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null);
+        mUserProfileImage = mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null);
 
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
@@ -81,6 +92,15 @@ public class BaseActivity extends AppCompatActivity implements
             mDrawerLayout.setDrawerListener(mDrawerToggle);
             mDrawerToggle.syncState();
         }
+
+        View headerView = mNavigationView.getHeaderView(0);
+        mProfileImage = (ImageView) headerView.findViewById(R.id.profile_image);
+        mAccountName = (TextView) headerView.findViewById(R.id.account_name_text_view);
+        mAccountEmail = (TextView) headerView.findViewById(R.id.account_email_text_view);
+
+        Picasso.with(this).load(mUserProfileImage).into(mProfileImage);
+        mAccountName.setText(mUserName);
+        mAccountEmail.setText(mUserEmail);
     }
 
     protected boolean useDrawerToggle() {
