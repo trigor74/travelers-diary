@@ -2,28 +2,32 @@ package com.travelersdiary.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.Query;
+import com.firebase.ui.FirebaseRecyclerAdapter;
+import com.travelersdiary.R;
+import com.travelersdiary.models.Travel;
+
+import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class TravelsListAdapter extends RecyclerView.Adapter<TravelsListAdapter.ViewHolder> {
+public class TravelsListAdapter extends FirebaseRecyclerAdapter<Travel, TravelsListAdapter.ViewHolder> {
 
-    /*example of recycler view adapter*/
-
-    private String[] mDataset;
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public TravelsListAdapter(String[] myDataset) {
-        mDataset = myDataset;
+    public TravelsListAdapter(Firebase ref) {
+        super(Travel.class, R.layout.list_item_travel, TravelsListAdapter.ViewHolder.class, ref);
     }
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-//        @Bind(R.id.text_view)
-//        TextView textView;
+    public TravelsListAdapter(Query ref) {
+        super(Travel.class, R.layout.list_item_travel, TravelsListAdapter.ViewHolder.class, ref);
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        @Bind(R.id.item_travel_title_text_view)
+        TextView textViewTitle;
+        @Bind(R.id.item_travel_description_text_view)
+        TextView textViewDescription;
 
         public ViewHolder(View view) {
             super(view);
@@ -31,31 +35,9 @@ public class TravelsListAdapter extends RecyclerView.Adapter<TravelsListAdapter.
         }
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
-    public TravelsListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
-//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
-
-        // set the view's size, margins, paddings and layout parameters
-
-//        return new ViewHolder(view);
-        return null;
+    protected void populateViewHolder(TravelsListAdapter.ViewHolder viewHolder, Travel model, int position) {
+        viewHolder.textViewTitle.setText(model.getTitle());
+        viewHolder.textViewDescription.setText(model.getDescription());
     }
-
-    // Replace the contents of a view (invoked by the layout manager)
-    @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-//        holder.textView.setText(mDataset[position]);
-
-    }
-
-    // Return the size of your dataset (invoked by the layout manager)
-    @Override
-    public int getItemCount() {
-        return mDataset.length;
-    }
-
 }
