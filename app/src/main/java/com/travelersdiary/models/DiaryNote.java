@@ -7,6 +7,7 @@ import java.util.ArrayList;
  */
 public class DiaryNote {
     private String travelId;
+    private String travelTitle;
     private long time;
     private String title;
     private String text;
@@ -39,6 +40,14 @@ public class DiaryNote {
 
     public void setTravelId(String travelId) {
         this.travelId = travelId;
+    }
+
+    public String getTravelTitle() {
+        return travelTitle;
+    }
+
+    public void setTravelTitle(String travelTitle) {
+        this.travelTitle = travelTitle;
     }
 
     public long getTime() {

@@ -1,6 +1,8 @@
 package com.travelersdiary.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.client.Firebase;
+import com.firebase.ui.FirebaseRecyclerAdapter;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.adapters.DiaryListAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -20,7 +26,7 @@ public class DiaryListFragment extends Fragment {
     @Bind(R.id.diary_list)
     RecyclerView mDiaryList;
 
-    private RecyclerView.Adapter mAdapter;
+    private FirebaseRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     @Nullable
@@ -41,14 +47,23 @@ public class DiaryListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mDiaryList.setLayoutManager(mLayoutManager);
 
-//        mAdapter = new DiaryListAdapter(myDataset);
-//        mDiaryList.setAdapter(mAdapter);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+        Firebase mFirebaseRef = new Firebase(Constants.FIREBASE_URL)
+                .child("users")
+                .child(userUID)
+                .child("diary");
+
+        mAdapter = new DiaryListAdapter(mFirebaseRef);
+        mDiaryList.setAdapter(mAdapter);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
+        mAdapter.cleanup();
     }
 
     @OnClick(R.id.test_button)
