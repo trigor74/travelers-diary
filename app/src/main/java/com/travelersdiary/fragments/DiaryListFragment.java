@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,6 +16,7 @@ import com.firebase.client.Firebase;
 import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.adapters.DiaryListAdapter;
 
 import butterknife.Bind;
@@ -68,6 +70,6 @@ public class DiaryListFragment extends Fragment {
 
     @OnClick(R.id.test_button)
     public void onTestButtonClick() {
-//        startActivity(new Intent(getActivity(), DiaryActivity.class));
+        startActivity(new Intent(getActivity(), DiaryActivity.class));
     }
 }

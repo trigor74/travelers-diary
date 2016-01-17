@@ -37,6 +37,12 @@
 
         <activity android:name=".activities.TravelActivity" />
 
+        <activity
+            android:name=".activities.DiaryActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name="com.onegravity.rteditor.media.choose.MediaChooserActivity" />
+
     </application>
 
 </manifest>
