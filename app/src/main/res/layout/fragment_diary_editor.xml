@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:onegravity="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,23 +10,14 @@
     <ScrollView
         android:id="@+id/rte_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/rte_toolbar_container"
         android:layout_alignParentTop="true"
         android:layout_margin="4dp"
         android:fillViewport="true"
         android:scrollbarStyle="insideOverlay">
 
-        <com.onegravity.rteditor.RTEditText
-            android:id="@+id/rtEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:gravity="top"
-            android:hint="Message"
-            android:imeOptions="actionDone|flagNoEnterAction"
-            android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
-            android:minHeight="200dp" />
+        <include layout="@layout/rte_content" />
 
     </ScrollView>
 

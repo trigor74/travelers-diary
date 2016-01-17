@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
@@ -32,7 +34,11 @@ public class DiaryEditorFragment extends Fragment {
 
     private RTManager mRtManager;
 
-    String message;
+    String mMessage;
+
+    public static DiaryEditorFragment getInstance() {
+        return new DiaryEditorFragment();
+    }
 
     @Nullable
     @Override
@@ -40,7 +46,7 @@ public class DiaryEditorFragment extends Fragment {
         // read extras
         if (savedInstanceState == null) {
             Intent intent = getActivity().getIntent();
-            message = getStringExtra(intent, "message");
+            mMessage = getStringExtra(intent, "message");
         }
 
         // set theme
@@ -50,19 +56,19 @@ public class DiaryEditorFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_diary_editor, container, false);
         ButterKnife.bind(this, view);
 
-        // initialize rich text manager
+        // create RTManager
         RTApi rtApi = new RTApi(getContext(), new RTProxyImpl(getActivity()), new RTMediaFactoryImpl(getContext(), true));
         mRtManager = new RTManager(rtApi, savedInstanceState);
-//
-//        // register toolbar (if it exists)
+
+        // register toolbar (if it exists)
         if (rtToolbar != null) {
             mRtManager.registerToolbar(toolbarContainer, rtToolbar);
         }
 
-        // register message editor
+        // register mMessage editor
         mRtManager.registerEditor(mRtEditText, true);
-        if (message != null) {
-            mRtEditText.setRichTextEditing(true, message);
+        if (mMessage != null) {
+            mRtEditText.setRichTextEditing(true, mMessage);
         }
 
         mRtEditText.requestFocus();
@@ -71,10 +77,17 @@ public class DiaryEditorFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-//        ((InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
-//                .showSoftInput(mRtEditText, InputMethodManager.SHOW_FORCED);
+    public void onResume() {
+        super.onResume();
+        ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .showSoftInput(mRtEditText, InputMethodManager.SHOW_FORCED);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
     }
 
     private String getStringExtra(Intent intent, String key) {
@@ -98,7 +111,7 @@ public class DiaryEditorFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (mRtManager != null) {
-            mRtManager.onDestroy(getActivity().isFinishing());
+            mRtManager.onDestroy(true);
         }
     }
 }

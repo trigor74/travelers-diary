@@ -32,9 +32,9 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.test_button)
     public void opedEditor() {
         getActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new DiaryEditorFragment())
+                .replace(R.id.fragment_container, DiaryEditorFragment.getInstance())
                 .addToBackStack(null)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
 }

@@ -37,7 +37,9 @@
 
         <activity android:name=".activities.TravelActivity" />
 
-        <activity android:name=".activities.DiaryActivity" />
+        <activity
+            android:name=".activities.DiaryActivity"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 
