@@ -24,6 +24,7 @@ import com.onegravity.rteditor.RTToolbar;
 import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
+import com.onegravity.rteditor.api.format.RTFormat;
 import com.travelersdiary.R;
 
 import butterknife.Bind;
@@ -166,6 +167,7 @@ public class DiaryEditorFragment extends Fragment {
                 }
                 return true;
             case R.id.action_save:
+                String text = mRtEditText.getText(RTFormat.HTML);
                 Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
                 mRtEditText.resetHasChanged();
                 return true;

@@ -43,6 +43,8 @@
 
         <activity android:name="com.onegravity.rteditor.media.choose.MediaChooserActivity" />
 
+        <activity android:name=".activities.AddDiaryNoteActivity" />
+
     </application>
 
 </manifest>

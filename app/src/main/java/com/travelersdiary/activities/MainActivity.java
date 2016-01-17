@@ -41,6 +41,9 @@ public class MainActivity extends BaseActivity {
                 addTravelDialog.show(fragmentManager, "dialog");
                 break;
             case 1: // Diary Tab
+                Intent intent = new Intent(this, AddDiaryNoteActivity.class);
+                //intent.putExtra(key, value);
+                startActivity(intent);
                 break;
             case 2: // Reminder Tab
                 break;
