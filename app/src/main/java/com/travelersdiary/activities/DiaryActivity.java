@@ -36,4 +36,5 @@ public class DiaryActivity extends BaseActivity {
                 .add(R.id.fragment_container, new DiaryFragment())
                 .commit();
     }
+
 }
