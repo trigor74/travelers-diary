@@ -7,6 +7,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <!-- Support library compatibility -->
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme" parent="AppTheme.Base" />
@@ -14,6 +16,12 @@
     <style name="AppTheme.FullScreen" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="RteTheme" parent="@style/RTE_ThemeLight">
+        <item name="colorPrimary">#CFD8DC</item>
+        <item name="colorAccent">#37474F</item>
+        <item name="colorPrimaryDark">#90A4AE</item>
     </style>
 
 </resources>

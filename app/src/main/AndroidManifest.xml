@@ -37,6 +37,8 @@
 
         <activity android:name=".activities.TravelActivity" />
 
+        <activity android:name=".activities.DiaryActivity" />
+
     </application>
 
 </manifest>
