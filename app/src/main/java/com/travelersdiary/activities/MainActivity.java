@@ -3,16 +3,21 @@ package com.travelersdiary.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
+import com.travelersdiary.dialogs.AddTravelDialog;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
@@ -26,6 +31,29 @@ public class MainActivity extends BaseActivity {
 
     @Bind(R.id.view_pager)
     ViewPager mViewPager;
+
+    @OnClick(R.id.main_activity_fab)
+    public void onClick(View v) {
+        switch (mViewPager.getCurrentItem()) {
+            case 0: // Travels Tab
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                AddTravelDialog addTravelDialog = new AddTravelDialog();
+//                if (isTabletLandMode()) {
+                    addTravelDialog.show(fragmentManager, "dialog");
+//                } else {
+//                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+//                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//                    transaction.add(R.id.main_content, addTravelDialog)
+//                            .addToBackStack(null).commit();
+//                }
+                break;
+            case 1: // Diary Tab
+                break;
+            case 2: // Reminder Tab
+                break;
+            default:
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,4 +134,7 @@ public class MainActivity extends BaseActivity {
         mNavigationView.getMenu().getItem(tabToOpen).setChecked(true);
     }
 
+    private boolean isTabletLandMode() {
+        return getResources().getBoolean(R.bool.isTabletLand);
+    }
 }
