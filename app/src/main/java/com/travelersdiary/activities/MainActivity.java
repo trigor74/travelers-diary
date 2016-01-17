@@ -38,14 +38,7 @@ public class MainActivity extends BaseActivity {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 AddTravelDialog addTravelDialog = new AddTravelDialog();
-//                if (isTabletLandMode()) {
-                    addTravelDialog.show(fragmentManager, "dialog");
-//                } else {
-//                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                    transaction.add(R.id.main_content, addTravelDialog)
-//                            .addToBackStack(null).commit();
-//                }
+                addTravelDialog.show(fragmentManager, "dialog");
                 break;
             case 1: // Diary Tab
                 break;
