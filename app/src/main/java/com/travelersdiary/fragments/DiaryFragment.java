@@ -34,7 +34,7 @@ public class DiaryFragment extends Fragment {
         getActivity().getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, DiaryEditorFragment.getInstance())
                 .addToBackStack(null)
-                .commitAllowingStateLoss();
+                .commit();
     }
 
 }
