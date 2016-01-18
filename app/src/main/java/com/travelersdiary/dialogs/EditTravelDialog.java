@@ -17,38 +17,55 @@ import com.travelersdiary.R;
 import com.travelersdiary.models.Travel;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class AddTravelDialog extends DialogFragment {
+public class EditTravelDialog extends DialogFragment {
 
     @Bind(R.id.new_travel_title_edit_text)
     EditText mTravelTitle;
     @Bind(R.id.new_travel_description_edit_text)
     EditText mTravelDescription;
 
+    private String mTravelKey;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
         View view = inflater.inflate(R.layout.dialog_add_travel, null);
         ButterKnife.bind(this, view);
 
+        Bundle arguments = getArguments();
+        String dialogTitle = getString(R.string.edit_travel_dialog_title_create);
+        String positiveButtonText = getString(R.string.create);
+        if (arguments != null) {
+            mTravelTitle.setText(arguments.getString(Constants.KEY_TRAVEL_TITLE));
+            mTravelDescription.setText(arguments.getString(Constants.KEY_TRAVEL_DESCRIPTION));
+            mTravelKey = arguments.getString(Constants.KEY_TRAVEL_KEY);
+            if (mTravelKey != null && !mTravelKey.isEmpty()){
+                dialogTitle = getString(R.string.edit_travel_dialog_title_edit);
+                positiveButtonText = getString(R.string.save);
+            }
+        }
+
         builder.setView(view)
-                .setTitle("Create new travel")
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                .setTitle(dialogTitle)
+                .setPositiveButton(positiveButtonText, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         long currentTime = System.currentTimeMillis();
 
                         String title = mTravelTitle.getText().toString();
                         String description = mTravelDescription.getText().toString();
-
-                        // Set default title name if none
+                        // Set default title if none
                         if (title == null || title.isEmpty()) {
-                            title = String.format("Travel at %s", SimpleDateFormat.getDateTimeInstance().format(currentTime));
+                            title = getString(R.string.edit_travel_dialog_default_title, SimpleDateFormat.getDateTimeInstance().format(currentTime));
                         }
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -59,20 +76,28 @@ public class AddTravelDialog extends DialogFragment {
                                 .child(userUID)
                                 .child("travels");
 
-                        Travel travel = new Travel();
-                        travel.setTitle(title);
-                        travel.setDescription(description);
-                        travel.setStart(currentTime);
-                        travel.setStop(-1);
-                        travel.setActive(false);
+                        if (mTravelKey == null || mTravelKey.isEmpty()) {
+                            Travel travel = new Travel();
+                            travel.setTitle(title);
+                            travel.setDescription(description);
+                            travel.setStart(currentTime);
+                            travel.setStop(-1);
+                            travel.setActive(false);
 
-                        Firebase newTravelRef = firebaseRef.push();
-                        newTravelRef.setValue(travel);
+                            Firebase newTravelRef = firebaseRef.push();
+                            newTravelRef.setValue(travel);
+                        } else {
+                            Map<String, Object> map = new HashMap<String, Object>();
+                            map.put(Constants.FIREBASE_TRAVEL_TITLE, title);
+                            map.put(Constants.FIREBASE_TRAVEL_DESCRIPTION, description);
+                            Firebase editTravelRef = firebaseRef.child(mTravelKey);
+                            editTravelRef.updateChildren(map);
+                        }
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        AddTravelDialog.this.getDialog().cancel();
+                        EditTravelDialog.this.getDialog().cancel();
                     }
                 });
         return builder.create();

@@ -7,7 +7,12 @@
     <string name="reminder_text">Reminder</string>
     <string name="map_text">Map</string>
     <string name="save">Save</string>
+    <string name="create">Create</string>
     <string name="discard">Discard</string>
     <string name="cancel">Cancel</string>
     <string name="discard_changes_text">Discard changes?</string>
+
+    <string name="edit_travel_dialog_title_create">Create new travel</string>
+    <string name="edit_travel_dialog_title_edit">Edit travel</string>
+    <string name="edit_travel_dialog_default_title">Travel at %s</string>
 </resources>
