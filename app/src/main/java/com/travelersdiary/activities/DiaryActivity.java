@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.fragments.DiaryFragment;
 
@@ -33,8 +34,16 @@ public class DiaryActivity extends BaseActivity {
         }
 
         if (savedInstanceState == null) {
+            String key = getIntent().getStringExtra(Constants.KEY_DAIRY_NOTE_REF);
+
+            DiaryFragment diaryFragment = new DiaryFragment();
+
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.KEY_DAIRY_NOTE_REF, key);
+            diaryFragment.setArguments(bundle);
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new DiaryFragment())
+                    .add(R.id.fragment_container, diaryFragment)
                     .commit();
         }
     }

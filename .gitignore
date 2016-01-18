@@ -64,3 +64,5 @@ app/google-services.json
 
 #don't store google_api_key.xml
 app/src/main/res/values/google_api_key.xml
+
+app/src/main/assets/assets.index

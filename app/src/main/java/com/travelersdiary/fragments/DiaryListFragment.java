@@ -59,6 +59,21 @@ public class DiaryListFragment extends Fragment {
 
         mAdapter = new DiaryListAdapter(mFirebaseRef);
         mDiaryList.setAdapter(mAdapter);
+
+        ((DiaryListAdapter) mAdapter).setOnItemClickListener(new DiaryListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                String key = mAdapter.getRef(position).getKey();
+
+                Intent intent = new Intent(getActivity(), DiaryActivity.class);
+                intent.putExtra(Constants.KEY_DAIRY_NOTE_REF, key);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+            }
+        });
     }
 
     @Override

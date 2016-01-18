@@ -12,12 +12,23 @@ import com.travelersdiary.R;
 import com.travelersdiary.models.DiaryNote;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class DiaryListAdapter extends FirebaseRecyclerAdapter<DiaryNote, DiaryListAdapter.ViewHolder> {
+
+    public interface OnItemClickListener  {
+        void onItemClick(View view, int position);
+
+        void onItemLongClick(View view, int position);
+    }
+
+    private static OnItemClickListener  onItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener  onItemClickListener) {
+        DiaryListAdapter.onItemClickListener = onItemClickListener;
+    }
 
     public DiaryListAdapter(Firebase ref) {
         super(DiaryNote.class, R.layout.list_item_diary_note, DiaryListAdapter.ViewHolder.class, ref);
@@ -52,6 +63,24 @@ public class DiaryListAdapter extends FirebaseRecyclerAdapter<DiaryNote, DiaryLi
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onItemClickListener != null)
+                        onItemClickListener.onItemClick(v, getLayoutPosition());
+                }
+            });
+            view.setLongClickable(true);
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemLongClick(v, getLayoutPosition());
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
     }
 
