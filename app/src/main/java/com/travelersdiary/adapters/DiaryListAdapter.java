@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.ui.FirebaseRecyclerAdapter;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.models.DiaryNote;
 
@@ -98,7 +99,7 @@ public class DiaryListAdapter extends FirebaseRecyclerAdapter<DiaryNote, DiaryLi
         String travelTitle = model.getTravelTitle();
         String travelId = model.getTravelId();
         viewHolder.textViewTravelTitle.setText(travelTitle);
-        if (travelId == null || travelId.equalsIgnoreCase("default")) {
+        if (travelId == null || travelId.equalsIgnoreCase(Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY)) {
             viewHolder.textViewTravelTitle.setVisibility(View.GONE);
         } else {
             viewHolder.textViewTravelTitle.setVisibility(View.VISIBLE);
@@ -106,8 +107,9 @@ public class DiaryListAdapter extends FirebaseRecyclerAdapter<DiaryNote, DiaryLi
 
         //Note text
         String text = model.getText();
+        text = text.replaceAll("<.*?>", "");
         if (text.length() > 200) {
-            text = text.substring(1, 200).concat("...");
+            text = text.substring(0, 200).concat("...");
         }
         viewHolder.textViewText.setText(text);
 

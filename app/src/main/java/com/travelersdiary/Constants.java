@@ -7,6 +7,17 @@ package com.travelersdiary;
 public final class Constants {
     // firebase
     public static final String FIREBASE_URL = BuildConfig.FIREBASE_ROOT_URL;
+    public static final String FIREBASE_USERS = "users";
+    public static final String FIREBASE_DIARY = "diary";
+    public static final String FIREBASE_TRAVELS = "travels";
+    public static final String FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY = "default";
+    public static final String FIREBASE_TRAVEL_TITLE = "title";
+    public static final String FIREBASE_TRAVEL_DESCRIPTION = "description";
+    public static final String FIREBASE_TRACKS = "tracks";
+    public static final String FIREBASE_REMINDER = "reminder";
+    public static final String FIREBASE_WAYPOINTS = "waypoints";
+
+
 
     // google
     public static final String GOOGLE_API_KEY = BuildConfig.GOOGLE_API_KEY;
@@ -25,6 +36,12 @@ public final class Constants {
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
+
+    // travel
+    public static final String KEY_TRAVEL_REF = "TRAVEL_REF";
+    public static final String KEY_TRAVEL_KEY = "TRAVEL_KEY";
+    public static final String KEY_TRAVEL_TITLE = "TRAVEL_TITLE";
+    public static final String KEY_TRAVEL_DESCRIPTION = "TRAVEL_DESCRIPTION";
 
     // dairy
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";

@@ -80,8 +80,8 @@ public class LoginActivity extends AppCompatActivity implements
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         mAuthProgressDialog = new ProgressDialog(this);
-        mAuthProgressDialog.setTitle("Loading");
-        mAuthProgressDialog.setMessage("Authenticating with Firebase...");
+        mAuthProgressDialog.setTitle(getString(R.string.login_activity_progress_dialog_title));
+        mAuthProgressDialog.setMessage(getString(R.string.login_activity_progress_dialog_message));
         mAuthProgressDialog.setCancelable(false);
         mAuthProgressDialog.show();
 
@@ -129,7 +129,7 @@ public class LoginActivity extends AppCompatActivity implements
      */
     private void showErrorDialog(String message) {
         new AlertDialog.Builder(this)
-                .setTitle("Error")
+                .setTitle(getString(R.string.login_activity_error_dialog_title))
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
@@ -186,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements
                     token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
                 } catch (IOException transientEx) {
                     /* Network or server error */
-                    errorMessage = "Network error: " + transientEx.getMessage();
+                    errorMessage = getString(R.string.login_activity_error_message_network, transientEx.getMessage());
                 } catch (UserRecoverableAuthException e) {
                     /* We probably need to ask for permissions, so start the intent if there is none pending */
                     if (!mGoogleIntentInProgress) {
@@ -197,7 +197,7 @@ public class LoginActivity extends AppCompatActivity implements
                 } catch (GoogleAuthException authEx) {
                     /* The call is not ever expected to succeed assuming you have already verified that
                      * Google Play services is installed. */
-                    errorMessage = "Error authenticating with Google: " + authEx.getMessage();
+                    errorMessage = getString(R.string.login_activity_error_message_auth, authEx.getMessage());
                 }
 
                 try {
@@ -312,7 +312,7 @@ public class LoginActivity extends AppCompatActivity implements
                 String profileImageURL = (String) authData.getProviderData().get(Constants.GOOGLE_PROFILE_IMAGE);
                 mSharedPreferences.edit().putString(Constants.KEY_PROFILE_IMAGE, profileImageURL).apply();
             } else {
-                showErrorDialog("Invalid login provider: " + authData.getProvider());
+                showErrorDialog(getString(R.string.login_activity_error_message_invalid_provider, authData.getProvider()));
             }
         } else {
             /* No authenticated user show all the login buttons */

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -13,7 +12,7 @@ import android.view.View;
 
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
-import com.travelersdiary.dialogs.AddTravelDialog;
+import com.travelersdiary.dialogs.EditTravelDialog;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -37,7 +36,7 @@ public class MainActivity extends BaseActivity {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                AddTravelDialog addTravelDialog = new AddTravelDialog();
+                EditTravelDialog addTravelDialog = new EditTravelDialog();
                 addTravelDialog.show(fragmentManager, "dialog");
                 break;
             case 1: // Diary Tab
