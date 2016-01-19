@@ -39,7 +39,7 @@ public class TravelActivity extends BaseActivity {
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setTitle("Travel title");
+            supportActionBar.setTitle(R.string.travel_activity_title);
         }
 
         setupViewPager();

@@ -16,6 +16,7 @@ import com.firebase.client.Firebase;
 import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.adapters.DiaryListAdapter;
 
@@ -52,10 +53,7 @@ public class DiaryListFragment extends Fragment {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-        Firebase mFirebaseRef = new Firebase(Constants.FIREBASE_URL)
-                .child("users")
-                .child(userUID)
-                .child("diary");
+        Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
 
         mAdapter = new DiaryListAdapter(mFirebaseRef);
         mDiaryList.setAdapter(mAdapter);

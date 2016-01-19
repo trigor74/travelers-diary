@@ -14,6 +14,7 @@ import android.widget.EditText;
 import com.firebase.client.Firebase;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.models.Travel;
 
 import java.text.SimpleDateFormat;
@@ -71,10 +72,7 @@ public class EditTravelDialog extends DialogFragment {
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
                         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-                        Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL)
-                                .child("users")
-                                .child(userUID)
-                                .child("travels");
+                        Firebase firebaseRef = new Firebase(Utils.getFirebaseUserTravelsUrl(userUID));
 
                         if (mTravelKey == null || mTravelKey.isEmpty()) {
                             Travel travel = new Travel();

@@ -15,4 +15,13 @@
     <string name="edit_travel_dialog_title_create">Create new travel</string>
     <string name="edit_travel_dialog_title_edit">Edit travel</string>
     <string name="edit_travel_dialog_default_title">Travel at %s</string>
+
+    <string name="login_activity_progress_dialog_title">Loading</string>
+    <string name="login_activity_progress_dialog_message">Authenticating with Firebase...</string>
+    <string name="login_activity_error_dialog_title">Error</string>
+    <string name="login_activity_error_message_network">Network error: %s</string>
+    <string name="login_activity_error_message_auth">Error authenticating with Google: %s</string>
+    <string name="login_activity_error_message_invalid_provider">Invalid login provider: %s</string>
+
+    <string name="travel_activity_title">Travel title</string>
 </resources>

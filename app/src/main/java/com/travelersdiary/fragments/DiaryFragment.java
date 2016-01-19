@@ -35,6 +35,7 @@ import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.models.DiaryNote;
 
 import butterknife.Bind;
@@ -163,10 +164,7 @@ public class DiaryFragment extends Fragment {
     }
 
     private void retrieveData(String key) {
-        Firebase itemRef = new Firebase(Constants.FIREBASE_URL)
-                .child("users")
-                .child(mUserUID)
-                .child("diary")
+        Firebase itemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                 .child(key);
         itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
