@@ -5,7 +5,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
 import com.travelersdiary.R;
-import com.travelersdiary.fragments.DiaryEditorFragment;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -31,10 +30,10 @@ public class AddDiaryNoteActivity extends BaseActivity {
             supportActionBar.setTitle("Add new note");
         }
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new DiaryEditorFragment())
-                    .commit();
-        }
+//        if (savedInstanceState == null) {
+//            getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.fragment_container, new DiaryEditorFragment())
+//                    .commit();
+//        }
     }
 }

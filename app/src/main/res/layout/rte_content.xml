@@ -5,18 +5,19 @@
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/diary_note_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="title"
+        android:hint="Title"
         android:visibility="gone" />
 
     <com.onegravity.rteditor.RTEditText
         android:id="@+id/rtEditText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:focusable="true"
         android:gravity="top"
-        android:hint="Message"
+        android:hint="Text"
         android:imeOptions="actionDone|flagNoEnterAction"
         android:inputType="none"
         android:minHeight="200dp"

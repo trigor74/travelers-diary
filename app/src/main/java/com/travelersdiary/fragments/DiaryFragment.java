@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -29,6 +30,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
+import com.onegravity.rteditor.RTToolbar;
 import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
@@ -46,14 +48,17 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
 
+    @Bind(R.id.diary_note_title)
+    EditText mDiaryNoteTitle;
+
     @Bind(R.id.rtEditText)
     RTEditText mRtEditText;
 
-//    @Bind(R.id.rte_toolbar_container)
-//    ViewGroup mToolbarContainer;
-//
-//    @Bind(R.id.rte_toolbar)
-//    RTToolbar mRtToolbar;
+    @Bind(R.id.rte_toolbar_container)
+    ViewGroup mToolbarContainer;
+
+    @Bind(R.id.rte_toolbar)
+    RTToolbar mRtToolbar;
 
     private ActionBar mSupportActionBar;
 
@@ -61,6 +66,9 @@ public class DiaryFragment extends Fragment {
 
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
+
+    private Firebase itemRef;
+    private DiaryNote diaryNote;
 
     private String mMessage;
     private String mUserUID;
@@ -101,17 +109,17 @@ public class DiaryFragment extends Fragment {
         RTApi rtApi = new RTApi(getContext(), new RTProxyImpl(getActivity()), new RTMediaFactoryImpl(getContext(), true));
         mRtManager = new RTManager(rtApi, savedInstanceState);
 
-        // register toolbar (if it exists)
-//        if (mRtToolbar != null) {
-//            mRtManager.registerToolbar(mToolbarContainer, mRtToolbar);
-//        }
-
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // register toolbar (if it exists)
+        if (mRtToolbar != null) {
+            mRtManager.registerToolbar(mToolbarContainer, mRtToolbar);
+        }
 
         // register rich text editor
         mRtManager.registerEditor(mRtEditText, true);
 
-        retrieveData(mKey);
+        enableReviewingMode();
 
         return view;
     }
@@ -141,6 +149,14 @@ public class DiaryFragment extends Fragment {
 
         mRtEditText.requestFocus();
 
+        mRtEditText.setSelection(mRtEditText.getText().length());
+
+        mToolbarContainer.setVisibility(View.VISIBLE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+
+        mDiaryNoteTitle.setVisibility(View.VISIBLE);
+        mDiaryNoteTitle.setText(mSupportActionBar.getTitle());
+
         mInputMethodManager.showSoftInput(mRtEditText, InputMethodManager.SHOW_IMPLICIT);
 
         mFabEditDiaryNote.setVisibility(View.GONE);
@@ -148,11 +164,19 @@ public class DiaryFragment extends Fragment {
         mSupportActionBar.invalidateOptionsMenu();
     }
 
-    private void enableViewingMode() {
+    private void enableReviewingMode() {
         isEditingMode = false;
+
+        retrieveData(mKey);
+
         // make edit text field not editable
         mRtEditText.setTextIsSelectable(true);
         mRtEditText.setInputType(InputType.TYPE_NULL);
+
+        mToolbarContainer.setVisibility(View.GONE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+
+        mDiaryNoteTitle.setVisibility(View.GONE);
 
         mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
 
@@ -163,7 +187,7 @@ public class DiaryFragment extends Fragment {
     }
 
     private void retrieveData(String key) {
-        Firebase itemRef = new Firebase(Constants.FIREBASE_URL)
+        itemRef = new Firebase(Constants.FIREBASE_URL)
                 .child("users")
                 .child(mUserUID)
                 .child("diary")
@@ -171,7 +195,8 @@ public class DiaryFragment extends Fragment {
         itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                DiaryNote diaryNote = dataSnapshot.getValue(DiaryNote.class);
+                diaryNote = dataSnapshot.getValue(DiaryNote.class);
+                mSupportActionBar.setTitle(diaryNote.getTitle());
                 mRtEditText.setRichTextEditing(true, diaryNote.getText());
             }
 
@@ -226,8 +251,8 @@ public class DiaryFragment extends Fragment {
                 .setMessage(R.string.discard_changes_text)
                 .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // go to view
-                        enableViewingMode();
+                        // go to review
+                        enableReviewingMode();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -246,21 +271,29 @@ public class DiaryFragment extends Fragment {
                     if (mRtEditText.hasChanged()) {
                         showDiscardDialog();
                     } else {
-                        enableViewingMode();
+                        enableReviewingMode();
                     }
                 } else {
                     getActivity().finish();
                 }
                 return true;
             case R.id.action_save:
-                String text = mRtEditText.getText(RTFormat.HTML);
+                saveChanges();
                 Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
-                mRtEditText.resetHasChanged();
-                enableViewingMode();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void saveChanges() {
+        mRtEditText.resetHasChanged();
+
+        diaryNote.setTitle(mDiaryNoteTitle.getText().toString());
+        diaryNote.setText(mRtEditText.getText(RTFormat.HTML));
+        itemRef.setValue(diaryNote);
+
+        enableReviewingMode();
     }
 
 
