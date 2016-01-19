@@ -19,9 +19,9 @@
     </style>
 
     <style name="RteTheme" parent="@style/RTE_ThemeLight">
-        <item name="colorPrimary">#CFD8DC</item>
-        <item name="colorAccent">#37474F</item>
-        <item name="colorPrimaryDark">#90A4AE</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
 </resources>
