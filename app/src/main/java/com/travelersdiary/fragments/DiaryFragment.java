@@ -68,8 +68,8 @@ public class DiaryFragment extends Fragment {
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
 
-    private Firebase itemRef;
-    private DiaryNote diaryNote;
+    private Firebase mItemRef;
+    private DiaryNote mDiaryNote;
 
     private String mMessage;
     private String mUserUID;
@@ -188,14 +188,14 @@ public class DiaryFragment extends Fragment {
     }
 
     private void retrieveData(String key) {
-        Firebase itemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
+        mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                 .child(key);
-        itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        mItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                diaryNote = dataSnapshot.getValue(DiaryNote.class);
-                mSupportActionBar.setTitle(diaryNote.getTitle());
-                mRtEditText.setRichTextEditing(true, diaryNote.getText());
+                mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
+                mSupportActionBar.setTitle(mDiaryNote.getTitle());
+                mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
             }
 
             @Override
@@ -287,9 +287,9 @@ public class DiaryFragment extends Fragment {
     private void saveChanges() {
         mRtEditText.resetHasChanged();
 
-        diaryNote.setTitle(mDiaryNoteTitle.getText().toString());
-        diaryNote.setText(mRtEditText.getText(RTFormat.HTML));
-        itemRef.setValue(diaryNote);
+        mDiaryNote.setTitle(mDiaryNoteTitle.getText().toString());
+        mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
+        mItemRef.setValue(mDiaryNote);
 
         enableReviewingMode();
     }
