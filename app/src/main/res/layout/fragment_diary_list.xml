@@ -12,13 +12,6 @@
         android:text="Diary list"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/test_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="open diary activity" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/diary_list"
         android:layout_width="match_parent"

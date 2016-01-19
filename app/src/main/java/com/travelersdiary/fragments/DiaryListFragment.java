@@ -22,7 +22,6 @@ import com.travelersdiary.adapters.DiaryListAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class DiaryListFragment extends Fragment {
 
@@ -81,8 +80,4 @@ public class DiaryListFragment extends Fragment {
         mAdapter.cleanup();
     }
 
-    @OnClick(R.id.test_button)
-    public void onTestButtonClick() {
-        startActivity(new Intent(getActivity(), DiaryActivity.class));
-    }
 }
