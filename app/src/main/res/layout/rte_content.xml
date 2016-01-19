@@ -4,6 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="title"
+        android:visibility="gone" />
+
     <com.onegravity.rteditor.RTEditText
         android:id="@+id/rtEditText"
         android:layout_width="match_parent"
@@ -12,7 +18,8 @@
         android:gravity="top"
         android:hint="Message"
         android:imeOptions="actionDone|flagNoEnterAction"
-        android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
-        android:minHeight="200dp" />
+        android:inputType="none"
+        android:minHeight="200dp"
+        android:textIsSelectable="true" />
 
 </LinearLayout>

@@ -3,7 +3,9 @@ package com.travelersdiary.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -18,6 +20,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
 import com.onegravity.rteditor.RTToolbar;
@@ -25,7 +31,9 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.models.DiaryNote;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -43,7 +51,8 @@ public class DiaryEditorFragment extends Fragment {
 
     private RTManager mRtManager;
 
-    String mMessage;
+    private String mMessage;
+    private String mUserUID;
 
     public static DiaryEditorFragment getInstance() {
         return new DiaryEditorFragment();
@@ -63,6 +72,12 @@ public class DiaryEditorFragment extends Fragment {
             Intent intent = getActivity().getIntent();
             mMessage = getStringExtra(intent, "message");
         }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+        String key = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
+        retrieveData(key);
 
         // set theme
         getActivity().setTheme(R.style.RteTheme);
@@ -116,6 +131,26 @@ public class DiaryEditorFragment extends Fragment {
     private String getStringExtra(Intent intent, String key) {
         String s = intent.getStringExtra(key);
         return s == null ? "" : s;
+    }
+
+    private void retrieveData(String key) {
+        Firebase itemRef = new Firebase(Constants.FIREBASE_URL)
+                .child("users")
+                .child(mUserUID)
+                .child("diary")
+                .child(key);
+        itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                DiaryNote diaryNote = dataSnapshot.getValue(DiaryNote.class);
+                mRtEditText.setRichTextEditing(true, diaryNote.getText());
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -175,6 +210,5 @@ public class DiaryEditorFragment extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
 }

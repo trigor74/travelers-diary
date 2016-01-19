@@ -36,4 +36,7 @@ public final class Constants {
     public static final String KEY_TRAVEL_KEY = "TRAVEL_KEY";
     public static final String KEY_TRAVEL_TITLE = "TRAVEL_TITLE";
     public static final String KEY_TRAVEL_DESCRIPTION = "TRAVEL_DESCRIPTION";
+
+    // dairy
+    public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";
 }

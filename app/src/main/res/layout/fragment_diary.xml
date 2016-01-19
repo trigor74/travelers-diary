@@ -1,14 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/test_button"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!--<include-->
+            <!--android:id="@+id/rte_toolbar_container"-->
+            <!--layout="@layout/rte_toolbar" />-->
+
+        <ScrollView
+            android:id="@+id/rte_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_margin="4dp"
+            android:fillViewport="true"
+            android:scrollbarStyle="insideOverlay">
+
+            <include layout="@layout/rte_content" />
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_edit_diary_note"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="go to editor" />
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:src="@drawable/ic_edit_white_24dp" />
 
-</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
