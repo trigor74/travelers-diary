@@ -106,8 +106,9 @@ public class DiaryListAdapter extends FirebaseRecyclerAdapter<DiaryNote, DiaryLi
 
         //Note text
         String text = model.getText();
+        text = text.replaceAll("\\<.*?\\>", "");
         if (text.length() > 200) {
-            text = text.substring(1, 200).concat("...");
+            text = text.substring(0, 200).concat("...");
         }
         viewHolder.textViewText.setText(text);
 
