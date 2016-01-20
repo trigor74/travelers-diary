@@ -16,8 +16,8 @@ public final class Constants {
     public static final String FIREBASE_TRACKS = "tracks";
     public static final String FIREBASE_REMINDER = "reminder";
     public static final String FIREBASE_WAYPOINTS = "waypoints";
-
-
+    public static final String FIREBASE_DIARY_TRAVELID = "travelId";
+    public static final String FIREBASE_DIARY_TRAVEL_TITLE = "travelTitle";
 
     // google
     public static final String GOOGLE_API_KEY = BuildConfig.GOOGLE_API_KEY;

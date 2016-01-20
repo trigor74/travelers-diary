@@ -11,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -49,7 +53,7 @@ public class EditTravelDialog extends DialogFragment {
             mTravelTitle.setText(arguments.getString(Constants.KEY_TRAVEL_TITLE));
             mTravelDescription.setText(arguments.getString(Constants.KEY_TRAVEL_DESCRIPTION));
             mTravelKey = arguments.getString(Constants.KEY_TRAVEL_KEY);
-            if (mTravelKey != null && !mTravelKey.isEmpty()){
+            if (mTravelKey != null && !mTravelKey.isEmpty()) {
                 dialogTitle = getString(R.string.edit_travel_dialog_title_edit);
                 positiveButtonText = getString(R.string.save);
             }
@@ -70,11 +74,12 @@ public class EditTravelDialog extends DialogFragment {
                         }
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-                        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+                        final String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
                         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserTravelsUrl(userUID));
 
                         if (mTravelKey == null || mTravelKey.isEmpty()) {
+                            // create
                             Travel travel = new Travel();
                             travel.setTitle(title);
                             travel.setDescription(description);
@@ -85,11 +90,33 @@ public class EditTravelDialog extends DialogFragment {
                             Firebase newTravelRef = firebaseRef.push();
                             newTravelRef.setValue(travel);
                         } else {
+                            // edit
                             Map<String, Object> map = new HashMap<String, Object>();
                             map.put(Constants.FIREBASE_TRAVEL_TITLE, title);
                             map.put(Constants.FIREBASE_TRAVEL_DESCRIPTION, description);
                             Firebase editTravelRef = firebaseRef.child(mTravelKey);
                             editTravelRef.updateChildren(map);
+
+                            // update all notes with new travel title
+                            final String newTravelTitle = title;
+
+                            Firebase diaryRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
+                            Query queryRef = diaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelKey);
+
+                            queryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Map<String, Object> map = new HashMap<String, Object>();
+                                    map.put(Constants.FIREBASE_DIARY_TRAVEL_TITLE, newTravelTitle);
+                                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                        child.getRef().updateChildren(map);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+                                }
+                            });
                         }
                     }
                 })
