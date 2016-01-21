@@ -2,12 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="20dp">
 
         <TextView
             android:id="@+id/item_note_title_text_view"
@@ -22,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right"
-            android:text="1 JAN 2016 09:00:00 AM"
+            android:text="1 JAN 2016 09:00 AM"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -44,7 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="right"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:id="@+id/photos_layout"
@@ -57,6 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:alpha=".5"
                 android:paddingRight="8dp"
                 android:src="@drawable/ic_photo_camera_black_24dp" />
 
@@ -81,6 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:alpha=".5"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:src="@drawable/ic_videocam_black_24dp" />
@@ -106,6 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:alpha=".5"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:src="@drawable/ic_audio_black_24dp" />

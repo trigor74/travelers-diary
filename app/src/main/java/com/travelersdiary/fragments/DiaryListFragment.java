@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.adapters.DiaryListAdapter;
+import com.travelersdiary.recyclerview.DividerItemDecoration;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -49,6 +51,13 @@ public class DiaryListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mDiaryList.setLayoutManager(mLayoutManager);
 
+        // animation
+        mDiaryList.setItemAnimator(new DefaultItemAnimator());
+
+        // decoration
+        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
+        mDiaryList.addItemDecoration(itemDecoration);
+        
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
