@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 
@@ -39,7 +40,12 @@ public class TravelActivity extends BaseActivity {
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setTitle(R.string.travel_activity_title);
+//            supportActionBar.setTitle(R.string.travel_activity_title);
+            String travelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
+            if (travelTitle == null || travelTitle.isEmpty()) {
+                travelTitle = getString(R.string.travel_activity_title);
+            }
+            supportActionBar.setTitle(travelTitle);
         }
 
         setupViewPager();

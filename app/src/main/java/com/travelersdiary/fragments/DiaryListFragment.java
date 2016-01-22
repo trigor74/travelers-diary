@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.firebase.client.Firebase;
+import com.firebase.client.Query;
 import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
@@ -57,13 +58,21 @@ public class DiaryListFragment extends Fragment {
         // decoration
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
         mDiaryList.addItemDecoration(itemDecoration);
-        
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
+        Query query;
 
-        mAdapter = new DiaryListAdapter(mFirebaseRef);
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        if (travelId != null && !travelId.isEmpty()) {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(travelId);
+        } else {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
+        }
+
+        mAdapter = new DiaryListAdapter(query);
         mDiaryList.setAdapter(mAdapter);
 
         ((DiaryListAdapter) mAdapter).setOnItemClickListener(new DiaryListAdapter.OnItemClickListener() {

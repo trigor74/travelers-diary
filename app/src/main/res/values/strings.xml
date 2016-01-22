@@ -23,5 +23,5 @@
     <string name="login_activity_error_message_auth">Error authenticating with Google: %s</string>
     <string name="login_activity_error_message_invalid_provider">Invalid login provider: %s</string>
 
-    <string name="travel_activity_title">Travel title</string>
+    <string name="travel_activity_title">A Travel</string>
 </resources>
