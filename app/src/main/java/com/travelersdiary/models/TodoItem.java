@@ -2,9 +2,6 @@ package com.travelersdiary.models;
 
 import java.util.ArrayList;
 
-/**
- * Created by itrifonov on 30.12.2015.
- */
 public class TodoItem {
     private String travelId;
     private String title;

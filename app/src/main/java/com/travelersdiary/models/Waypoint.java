@@ -1,8 +1,5 @@
 package com.travelersdiary.models;
 
-/**
- * Created by itrifonov on 30.12.2015.
- */
 public class Waypoint {
     private String travelId;
     private String title;
