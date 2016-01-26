@@ -61,8 +61,18 @@ public class ReminderListFragment extends Fragment {
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
-        Query query = mFirebaseRef.orderByKey();
+        Query query;
 
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        if (travelId != null && !travelId.isEmpty()) {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(travelId);
+        } else {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_ACTIVE).equalTo(true);
+        }
+
+        if (mAdapter != null) {
+            mAdapter.cleanup();
+        }
         mAdapter = new ReminderListAdapter(query);
         mReminderList.setAdapter(mAdapter);
     }

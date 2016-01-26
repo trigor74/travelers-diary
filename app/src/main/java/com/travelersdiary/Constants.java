@@ -15,6 +15,8 @@ public final class Constants {
     public static final String FIREBASE_TRAVEL_DESCRIPTION = "description";
     public static final String FIREBASE_TRACKS = "tracks";
     public static final String FIREBASE_REMINDER = "reminder";
+    public static final String FIREBASE_REMINDER_TRAVELID = "travelId";
+    public static final String FIREBASE_REMINDER_ACTIVE = "active";
     public static final String FIREBASE_WAYPOINTS = "waypoints";
     public static final String FIREBASE_DIARY_TRAVELID = "travelId";
     public static final String FIREBASE_DIARY_TRAVEL_TITLE = "travelTitle";

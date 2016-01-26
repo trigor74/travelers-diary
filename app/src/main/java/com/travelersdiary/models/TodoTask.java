@@ -1,8 +1,5 @@
 package com.travelersdiary.models;
 
-/**
- * Created by itrifonov on 31.12.2015.
- */
 public class TodoTask {
     private String item;
     private boolean checked;
