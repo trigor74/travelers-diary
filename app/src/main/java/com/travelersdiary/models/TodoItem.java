@@ -2,15 +2,13 @@ package com.travelersdiary.models;
 
 import java.util.ArrayList;
 
-/**
- * Created by itrifonov on 30.12.2015.
- */
 public class TodoItem {
     private String travelId;
     private String title;
     private ArrayList<TodoTask> task;
     private boolean viewAsCheckboxes;
     private boolean completed;
+    private boolean active;
     //Remind at time
     private long time;
     private long interval;
@@ -23,13 +21,14 @@ public class TodoItem {
     }
 
     public TodoItem(String travelId, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
-                    boolean completed, long time, long interval, Waypoint waypoint, int distance,
-                    boolean repeat) {
+                    boolean completed, boolean active, long time, long interval,
+                    Waypoint waypoint, int distance, boolean repeat) {
         this.travelId = travelId;
         this.title = title;
         this.task = task;
         this.viewAsCheckboxes = viewAsCheckboxes;
         this.completed = completed;
+        this.active = active;
         this.time = time;
         this.interval = interval;
         this.waypoint = waypoint;
@@ -75,6 +74,14 @@ public class TodoItem {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public long getTime() {

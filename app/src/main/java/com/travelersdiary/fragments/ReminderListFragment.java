@@ -1,15 +1,25 @@
 package com.travelersdiary.fragments;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.Query;
+import com.firebase.ui.FirebaseRecyclerAdapter;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
+import com.travelersdiary.adapters.ReminderListAdapter;
+import com.travelersdiary.recyclerview.DividerItemDecoration;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -19,7 +29,7 @@ public class ReminderListFragment extends Fragment {
     @Bind(R.id.reminder_list)
     RecyclerView mReminderList;
 
-    private RecyclerView.Adapter mAdapter;
+    private FirebaseRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     @Nullable
@@ -40,13 +50,37 @@ public class ReminderListFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mReminderList.setLayoutManager(mLayoutManager);
 
-//        mAdapter = new ReminderListAdapter(myDataset);
-//        mReminderList.setAdapter(mAdapter);
+        // animation
+        mReminderList.setItemAnimator(new DefaultItemAnimator());
+
+        // decoration
+        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
+        mReminderList.addItemDecoration(itemDecoration);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+        Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
+        Query query;
+
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        if (travelId != null && !travelId.isEmpty()) {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(travelId);
+        } else {
+            query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_ACTIVE).equalTo(true);
+        }
+
+        if (mAdapter != null) {
+            mAdapter.cleanup();
+        }
+        mAdapter = new ReminderListAdapter(query);
+        mReminderList.setAdapter(mAdapter);
     }
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         ButterKnife.unbind(this);
+        mAdapter.cleanup();
+        super.onDestroyView();
     }
 }

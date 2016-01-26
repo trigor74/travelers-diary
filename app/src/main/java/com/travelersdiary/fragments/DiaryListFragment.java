@@ -72,6 +72,9 @@ public class DiaryListFragment extends Fragment {
             query = mFirebaseRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
         }
 
+        if (mAdapter != null) {
+            mAdapter.cleanup();
+        }
         mAdapter = new DiaryListAdapter(query);
         mDiaryList.setAdapter(mAdapter);
 
@@ -93,9 +96,9 @@ public class DiaryListFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         ButterKnife.unbind(this);
         mAdapter.cleanup();
+        super.onDestroyView();
     }
 
 }
