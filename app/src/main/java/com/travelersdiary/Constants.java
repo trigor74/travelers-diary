@@ -48,4 +48,7 @@ public final class Constants {
 
     // dairy
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";
+
+    // reminder
+    public static final String KEY_TODO_ITEM_REF = "TODO_ITEM_REF";
 }

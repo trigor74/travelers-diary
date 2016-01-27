@@ -19,13 +19,7 @@
 
         <activity
             android:name=".activities.LoginActivity"
-            android:theme="@style/AppTheme.FullScreen">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
+            android:theme="@style/AppTheme.FullScreen" />
 
         <activity android:name=".activities.MainActivity">
             <intent-filter>
@@ -44,6 +38,8 @@
         <activity android:name="com.onegravity.rteditor.media.choose.MediaChooserActivity" />
 
         <activity android:name=".activities.AddDiaryNoteActivity" />
+
+        <activity android:name=".activities.TodoItemActivity" />
 
     </application>
 
