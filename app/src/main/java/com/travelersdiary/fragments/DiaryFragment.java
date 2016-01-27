@@ -22,12 +22,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.firebase.ui.FirebaseListAdapter;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
 import com.onegravity.rteditor.RTToolbar;
@@ -39,6 +41,10 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.Travel;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -49,10 +55,10 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
 
-    @Bind(R.id.diary_note_title)
+    @Bind(R.id.edt_diary_note_title)
     EditText mDiaryNoteTitle;
 
-    @Bind(R.id.rtEditText)
+    @Bind(R.id.rt_editor)
     RTEditText mRtEditText;
 
     @Bind(R.id.rte_toolbar_container)
@@ -60,6 +66,24 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.rte_toolbar)
     RTToolbar mRtToolbar;
+
+    @Bind(R.id.txt_date)
+    TextView mTxtDate;
+
+    @Bind(R.id.txt_day)
+    TextView mTxtDay;
+
+    @Bind(R.id.txt_month_year)
+    TextView mTxtMonthYear;
+
+    @Bind(R.id.txt_time)
+    TextView mTxtTime;
+
+    @Bind(R.id.txt_travel)
+    TextView mTxtTravel;
+
+//    @Bind(R.id.spinner_travels)
+//    Spinner mTravelsSpinner;
 
     private ActionBar mSupportActionBar;
 
@@ -69,6 +93,8 @@ public class DiaryFragment extends Fragment {
     private InputMethodManager mInputMethodManager;
 
     private Firebase mItemRef;
+    private ValueEventListener mValueEventListener;
+    private FirebaseListAdapter<Travel> mAdapter;
     private DiaryNote mDiaryNote;
 
     private String mMessage;
@@ -120,6 +146,20 @@ public class DiaryFragment extends Fragment {
         // register rich text editor
         mRtManager.registerEditor(mRtEditText, true);
 
+        mAdapter = new FirebaseListAdapter<Travel>(getActivity(), Travel.class,
+                android.R.layout.simple_dropdown_item_1line, new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))) {
+            @Override
+            protected void populateView(View view, Travel travel, int position) {
+                super.populateView(view, travel, position);
+                ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
+            }
+        };
+
+//        mTravelsSpinner.setAdapter(mAdapter);
+
+
+        addDataChangeListener();
+
         enableReviewingMode();
 
         return view;
@@ -141,56 +181,73 @@ public class DiaryFragment extends Fragment {
         mRtEditText.setCursorVisible(true);
         mRtEditText.setFocusable(true);
         mRtEditText.setFocusableInTouchMode(true);
-
         mRtEditText.setClickable(true);
         mRtEditText.setLongClickable(true);
-
-        mRtEditText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE |
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
                 InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-
         mRtEditText.requestFocus();
-
         mRtEditText.setSelection(mRtEditText.getText().length());
 
+        //setup rte toolbar
         mToolbarContainer.setVisibility(View.VISIBLE);
         mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
 
+        //setup title field
         mDiaryNoteTitle.setVisibility(View.VISIBLE);
         mDiaryNoteTitle.setText(mSupportActionBar.getTitle());
 
+        //show spinner, hide travel title
+//        mTravelsSpinner.setVisibility(View.VISIBLE);
+        mTxtTravel.setVisibility(View.GONE);
+
+        //show keyboard
         mInputMethodManager.showSoftInput(mRtEditText, InputMethodManager.SHOW_IMPLICIT);
 
+        //hide fab
         mFabEditDiaryNote.setVisibility(View.GONE);
 
+        //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
     }
 
     private void enableReviewingMode() {
         isEditingMode = false;
 
-        retrieveData(mKey);
+        retrieveData();
 
         // make edit text field not editable
-        mRtEditText.setTextIsSelectable(true);
-        mRtEditText.setInputType(InputType.TYPE_NULL);
+//        mRtEditText.setTextIsSelectable(true);
+//        mRtEditText.setInputType(InputType.TYPE_NULL);
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        mRtEditText.setFocusable(false);
 
+        //setup rte toolbar
         mToolbarContainer.setVisibility(View.GONE);
         mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
 
+        //setup title field
         mDiaryNoteTitle.setVisibility(View.GONE);
 
+        //show travel title, hide spinner
+        mTxtTravel.setVisibility(View.VISIBLE);
+//        mTxtTravel.setText("sample");
+//        mTravelsSpinner.setVisibility(View.GONE);
+
+        //hide keyboard
         mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
 
+        //show fab
         mFabEditDiaryNote.setVisibility(View.VISIBLE);
 
+        //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
-
     }
 
-    private void retrieveData(String key) {
+    private void addDataChangeListener() {
         mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
-                .child(key);
-        mItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                .child(mKey);
+
+        mValueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
@@ -202,7 +259,35 @@ public class DiaryFragment extends Fragment {
             public void onCancelled(FirebaseError firebaseError) {
                 Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
+        };
+
+        mItemRef.addValueEventListener(mValueEventListener);
+    }
+
+    private void retrieveData() {
+        new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
+                .child(mKey)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
+                        mSupportActionBar.setTitle(mDiaryNote.getTitle());
+
+                        Date time = new Date(mDiaryNote.getTime());
+                        mTxtDate.setText(new SimpleDateFormat("dd").format(time));
+                        mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
+                        mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
+
+                        mTxtTravel.setText(mDiaryNote.getTravelTitle());
+
+                        mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private String getStringExtra(Intent intent, String key) {
@@ -222,6 +307,12 @@ public class DiaryFragment extends Fragment {
         if (mRtManager != null) {
             mRtManager.onDestroy(true);
         }
+
+        if (mItemRef != null) {
+            mItemRef.removeEventListener(mValueEventListener);
+        }
+
+        mAdapter.cleanup();
     }
 
     @Override
@@ -277,7 +368,6 @@ public class DiaryFragment extends Fragment {
                 return true;
             case R.id.action_save:
                 saveChanges();
-                Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -285,13 +375,25 @@ public class DiaryFragment extends Fragment {
     }
 
     private void saveChanges() {
-        mRtEditText.resetHasChanged();
+        if (!isEmpty(mDiaryNoteTitle)) {
+            mDiaryNote.setTitle(mDiaryNoteTitle.getText().toString());
+        } else {
+            Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
+            mDiaryNoteTitle.requestFocus();
+            return;
+        }
 
-        mDiaryNote.setTitle(mDiaryNoteTitle.getText().toString());
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
         mItemRef.setValue(mDiaryNote);
 
+        mRtEditText.resetHasChanged();
+        Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
+
         enableReviewingMode();
+    }
+
+    private boolean isEmpty(EditText etText) {
+        return etText.getText().toString().trim().length() == 0;
     }
 
 
