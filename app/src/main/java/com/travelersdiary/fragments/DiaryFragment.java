@@ -55,9 +55,6 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
 
-    @Bind(R.id.edt_diary_note_title)
-    EditText mDiaryNoteTitle;
-
     @Bind(R.id.rt_editor)
     RTEditText mRtEditText;
 
@@ -86,6 +83,8 @@ public class DiaryFragment extends Fragment {
 //    Spinner mTravelsSpinner;
 
     private ActionBar mSupportActionBar;
+
+    private EditText mEdtDiaryNoteTitle;
 
     private boolean isEditingMode;
 
@@ -155,8 +154,18 @@ public class DiaryFragment extends Fragment {
             }
         };
 
-//        mTravelsSpinner.setAdapter(mAdapter);
+        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+        mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+                } else {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+                }
+            }
+        });
 
+//        mTravelsSpinner.setAdapter(mAdapter);
 
         addDataChangeListener();
 
@@ -193,8 +202,9 @@ public class DiaryFragment extends Fragment {
         mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
 
         //setup title field
-        mDiaryNoteTitle.setVisibility(View.VISIBLE);
-        mDiaryNoteTitle.setText(mSupportActionBar.getTitle());
+        mEdtDiaryNoteTitle.setVisibility(View.VISIBLE);
+        mEdtDiaryNoteTitle.setText(mSupportActionBar.getTitle());
+        mSupportActionBar.setDisplayShowTitleEnabled(false);
 
         //show spinner, hide travel title
 //        mTravelsSpinner.setVisibility(View.VISIBLE);
@@ -226,7 +236,8 @@ public class DiaryFragment extends Fragment {
         mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
 
         //setup title field
-        mDiaryNoteTitle.setVisibility(View.GONE);
+        mEdtDiaryNoteTitle.setVisibility(View.GONE);
+        mSupportActionBar.setDisplayShowTitleEnabled(true);
 
         //show travel title, hide spinner
         mTxtTravel.setVisibility(View.VISIBLE);
@@ -375,11 +386,11 @@ public class DiaryFragment extends Fragment {
     }
 
     private void saveChanges() {
-        if (!isEmpty(mDiaryNoteTitle)) {
-            mDiaryNote.setTitle(mDiaryNoteTitle.getText().toString());
+        if (!isEmpty(mEdtDiaryNoteTitle)) {
+            mDiaryNote.setTitle(mEdtDiaryNoteTitle.getText().toString());
         } else {
             Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
-            mDiaryNoteTitle.requestFocus();
+            mEdtDiaryNoteTitle.requestFocus();
             return;
         }
 
