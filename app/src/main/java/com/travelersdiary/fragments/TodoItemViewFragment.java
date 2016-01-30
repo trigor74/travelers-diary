@@ -2,42 +2,39 @@ package com.travelersdiary.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.TodoItem;
-import com.travelersdiary.models.TodoTask;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class TodoItemViewFragment extends Fragment {
     private ActionBar mSupportActionBar;
@@ -47,14 +44,17 @@ public class TodoItemViewFragment extends Fragment {
     private String mUserUID;
     private String mKey;
 
-    @Bind(R.id.todo_item_remind_text_container)
-    LinearLayout remindTextContainer;
     @Bind(R.id.todo_item_remind_info_text_view)
     TextView textViewInfo;
     @Bind(R.id.todo_item_type_icon)
     ImageView imageViewItemTypeIcon;
 
     private Context mContext;
+
+    @Bind(R.id.todo_item_task)
+    RecyclerView mTodoItemTask;
+
+    private TodoTaskAdapter mAdapter;
 
     @Nullable
     @Override
@@ -87,66 +87,16 @@ public class TodoItemViewFragment extends Fragment {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
 
-                final Firebase itemRef = dataSnapshot.getRef();
+                Firebase itemRef = dataSnapshot.getRef();
+                Query todoTaskList = itemRef.child(Constants.FIREBASE_REMINDER_TASK).orderByKey();
 
-                ArrayList<TodoTask> todoTaskList = mTodoItem.getTask();
-                if (mTodoItem.isViewAsCheckboxes()) {
-                    // view as checkboxes
-                    for (int i = 0; i < todoTaskList.size(); i++) {
-                        TodoTask taskLine = todoTaskList.get(i);
-
-                        AppCompatCheckBox checkBox = new AppCompatCheckBox(mContext);
-                        checkBox.setLayoutParams(
-                                new LinearLayoutCompat.LayoutParams(
-                                        LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-                                        LinearLayoutCompat.LayoutParams.WRAP_CONTENT
-                                )
-                        );
-                        checkBox.setText(taskLine.getItem());
-                        checkBox.setChecked(taskLine.isChecked());
-                        if (taskLine.isChecked()) {
-                            checkBox.setPaintFlags(checkBox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                        }
-
-                        final Firebase editTaskLineRef = itemRef
-                                .child(Constants.FIREBASE_REMINDER_TASK)
-                                .child(Integer.toString(i));
-
-                        checkBox.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                AppCompatCheckBox checkBox = (AppCompatCheckBox) v;
-                                if (checkBox.isChecked()) {
-                                    checkBox.setPaintFlags(checkBox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                                } else {
-                                    checkBox.setPaintFlags(checkBox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                                }
-
-                                Map<String, Object> map = new HashMap<String, Object>();
-                                map.put(Constants.FIREBASE_REMINDER_TASK_ITEM_CHECKED,
-                                        Boolean.toString(checkBox.isChecked()));
-                                editTaskLineRef.updateChildren(map);
-                            }
-                        });
-
-                        remindTextContainer.addView(checkBox);
-                    }
-                } else {
-                    // view as simple lines
-                    StringBuilder builder = new StringBuilder();
-                    for (TodoTask lines : todoTaskList) {
-                        builder.append(lines.getItem() + "\n");
-                    }
-                    TextView textView = new TextView(mContext);
-                    textView.setLayoutParams(
-                            new LinearLayoutCompat.LayoutParams(
-                                    LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
-                                    LinearLayoutCompat.LayoutParams.WRAP_CONTENT
-                            )
-                    );
-                    textView.setText(builder.toString());
-                    remindTextContainer.addView(textView);
-                }
+                mAdapter = new TodoTaskAdapter(todoTaskList, mTodoItem.isViewAsCheckboxes());
+//                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
+                LinearLayoutManager layoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                mTodoItemTask.setLayoutManager(layoutManager);
+                mTodoItemTask.setItemAnimator(new DefaultItemAnimator());
+                mTodoItemTask.setAdapter(mAdapter);
+                mAdapter.notifyDataSetChanged();
 
                 long time = mTodoItem.getTime();
                 if (time > 0) {
@@ -173,5 +123,32 @@ public class TodoItemViewFragment extends Fragment {
     public void onDestroyView() {
         ButterKnife.unbind(this);
         super.onDestroyView();
+    }
+
+    // test edit
+    private boolean mIsEditingMode = false;
+
+    @OnClick(R.id.todo_item_edit_button)
+    public void onClick(View v) {
+        if (mIsEditingMode) {
+            mIsEditingMode = false;
+//            mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+//            mRtEditText.setFocusable(false);
+//            android:focusableInTouchMode="false"
+        } else {
+            mIsEditingMode = true;
+        }
+    }
+
+    @OnClick(R.id.todo_item_as_checkboxes_button)
+    public void onClickAsCheckboxes(View v) {
+        if (mTodoItem.isViewAsCheckboxes()) {
+            mTodoItem.setViewAsCheckboxes(false);
+            ((Button) v).setText("Show checkboxes");
+        } else {
+            mTodoItem.setViewAsCheckboxes(true);
+            ((Button) v).setText("Hide checkboxes");
+        }
+        mAdapter.setViewAsCheckboxes(mTodoItem.isViewAsCheckboxes());
     }
 }

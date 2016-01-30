@@ -1,44 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/todo_item_remind_text_container"
+    <Button
+        android:id="@+id/todo_item_edit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="Edit" />
 
-        <!--<TextView-->
-        <!--android:id="@+id/todo_item_text_view"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Todo Item View Fragment" />-->
+    <Button
+        android:id="@+id/todo_item_as_checkboxes_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show checkboxes" />
 
-        <!--<android.support.v7.widget.AppCompatCheckBox-->
-        <!--style="@style/ListItemPrimaryText"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:checked="true"-->
-        <!--android:text="Text" />-->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/todo_item_task"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:layout_weight="1" />
 
-        <!--<android.support.v7.widget.AppCompatCheckedTextView-->
-        <!--style="@style/ListItemPrimaryText"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:checked="false"-->
-        <!--android:clickable="true"-->
-        <!--android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"-->
-        <!--android:gravity="center_vertical"-->
-        <!--android:text="Test Text Line" />-->
-
-    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/common_action_bar_splitter" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
 
         <ImageView
             android:id="@+id/todo_item_type_icon"
