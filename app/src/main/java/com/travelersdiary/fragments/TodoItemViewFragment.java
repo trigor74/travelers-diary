@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,6 +31,8 @@ import com.travelersdiary.models.TodoTask;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -82,10 +85,14 @@ public class TodoItemViewFragment extends Fragment {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
 
+                final Firebase itemRef = dataSnapshot.getRef();
+
                 ArrayList<TodoTask> todoTaskList = mTodoItem.getTask();
                 if (mTodoItem.isViewAsCheckboxes()) {
                     // view as checkboxes
-                    for (TodoTask lines : todoTaskList) {
+                    for (int i = 0; i < todoTaskList.size(); i++) {
+                        TodoTask taskLine = todoTaskList.get(i);
+
                         AppCompatCheckBox checkBox = new AppCompatCheckBox(mContext);
                         checkBox.setLayoutParams(
                                 new LinearLayoutCompat.LayoutParams(
@@ -93,8 +100,23 @@ public class TodoItemViewFragment extends Fragment {
                                         LinearLayoutCompat.LayoutParams.WRAP_CONTENT
                                 )
                         );
-                        checkBox.setText(lines.getItem());
-                        checkBox.setChecked(lines.isChecked());
+                        checkBox.setText(taskLine.getItem());
+                        checkBox.setChecked(taskLine.isChecked());
+
+                        final Firebase editTaskLineRef = itemRef
+                                .child(Constants.FIREBASE_REMINDER_TASK)
+                                .child(Integer.toString(i));
+
+                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                // edit
+                                Map<String, Object> map = new HashMap<String, Object>();
+                                map.put(Constants.FIREBASE_REMINDER_TASK_ITEM_CHECKED, Boolean.toString(isChecked));
+                                editTaskLineRef.updateChildren(map);
+                            }
+                        });
+
                         remindTextContainer.addView(checkBox);
                     }
                 } else {

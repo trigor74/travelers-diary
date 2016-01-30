@@ -17,10 +17,21 @@
         <!--android:text="Todo Item View Fragment" />-->
 
         <!--<android.support.v7.widget.AppCompatCheckBox-->
+        <!--style="@style/ListItemPrimaryText"-->
         <!--android:layout_width="wrap_content"-->
         <!--android:layout_height="wrap_content"-->
         <!--android:checked="true"-->
         <!--android:text="Text" />-->
+
+        <!--<android.support.v7.widget.AppCompatCheckedTextView-->
+        <!--style="@style/ListItemPrimaryText"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:checked="false"-->
+        <!--android:clickable="true"-->
+        <!--android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:text="Test Text Line" />-->
 
     </LinearLayout>
 
