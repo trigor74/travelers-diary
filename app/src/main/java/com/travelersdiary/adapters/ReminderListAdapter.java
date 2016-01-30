@@ -26,15 +26,15 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
         super(TodoItem.class, R.layout.list_item_reminder_todo_item, ReminderListAdapter.ViewHolder.class, ref);
     }
 
-    public interface OnItemClickListener  {
+    public interface OnItemClickListener {
         void onItemClick(View view, int position);
 
         void onItemLongClick(View view, int position);
     }
 
-    private static OnItemClickListener  onItemClickListener;
+    private static OnItemClickListener onItemClickListener;
 
-    public void setOnItemClickListener(OnItemClickListener  onItemClickListener) {
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -42,7 +42,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
 
         @Bind(R.id.item_reminder_todo_item_title_text_view)
         TextView textViewTitle;
-        @Bind(R.id.item_reminder_todo_item_info_text_view)
+        @Bind(R.id.item_reminder_todo_item_remind_info_text_view)
         TextView textViewInfo;
         @Bind(R.id.item_reminder_todo_item_type_icon)
         ImageView imageViewItemTypeIcon;

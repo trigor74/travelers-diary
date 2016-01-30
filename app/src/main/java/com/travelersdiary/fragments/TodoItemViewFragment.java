@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -7,9 +8,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -20,7 +26,12 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.models.TodoItem;
+import com.travelersdiary.models.TodoTask;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+
+import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class TodoItemViewFragment extends Fragment {
@@ -31,11 +42,21 @@ public class TodoItemViewFragment extends Fragment {
     private String mUserUID;
     private String mKey;
 
+    @Bind(R.id.todo_item_remind_text_container)
+    LinearLayout remindTextContainer;
+    @Bind(R.id.todo_item_remind_info_text_view)
+    TextView textViewInfo;
+    @Bind(R.id.todo_item_type_icon)
+    ImageView imageViewItemTypeIcon;
+
+    private Context mContext;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_todo_item_view, container, false);
         ButterKnife.bind(this, view);
+        mContext = getContext();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
@@ -60,6 +81,50 @@ public class TodoItemViewFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
+
+                ArrayList<TodoTask> todoTaskList = mTodoItem.getTask();
+                if (mTodoItem.isViewAsCheckboxes()) {
+                    // view as checkboxes
+                    for (TodoTask lines : todoTaskList) {
+                        AppCompatCheckBox checkBox = new AppCompatCheckBox(mContext);
+                        checkBox.setLayoutParams(
+                                new LinearLayoutCompat.LayoutParams(
+                                        LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
+                                        LinearLayoutCompat.LayoutParams.WRAP_CONTENT
+                                )
+                        );
+                        checkBox.setText(lines.getItem());
+                        checkBox.setChecked(lines.isChecked());
+                        remindTextContainer.addView(checkBox);
+                    }
+                } else {
+                    // view as simple lines
+                    StringBuilder builder = new StringBuilder();
+                    for (TodoTask lines : todoTaskList) {
+                        builder.append(lines.getItem() + "\n");
+                    }
+                    TextView textView = new TextView(mContext);
+                    textView.setLayoutParams(
+                            new LinearLayoutCompat.LayoutParams(
+                                    LinearLayoutCompat.LayoutParams.WRAP_CONTENT,
+                                    LinearLayoutCompat.LayoutParams.WRAP_CONTENT
+                            )
+                    );
+                    textView.setText(builder.toString());
+                    remindTextContainer.addView(textView);
+                }
+
+                long time = mTodoItem.getTime();
+                if (time > 0) {
+                    // remind at time
+                    String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
+                    imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
+                    textViewInfo.setText(timeText);
+                } else {
+                    // remind at location
+                    textViewInfo.setText(mTodoItem.getWaypoint().getTitle());
+                    imageViewItemTypeIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
+                }
             }
 
             @Override
