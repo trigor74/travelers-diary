@@ -74,14 +74,22 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/txt_travel"
-        style="@style/DiaryHeaderText"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
         android:layout_weight="1"
         android:gravity="end"
-        android:paddingTop="3dp"
-        android:text="Travel title" />
+        android:orientation="horizontal"
+        android:paddingTop="3dp">
+
+        <TextView
+            android:id="@+id/txt_travel"
+            style="@style/DiaryHeaderText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Travel title" />
+
+    </LinearLayout>
 
 </LinearLayout>

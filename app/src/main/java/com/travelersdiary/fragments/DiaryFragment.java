@@ -79,9 +79,6 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
-//    @Bind(R.id.spinner_travels)
-//    Spinner mTravelsSpinner;
-
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -95,6 +92,7 @@ public class DiaryFragment extends Fragment {
     private ValueEventListener mValueEventListener;
     private FirebaseListAdapter<Travel> mAdapter;
     private DiaryNote mDiaryNote;
+    private String mTravelId;
 
     private String mMessage;
     private String mUserUID;
@@ -131,6 +129,17 @@ public class DiaryFragment extends Fragment {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+        mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+                } else {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+                }
+            }
+        });
+
         // create RTManager
         RTApi rtApi = new RTApi(getContext(), new RTProxyImpl(getActivity()), new RTMediaFactoryImpl(getContext(), true));
         mRtManager = new RTManager(rtApi, savedInstanceState);
@@ -153,19 +162,6 @@ public class DiaryFragment extends Fragment {
                 ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
             }
         };
-
-        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
-        mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
-                } else {
-                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
-                }
-            }
-        });
-
-//        mTravelsSpinner.setAdapter(mAdapter);
 
         addDataChangeListener();
 
@@ -206,9 +202,8 @@ public class DiaryFragment extends Fragment {
         mEdtDiaryNoteTitle.setText(mSupportActionBar.getTitle());
         mSupportActionBar.setDisplayShowTitleEnabled(false);
 
-        //show spinner, hide travel title
-//        mTravelsSpinner.setVisibility(View.VISIBLE);
-        mTxtTravel.setVisibility(View.GONE);
+        //show travel title drop down arrow
+        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.drop_down_arrow, 0);
 
         //show keyboard
         mInputMethodManager.showSoftInput(mRtEditText, InputMethodManager.SHOW_IMPLICIT);
@@ -231,18 +226,16 @@ public class DiaryFragment extends Fragment {
         mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         mRtEditText.setFocusable(false);
 
-        //setup rte toolbar
-        mToolbarContainer.setVisibility(View.GONE);
-        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
-
         //setup title field
         mEdtDiaryNoteTitle.setVisibility(View.GONE);
         mSupportActionBar.setDisplayShowTitleEnabled(true);
 
-        //show travel title, hide spinner
-        mTxtTravel.setVisibility(View.VISIBLE);
-//        mTxtTravel.setText("sample");
-//        mTravelsSpinner.setVisibility(View.GONE);
+        //setup rte toolbar
+        mToolbarContainer.setVisibility(View.GONE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+
+        //hide travel title drop down arrow
+        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
         //hide keyboard
         mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
@@ -395,6 +388,12 @@ public class DiaryFragment extends Fragment {
         }
 
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
+
+        if (mTravelId != null) {
+            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+            mDiaryNote.setTravelId(mTravelId);
+        }
+
         mItemRef.setValue(mDiaryNote);
 
         mRtEditText.resetHasChanged();
@@ -407,5 +406,28 @@ public class DiaryFragment extends Fragment {
         return etText.getText().toString().trim().length() == 0;
     }
 
+    @OnClick(R.id.txt_travel)
+    public void onTravelSpinnerClick() {
+        if (isEditingMode) {
+            Toast.makeText(getContext(), "travel clicked", Toast.LENGTH_SHORT).show();
+
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Select travel")
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //do nothing
+                        }
+                    })
+                    .setAdapter(mAdapter, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Travel travel = mAdapter.getItem(which);
+                            mTravelId = mAdapter.getRef(which).getKey();
+                            mTxtTravel.setText(travel.getTitle());
+                        }
+                    })
+                    .show();
+        }
+    }
 
 }
