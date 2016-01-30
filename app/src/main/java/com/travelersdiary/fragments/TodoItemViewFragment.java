@@ -2,6 +2,7 @@ package com.travelersdiary.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -102,17 +104,27 @@ public class TodoItemViewFragment extends Fragment {
                         );
                         checkBox.setText(taskLine.getItem());
                         checkBox.setChecked(taskLine.isChecked());
+                        if (taskLine.isChecked()) {
+                            checkBox.setPaintFlags(checkBox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        }
 
                         final Firebase editTaskLineRef = itemRef
                                 .child(Constants.FIREBASE_REMINDER_TASK)
                                 .child(Integer.toString(i));
 
-                        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        checkBox.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                // edit
+                            public void onClick(View v) {
+                                AppCompatCheckBox checkBox = (AppCompatCheckBox) v;
+                                if (checkBox.isChecked()) {
+                                    checkBox.setPaintFlags(checkBox.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                                } else {
+                                    checkBox.setPaintFlags(checkBox.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                                }
+
                                 Map<String, Object> map = new HashMap<String, Object>();
-                                map.put(Constants.FIREBASE_REMINDER_TASK_ITEM_CHECKED, Boolean.toString(isChecked));
+                                map.put(Constants.FIREBASE_REMINDER_TASK_ITEM_CHECKED,
+                                        Boolean.toString(checkBox.isChecked()));
                                 editTaskLineRef.updateChildren(map);
                             }
                         });
