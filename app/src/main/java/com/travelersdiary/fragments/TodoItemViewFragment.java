@@ -23,13 +23,11 @@ import android.widget.Toast;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.TodoTaskAdapter;
-import com.travelersdiary.adapters.TodoTaskFirebaseAdapter;
 import com.travelersdiary.models.TodoItem;
 
 import org.solovyev.android.views.llm.LinearLayoutManager;
@@ -95,14 +93,11 @@ public class TodoItemViewFragment extends Fragment {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
 
-//                Firebase itemRef = dataSnapshot.getRef();
-//                Query todoTaskList = itemRef.child(Constants.FIREBASE_REMINDER_TASK).orderByKey();
-//                mAdapter = new TodoTaskFirebaseAdapter(todoTaskList, mTodoItem.isViewAsCheckboxes());
-
                 mAdapter = new TodoTaskAdapter(mTodoItem.getTask(), mTodoItem.isViewAsCheckboxes());
 
                 LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
                 mTodoItemTask.setLayoutManager(layoutManager);
+
                 mTodoItemTask.setAdapter(mAdapter);
 
                 long time = mTodoItem.getTime();
