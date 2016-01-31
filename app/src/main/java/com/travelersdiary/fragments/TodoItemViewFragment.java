@@ -29,6 +29,7 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.TodoTaskAdapter;
+import com.travelersdiary.adapters.TodoTaskFirebaseAdapter;
 import com.travelersdiary.models.TodoItem;
 
 import org.solovyev.android.views.llm.LinearLayoutManager;
@@ -57,7 +58,7 @@ public class TodoItemViewFragment extends Fragment {
     @Bind(R.id.todo_item_task)
     RecyclerView mTodoItemTask;
 
-    private TodoTaskAdapter mAdapter;
+    private RecyclerView.Adapter mAdapter;
 
     private InputMethodManager mInputMethodManager;
 
@@ -94,14 +95,14 @@ public class TodoItemViewFragment extends Fragment {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
 
-                Firebase itemRef = dataSnapshot.getRef();
-                Query todoTaskList = itemRef.child(Constants.FIREBASE_REMINDER_TASK).orderByKey();
+//                Firebase itemRef = dataSnapshot.getRef();
+//                Query todoTaskList = itemRef.child(Constants.FIREBASE_REMINDER_TASK).orderByKey();
+//                mAdapter = new TodoTaskFirebaseAdapter(todoTaskList, mTodoItem.isViewAsCheckboxes());
 
-                mAdapter = new TodoTaskAdapter(todoTaskList, mTodoItem.isViewAsCheckboxes());
-//                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                mAdapter = new TodoTaskAdapter(mTodoItem.getTask(), mTodoItem.isViewAsCheckboxes());
+
                 LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
                 mTodoItemTask.setLayoutManager(layoutManager);
-//                mTodoItemTask.setItemAnimator(new DefaultItemAnimator());
                 mTodoItemTask.setAdapter(mAdapter);
 
                 long time = mTodoItem.getTime();
@@ -138,7 +139,7 @@ public class TodoItemViewFragment extends Fragment {
     public void onClick(View v) {
         if (mIsEditingMode) {
             mIsEditingMode = false;
-            mAdapter.setEditable(false);
+            ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
             //hide keyboard
             mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
         } else {
@@ -167,6 +168,6 @@ public class TodoItemViewFragment extends Fragment {
             mTodoItem.setViewAsCheckboxes(true);
             ((Button) v).setText("Hide checkboxes");
         }
-        mAdapter.setViewAsCheckboxes(mTodoItem.isViewAsCheckboxes());
+        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mTodoItem.isViewAsCheckboxes());
     }
 }

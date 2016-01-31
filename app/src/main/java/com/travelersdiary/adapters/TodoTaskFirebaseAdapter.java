@@ -1,24 +1,22 @@
 package com.travelersdiary.adapters;
 
-import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.firebase.client.Firebase;
+import com.firebase.client.Query;
+import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
-
-import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHolder> {
+public class TodoTaskFirebaseAdapter extends FirebaseRecyclerAdapter<TodoTask, TodoTaskFirebaseAdapter.ViewHolder> {
 
     private boolean mViewAsCheckboxes;
 
@@ -34,7 +32,31 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public TodoTaskFirebaseAdapter(Query ref) {
+        super(TodoTask.class, R.layout.list_item_task_item, TodoTaskFirebaseAdapter.ViewHolder.class, ref);
+        this.mViewAsCheckboxes = false;
+        this.mEditable = false;
+    }
+
+    public TodoTaskFirebaseAdapter(Query ref, boolean mViewAsCheckboxes) {
+        super(TodoTask.class, R.layout.list_item_task_item, TodoTaskFirebaseAdapter.ViewHolder.class, ref);
+        this.mViewAsCheckboxes = mViewAsCheckboxes;
+        this.mEditable = false;
+    }
+
+    public TodoTaskFirebaseAdapter(Firebase ref) {
+        super(TodoTask.class, R.layout.list_item_task_item, TodoTaskFirebaseAdapter.ViewHolder.class, ref);
+        this.mViewAsCheckboxes = false;
+        this.mEditable = false;
+    }
+
+    public TodoTaskFirebaseAdapter(Firebase ref, boolean mViewAsCheckboxes) {
+        super(TodoTask.class, R.layout.list_item_task_item, TodoTaskFirebaseAdapter.ViewHolder.class, ref);
+        this.mViewAsCheckboxes = mViewAsCheckboxes;
+        this.mEditable = false;
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.task_item_checkbox)
         AppCompatCheckBox checkBox;
@@ -47,34 +69,8 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         }
     }
 
-    private ArrayList<TodoTask> mTodoTaskItemList;
-
-    public TodoTaskAdapter(ArrayList<TodoTask> itemList) {
-        this.mTodoTaskItemList = itemList;
-        this.mViewAsCheckboxes = false;
-        this.mEditable = false;
-    }
-
-    public TodoTaskAdapter(ArrayList<TodoTask> itemList, boolean viewAsCheckboxes) {
-        this.mTodoTaskItemList = itemList;
-        this.mViewAsCheckboxes = viewAsCheckboxes;
-        this.mEditable = false;
-    }
-
-    private Context mContext;
-
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_task_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        TodoTask model = mTodoTaskItemList.get(position);
-
+    protected void populateViewHolder(ViewHolder viewHolder, TodoTask model, int position) {
         if (mEditable) {
             viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT
                     | InputType.TYPE_TEXT_FLAG_MULTI_LINE
@@ -102,10 +98,5 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
             viewHolder.checkBox.setVisibility(View.GONE);
             viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return mTodoTaskItemList.size();
     }
 }
