@@ -8,13 +8,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.ArrowKeyMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +30,8 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.TodoItem;
+
+import org.solovyev.android.views.llm.LinearLayoutManager;
 
 import java.text.SimpleDateFormat;
 
@@ -56,6 +59,8 @@ public class TodoItemViewFragment extends Fragment {
 
     private TodoTaskAdapter mAdapter;
 
+    private InputMethodManager mInputMethodManager;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,6 +77,8 @@ public class TodoItemViewFragment extends Fragment {
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         retrieveData(mKey);
 
@@ -91,12 +98,11 @@ public class TodoItemViewFragment extends Fragment {
                 Query todoTaskList = itemRef.child(Constants.FIREBASE_REMINDER_TASK).orderByKey();
 
                 mAdapter = new TodoTaskAdapter(todoTaskList, mTodoItem.isViewAsCheckboxes());
-//                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-                LinearLayoutManager layoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+//                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
                 mTodoItemTask.setLayoutManager(layoutManager);
-                mTodoItemTask.setItemAnimator(new DefaultItemAnimator());
+//                mTodoItemTask.setItemAnimator(new DefaultItemAnimator());
                 mTodoItemTask.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
 
                 long time = mTodoItem.getTime();
                 if (time > 0) {
@@ -132,11 +138,23 @@ public class TodoItemViewFragment extends Fragment {
     public void onClick(View v) {
         if (mIsEditingMode) {
             mIsEditingMode = false;
-//            mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-//            mRtEditText.setFocusable(false);
-//            android:focusableInTouchMode="false"
+            mAdapter.setEditable(false);
+            //hide keyboard
+            mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
         } else {
             mIsEditingMode = true;
+            ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
+            mTodoItemTask.scrollToPosition(0);
+            EditText et = (EditText) mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text);
+            et.setTextIsSelectable(false);
+            et.setMovementMethod(ArrowKeyMovementMethod.getInstance());
+            et.setCursorVisible(true);
+            et.setFocusable(true);
+            et.setFocusableInTouchMode(true);
+            et.setSelection(et.getText().length());
+            et.requestFocus();
+            //show keyboard
+            mInputMethodManager.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
         }
     }
 

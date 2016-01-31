@@ -1,12 +1,10 @@
 package com.travelersdiary.adapters;
 
-import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.text.InputType;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.firebase.client.Firebase;
@@ -14,8 +12,6 @@ import com.firebase.client.Query;
 import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
-
-import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,24 +25,35 @@ public class TodoTaskAdapter extends FirebaseRecyclerAdapter<TodoTask, TodoTaskA
         notifyDataSetChanged();
     }
 
+    private boolean mEditable;
+
+    public void setEditable(boolean editable) {
+        this.mEditable = editable;
+        notifyDataSetChanged();
+    }
+
     public TodoTaskAdapter(Query ref) {
         super(TodoTask.class, R.layout.list_item_task_item, TodoTaskAdapter.ViewHolder.class, ref);
         this.mViewAsCheckboxes = false;
+        this.mEditable = false;
     }
 
     public TodoTaskAdapter(Query ref, boolean mViewAsCheckboxes) {
         super(TodoTask.class, R.layout.list_item_task_item, TodoTaskAdapter.ViewHolder.class, ref);
         this.mViewAsCheckboxes = mViewAsCheckboxes;
+        this.mEditable = false;
     }
 
     public TodoTaskAdapter(Firebase ref) {
         super(TodoTask.class, R.layout.list_item_task_item, TodoTaskAdapter.ViewHolder.class, ref);
         this.mViewAsCheckboxes = false;
+        this.mEditable = false;
     }
 
     public TodoTaskAdapter(Firebase ref, boolean mViewAsCheckboxes) {
         super(TodoTask.class, R.layout.list_item_task_item, TodoTaskAdapter.ViewHolder.class, ref);
         this.mViewAsCheckboxes = mViewAsCheckboxes;
+        this.mEditable = false;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -64,6 +71,19 @@ public class TodoTaskAdapter extends FirebaseRecyclerAdapter<TodoTask, TodoTaskA
 
     @Override
     protected void populateViewHolder(ViewHolder viewHolder, TodoTask model, int position) {
+        if (mEditable) {
+            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT
+                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                    | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+                    | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            viewHolder.editText.setFocusable(true);
+            viewHolder.editText.setFocusableInTouchMode(true);
+        } else {
+            viewHolder.editText.setInputType(InputType.TYPE_NULL);
+            viewHolder.editText.setFocusable(false);
+            viewHolder.editText.setFocusableInTouchMode(false);
+        }
+
         viewHolder.editText.setText(model.getItem());
         viewHolder.checkBox.setChecked(model.isChecked());
 

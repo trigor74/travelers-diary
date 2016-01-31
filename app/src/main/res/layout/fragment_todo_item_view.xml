@@ -1,57 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <Button
-        android:id="@+id/todo_item_edit_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edit" />
-
-    <Button
-        android:id="@+id/todo_item_as_checkboxes_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Show checkboxes" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/todo_item_task"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:layout_weight="1" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/common_action_bar_splitter" />
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="8dp">
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/todo_item_type_icon"
+        <Button
+            android:id="@+id/todo_item_edit_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:alpha=".5"
-            android:paddingRight="8sp"
-            android:src="@drawable/ic_alarm_black_24dp" />
+            android:text="Edit" />
 
-        <TextView
-            android:id="@+id/todo_item_remind_info_text_view"
-            style="@style/ListItemSecondaryText"
+        <Button
+            android:id="@+id/todo_item_as_checkboxes_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show checkboxes" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/todo_item_task"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="A todo item place or time info" />
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/common_action_bar_splitter" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:id="@+id/todo_item_type_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:alpha=".5"
+                android:paddingRight="8sp"
+                android:src="@drawable/ic_alarm_black_24dp" />
+
+            <TextView
+                android:id="@+id/todo_item_remind_info_text_view"
+                style="@style/ListItemSecondaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="A todo item place or time info" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.v4.widget.NestedScrollView>
