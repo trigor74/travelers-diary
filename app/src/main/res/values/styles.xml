@@ -36,4 +36,13 @@
         <item name="android:textStyle">normal</item>
     </style>
 
+    <style name="DiaryHeaderText">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="DiaryFooterText">
+        <item name="android:textColor">#282828</item>
+    </style>
+
 </resources>
