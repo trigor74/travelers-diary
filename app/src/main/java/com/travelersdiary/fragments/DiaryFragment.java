@@ -142,6 +142,9 @@ public class DiaryFragment extends Fragment {
                 } else {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
                     tintWidget(mEdtDiaryNoteTitle, R.color.white);
+                    if (isEmpty(mEdtDiaryNoteTitle)) {
+                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                    }
                 }
             }
         });
@@ -423,8 +426,6 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.txt_travel)
     public void onTravelSpinnerClick() {
         if (isEditingMode) {
-            Toast.makeText(getContext(), "travel clicked", Toast.LENGTH_SHORT).show();
-
             new AlertDialog.Builder(getContext())
                     .setTitle("Select travel")
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
