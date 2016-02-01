@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.text.method.ArrowKeyMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,14 +139,16 @@ public class TodoItemViewFragment extends Fragment {
         } else {
             mIsEditingMode = true;
             ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
-            mTodoItemTask.scrollToPosition(0);
-            EditText et = (EditText) mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text);
-            et.setTextIsSelectable(false);
-            et.setMovementMethod(ArrowKeyMovementMethod.getInstance());
-            et.setCursorVisible(true);
+//            mTodoItemTask.scrollToPosition(0);
+//            EditText et = (EditText) mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text);
+            EditText et = (EditText) mTodoItemTask
+                    .findViewHolderForLayoutPosition(0)
+                    .itemView
+                    .findViewById(R.id.task_item_edit_text);
             et.setFocusable(true);
             et.setFocusableInTouchMode(true);
             et.setSelection(et.getText().length());
+            et.setCursorVisible(true);
             et.requestFocus();
             //show keyboard
             mInputMethodManager.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);

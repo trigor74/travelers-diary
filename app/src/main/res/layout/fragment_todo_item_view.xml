@@ -9,12 +9,6 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/todo_item_edit_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Edit" />
-
-        <Button
             android:id="@+id/todo_item_as_checkboxes_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -56,6 +50,12 @@
                 android:text="A todo item place or time info" />
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/todo_item_edit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit" />
 
     </LinearLayout>
 

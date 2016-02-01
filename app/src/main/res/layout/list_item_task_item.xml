@@ -18,10 +18,9 @@
         android:background="@android:color/transparent"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:inputType="none" />
+        android:inputType="text|textMultiLine" />
     <!--android:focusable="false"-->
     <!--android:focusableInTouchMode="false"-->
-    <!--android:inputType="none"-->
     <!--android:background="?attr/editTextBackground"-->
     <!--android:background="@android:color/transparent"-->
 

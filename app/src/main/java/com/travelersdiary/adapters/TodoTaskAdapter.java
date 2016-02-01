@@ -10,9 +10,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
@@ -60,6 +58,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -70,6 +69,23 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                         mTodoTaskItemList.get(getLayoutPosition()).setChecked(false);
                         notifyItemChanged(getLayoutPosition());
                     }
+                }
+            });
+
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    mTodoTaskItemList.get(getLayoutPosition()).setItem(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
                 }
             });
         }
@@ -115,7 +131,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
             viewHolder.editText.setFocusable(true);
             viewHolder.editText.setFocusableInTouchMode(true);
         } else {
-            viewHolder.editText.setInputType(InputType.TYPE_NULL);
+            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             viewHolder.editText.setFocusable(false);
             viewHolder.editText.setFocusableInTouchMode(false);
         }
