@@ -4,11 +4,15 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
@@ -19,6 +23,18 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHolder> {
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+
+        void onItemLongClick(View view, int position);
+    }
+
+    private static OnItemClickListener onItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
 
     private boolean mViewAsCheckboxes;
 
@@ -44,10 +60,26 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (((AppCompatCheckBox) v).isChecked()) {
+                        mTodoTaskItemList.get(getLayoutPosition()).setChecked(true);
+                        notifyItemChanged(getLayoutPosition());
+                    } else {
+                        mTodoTaskItemList.get(getLayoutPosition()).setChecked(false);
+                        notifyItemChanged(getLayoutPosition());
+                    }
+                }
+            });
         }
     }
 
     private ArrayList<TodoTask> mTodoTaskItemList;
+
+    public ArrayList<TodoTask> getTodoTask() {
+        return mTodoTaskItemList;
+    }
 
     public TodoTaskAdapter(ArrayList<TodoTask> itemList) {
         this.mTodoTaskItemList = itemList;
