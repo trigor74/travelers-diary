@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
 
     <android.support.v7.widget.AppCompatCheckBox
         android:id="@+id/task_item_checkbox"
@@ -16,9 +18,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:background="@android:color/transparent"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:inputType="text|textMultiLine" />
+        android:inputType="textMultiLine"
+        android:paddingLeft="16dp" />
+
     <!--android:focusable="false"-->
     <!--android:focusableInTouchMode="false"-->
     <!--android:background="?attr/editTextBackground"-->

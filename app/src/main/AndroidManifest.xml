@@ -39,7 +39,9 @@
 
         <activity android:name=".activities.AddDiaryNoteActivity" />
 
-        <activity android:name=".activities.TodoItemActivity" />
+        <activity
+            android:name=".activities.TodoItemActivity"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 

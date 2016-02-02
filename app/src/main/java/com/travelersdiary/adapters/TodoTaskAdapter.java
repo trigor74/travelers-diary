@@ -7,10 +7,12 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
@@ -88,6 +90,29 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
 
                 }
             });
+
+            editText.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    if(keyCode == KeyEvent.KEYCODE_DEL){
+                        //this is for backspace
+                        int cursorPosition = editText.getSelectionStart();
+                        Toast.makeText(mContext, "DELETE KEY, CURSOR AT " + Integer.toString(cursorPosition), Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                        int cursorPosition = editText.getSelectionStart();
+
+                        //select all the text after the cursor
+                        CharSequence enteredText = mTodoTaskItemList.get(getLayoutPosition()).getItem();
+                        CharSequence cursorToEnd = enteredText.subSequence(cursorPosition, enteredText.length());
+
+                        Toast.makeText(mContext, "ENTER KEY, CURSOR AT " + Integer.toString(cursorPosition) + ", TEXT: " + cursorToEnd.toString(), Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
     }
 
@@ -124,16 +149,20 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         TodoTask model = mTodoTaskItemList.get(position);
 
         if (mEditable) {
-            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT
-                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE
-                    | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
-                    | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+//            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT
+//                    | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+//                    | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+//                    | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             viewHolder.editText.setFocusable(true);
             viewHolder.editText.setFocusableInTouchMode(true);
+            viewHolder.editText.setLongClickable(true);
+//            viewHolder.editText.setKeyListener(new EditText(mContext.getApplicationContext()).getKeyListener());
         } else {
-            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+//            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             viewHolder.editText.setFocusable(false);
             viewHolder.editText.setFocusableInTouchMode(false);
+            viewHolder.editText.setLongClickable(false);
+//            viewHolder.editText.setKeyListener(null);
         }
 
         viewHolder.editText.setText(model.getItem());
