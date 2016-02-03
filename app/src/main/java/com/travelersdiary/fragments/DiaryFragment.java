@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -127,6 +130,7 @@ public class DiaryFragment extends Fragment {
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
+            mSupportActionBar.setDisplayShowTitleEnabled(false);
         }
 
         mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
@@ -134,8 +138,13 @@ public class DiaryFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+                    tintWidget(mEdtDiaryNoteTitle, R.color.colorAccent);
                 } else {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+                    tintWidget(mEdtDiaryNoteTitle, R.color.white);
+                    if (isEmpty(mEdtDiaryNoteTitle)) {
+                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                    }
                 }
             }
         });
@@ -198,9 +207,9 @@ public class DiaryFragment extends Fragment {
         mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
 
         //setup title field
-        mEdtDiaryNoteTitle.setVisibility(View.VISIBLE);
-        mEdtDiaryNoteTitle.setText(mSupportActionBar.getTitle());
-        mSupportActionBar.setDisplayShowTitleEnabled(false);
+        mEdtDiaryNoteTitle.setFocusable(true);
+        mEdtDiaryNoteTitle.setFocusableInTouchMode(true);
+        tintWidget(mEdtDiaryNoteTitle, R.color.white);
 
         //show travel title drop down arrow
         mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.drop_down_arrow, 0);
@@ -227,8 +236,8 @@ public class DiaryFragment extends Fragment {
         mRtEditText.setFocusable(false);
 
         //setup title field
-        mEdtDiaryNoteTitle.setVisibility(View.GONE);
-        mSupportActionBar.setDisplayShowTitleEnabled(true);
+        mEdtDiaryNoteTitle.setFocusable(false);
+        tintWidget(mEdtDiaryNoteTitle, android.R.color.transparent);
 
         //setup rte toolbar
         mToolbarContainer.setVisibility(View.GONE);
@@ -255,7 +264,8 @@ public class DiaryFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-                mSupportActionBar.setTitle(mDiaryNote.getTitle());
+//                mSupportActionBar.setTitle(mDiaryNote.getTitle());
+                mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                 mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
             }
 
@@ -275,7 +285,8 @@ public class DiaryFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-                        mSupportActionBar.setTitle(mDiaryNote.getTitle());
+//                        mSupportActionBar.setTitle(mDiaryNote.getTitle());
+                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
 
                         Date time = new Date(mDiaryNote.getTime());
                         mTxtDate.setText(new SimpleDateFormat("dd").format(time));
@@ -297,6 +308,12 @@ public class DiaryFragment extends Fragment {
     private String getStringExtra(Intent intent, String key) {
         String s = intent.getStringExtra(key);
         return s == null ? "" : s;
+    }
+
+    private void tintWidget(View view, int color) {
+        Drawable wrappedDrawable = DrawableCompat.wrap(view.getBackground());
+        DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(getContext(), color));
+        view.setBackground(wrappedDrawable);
     }
 
     @Override
@@ -409,8 +426,6 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.txt_travel)
     public void onTravelSpinnerClick() {
         if (isEditingMode) {
-            Toast.makeText(getContext(), "travel clicked", Toast.LENGTH_SHORT).show();
-
             new AlertDialog.Builder(getContext())
                     .setTitle("Select travel")
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
