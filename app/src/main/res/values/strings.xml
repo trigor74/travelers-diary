@@ -6,6 +6,7 @@
     <string name="diary_text">Diary</string>
     <string name="reminder_text">Reminder</string>
     <string name="map_text">Map</string>
+    <string name="settings">Settings</string>
     <string name="save">Save</string>
     <string name="create">Create</string>
     <string name="discard">Discard</string>
