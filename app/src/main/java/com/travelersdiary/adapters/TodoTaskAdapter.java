@@ -5,14 +5,12 @@ import android.graphics.Paint;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.travelersdiary.R;
 import com.travelersdiary.models.TodoTask;
@@ -50,6 +48,18 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         notifyDataSetChanged();
     }
 
+    private int mSelectedItem = -1;
+
+    public void setSelectedItem(int position) {
+        mSelectedItem = position;
+    }
+
+    private int mEditTextCursorPosition = 0;
+
+    private void setEditTextCursorPosition(int position) {
+        mEditTextCursorPosition = position;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.task_item_checkbox)
@@ -64,13 +74,17 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    int position = getLayoutPosition();
                     if (((AppCompatCheckBox) v).isChecked()) {
-                        mTodoTaskItemList.get(getLayoutPosition()).setChecked(true);
-                        notifyItemChanged(getLayoutPosition());
+                        mTodoTaskItemList.get(position).setChecked(true);
+                        notifyItemChanged(position);
                     } else {
-                        mTodoTaskItemList.get(getLayoutPosition()).setChecked(false);
-                        notifyItemChanged(getLayoutPosition());
+                        mTodoTaskItemList.get(position).setChecked(false);
+                        notifyItemChanged(position);
                     }
+                    setSelectedItem(position);
+//                    setEditTextCursorPosition(0);
+                    setEditTextCursorPosition(mTodoTaskItemList.get(position).getItem().length());
                 }
             });
 
@@ -94,20 +108,47 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
             editText.setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View v, int keyCode, KeyEvent event) {
-                    if(keyCode == KeyEvent.KEYCODE_DEL){
-                        //this is for backspace
+                    if (keyCode == KeyEvent.KEYCODE_DEL
+                            && event.getAction() == KeyEvent.ACTION_DOWN) {
                         int cursorPosition = editText.getSelectionStart();
-                        Toast.makeText(mContext, "DELETE KEY, CURSOR AT " + Integer.toString(cursorPosition), Toast.LENGTH_SHORT).show();
-                        return true;
+                        if (cursorPosition == 0) {
+                            int index = getLayoutPosition();
+                            String enteredText = mTodoTaskItemList.get(index).getItem();
+                            if (index > 0) {
+                                boolean previousCheckState = mTodoTaskItemList.get(index - 1).isChecked();
+                                String previousText = mTodoTaskItemList.get(index - 1).getItem();
+                                mTodoTaskItemList.get(index - 1).setItem(previousText.concat(enteredText));
+                                mTodoTaskItemList.get(index - 1).setChecked(previousCheckState);
+                                mTodoTaskItemList.remove(index);
+                                notifyItemRemoved(index);
+                                notifyItemChanged(index - 1);
+                                setSelectedItem(index - 1);
+                                setEditTextCursorPosition(previousText.length());
+                                return true;
+                            } else {
+                                if (enteredText.length() == 0) {
+                                    mTodoTaskItemList.get(0).setChecked(false);
+                                    notifyItemChanged(0);
+                                    setSelectedItem(0);
+                                    setEditTextCursorPosition(0);
+                                    return true;
+                                }
+                            }
+                        }
                     }
-                    if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN) {
                         int cursorPosition = editText.getSelectionStart();
+                        int index = getLayoutPosition();
 
-                        //select all the text after the cursor
-                        CharSequence enteredText = mTodoTaskItemList.get(getLayoutPosition()).getItem();
-                        CharSequence cursorToEnd = enteredText.subSequence(cursorPosition, enteredText.length());
-
-                        Toast.makeText(mContext, "ENTER KEY, CURSOR AT " + Integer.toString(cursorPosition) + ", TEXT: " + cursorToEnd.toString(), Toast.LENGTH_SHORT).show();
+                        String enteredText = mTodoTaskItemList.get(index).getItem();
+                        String startToCursor = enteredText.substring(0, cursorPosition);
+                        String cursorToEnd = enteredText.substring(cursorPosition, enteredText.length());
+                        mTodoTaskItemList.get(index).setItem(startToCursor);
+                        mTodoTaskItemList.add(index + 1, new TodoTask(cursorToEnd, false));
+                        notifyItemInserted(index + 1);
+                        notifyItemRangeChanged(index, 2);
+                        setSelectedItem(index + 1);
+                        setEditTextCursorPosition(0);
                         return true;
                     }
                     return false;
@@ -118,8 +159,26 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
 
     private ArrayList<TodoTask> mTodoTaskItemList;
 
-    public ArrayList<TodoTask> getTodoTask() {
+    public ArrayList<TodoTask> getTodoTaskList() {
         return mTodoTaskItemList;
+    }
+
+    public void addItem(String line, boolean checked) {
+        TodoTask todoTask = new TodoTask(line, checked);
+        mTodoTaskItemList.add(todoTask);
+        notifyItemInserted(mTodoTaskItemList.size() - 1);
+    }
+
+    public void addItem(int index, String line, boolean checked) {
+        TodoTask todoTask = new TodoTask(line, checked);
+        mTodoTaskItemList.add(index, todoTask);
+        notifyItemInserted(index);
+    }
+
+    public void remove(int index) {
+        mTodoTaskItemList.remove(index);
+        notifyItemRemoved(index);
+        notifyItemRangeChanged(index, mTodoTaskItemList.size());
     }
 
     public TodoTaskAdapter(ArrayList<TodoTask> itemList) {
@@ -156,12 +215,14 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
             viewHolder.editText.setFocusable(true);
             viewHolder.editText.setFocusableInTouchMode(true);
             viewHolder.editText.setLongClickable(true);
+            viewHolder.editText.setCursorVisible(true);
 //            viewHolder.editText.setKeyListener(new EditText(mContext.getApplicationContext()).getKeyListener());
         } else {
 //            viewHolder.editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
             viewHolder.editText.setFocusable(false);
             viewHolder.editText.setFocusableInTouchMode(false);
             viewHolder.editText.setLongClickable(false);
+            viewHolder.editText.setCursorVisible(false);
 //            viewHolder.editText.setKeyListener(null);
         }
 
@@ -178,6 +239,19 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         } else {
             viewHolder.checkBox.setVisibility(View.GONE);
             viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+        }
+
+        if (mSelectedItem == position) {
+            viewHolder.editText.setSelected(true);
+            if (mEditable) {
+                viewHolder.editText.requestFocus();
+                if (mEditTextCursorPosition > viewHolder.editText.getText().length()) {
+                    setEditTextCursorPosition(viewHolder.editText.getText().length());
+                }
+                viewHolder.editText.setSelection(mEditTextCursorPosition);
+            }
+        } else {
+            viewHolder.editText.setSelected(false);
         }
     }
 
