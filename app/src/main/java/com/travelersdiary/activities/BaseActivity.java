@@ -90,8 +90,16 @@ public class BaseActivity extends AppCompatActivity implements
         TextView mAccountName = (TextView) headerView.findViewById(R.id.account_name_text_view);
         TextView mAccountEmail = (TextView) headerView.findViewById(R.id.account_email_text_view);
 
-        Picasso.with(this).load(mSharedPreferences.getString(Constants.KEY_COVER_IMAGE, null)).into(mCoverImage);
-        Picasso.with(this).load(mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null)).into(mProfileImage);
+        String coverImageUrl = mSharedPreferences.getString(Constants.KEY_COVER_IMAGE, null);
+        if (coverImageUrl != null) {
+            Picasso.with(this).load(coverImageUrl).into(mCoverImage);
+        }
+
+        String profileImageUrl = mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null);
+        if (profileImageUrl != null) {
+            Picasso.with(this).load(profileImageUrl).into(mProfileImage);
+        }
+
         mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
         mAccountEmail.setText(mSharedPreferences.getString(Constants.KEY_EMAIL, null));
     }
