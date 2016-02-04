@@ -78,9 +78,18 @@ public class TodoItemViewFragment extends Fragment {
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        retrieveData(mKey);
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        retrieveData(mKey);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     private void retrieveData(String key) {

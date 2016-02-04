@@ -75,16 +75,14 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     int position = getLayoutPosition();
-                    if (((AppCompatCheckBox) v).isChecked()) {
-                        mTodoTaskItemList.get(position).setChecked(true);
-                        notifyItemChanged(position);
-                    } else {
-                        mTodoTaskItemList.get(position).setChecked(false);
-                        notifyItemChanged(position);
+                    setEditTextCursorPosition(editText.getSelectionStart());
+                    if (mSelectedItem != position) {
+                        setSelectedItem(position);
+//                        setEditTextCursorPosition(0);
+                        setEditTextCursorPosition(mTodoTaskItemList.get(position).getItem().length());
                     }
-                    setSelectedItem(position);
-//                    setEditTextCursorPosition(0);
-                    setEditTextCursorPosition(mTodoTaskItemList.get(position).getItem().length());
+                    mTodoTaskItemList.get(position).setChecked(((AppCompatCheckBox) v).isChecked());
+                    notifyItemChanged(position);
                 }
             });
 
