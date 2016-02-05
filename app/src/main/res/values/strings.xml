@@ -19,6 +19,9 @@
     <string name="edit_travel_dialog_title_edit">Edit travel</string>
     <string name="edit_travel_dialog_default_title">Travel at %s</string>
 
+    <string name="default_travel_title">Uncategorized</string>
+    <string name="default_travel_description">Default category</string>
+
     <string name="login_activity_progress_dialog_title">Loading</string>
     <string name="login_activity_progress_dialog_message">Authenticating with Firebase...</string>
     <string name="login_activity_error_dialog_title">Error</string>
