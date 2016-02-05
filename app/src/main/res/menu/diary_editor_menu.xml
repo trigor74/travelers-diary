@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/action_save"
-        android:icon="@drawable/ic_save_white_24dp"
-        android:title="@string/save"
-        app:showAsAction="always" />
-
+    <group android:id="@+id/editor_menu">
+        <item
+            android:id="@+id/action_save"
+            android:icon="@drawable/ic_save_white_24dp"
+            android:title="@string/save"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/action_add_photo"
+            android:icon="@drawable/ic_camera_alt_white_24dp"
+            android:title="@string/add_photo"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_add_image"
+            android:icon="@drawable/ic_insert_photo_white_24dp"
+            android:title="@string/add_image"
+            app:showAsAction="never" />
+    </group>
 </menu>

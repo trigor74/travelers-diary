@@ -4,12 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!--<Spinner-->
-    <!--android:visibility="gone"-->
-    <!--android:id="@+id/spinner_travels"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content" />-->
-
     <com.onegravity.rteditor.RTEditText
         android:id="@+id/rt_editor"
         android:layout_width="match_parent"
