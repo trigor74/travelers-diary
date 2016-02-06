@@ -45,8 +45,7 @@ public class ReminderListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        mReminderList.setLayoutManager(new LinearLayoutManager(getContext()));
-
+        // LayoutManager
         mLayoutManager = new LinearLayoutManager(getContext());
         mReminderList.setLayoutManager(mLayoutManager);
 
@@ -56,6 +55,11 @@ public class ReminderListFragment extends Fragment {
         // decoration
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
         mReminderList.addItemDecoration(itemDecoration);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
@@ -72,9 +76,12 @@ public class ReminderListFragment extends Fragment {
 
         if (mAdapter != null) {
             mAdapter.cleanup();
+            mAdapter = new ReminderListAdapter(query);
+            mReminderList.swapAdapter(mAdapter, true);
+        } else {
+            mAdapter = new ReminderListAdapter(query);
+            mReminderList.setAdapter(mAdapter);
         }
-        mAdapter = new ReminderListAdapter(query);
-        mReminderList.setAdapter(mAdapter);
     }
 
     @Override
