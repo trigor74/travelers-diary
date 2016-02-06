@@ -58,6 +58,11 @@ public class DiaryListFragment extends Fragment {
         // decoration
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
         mDiaryList.addItemDecoration(itemDecoration);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
@@ -74,9 +79,12 @@ public class DiaryListFragment extends Fragment {
 
         if (mAdapter != null) {
             mAdapter.cleanup();
+            mAdapter = new DiaryListAdapter(query);
+            mDiaryList.swapAdapter(mAdapter, true);
+        } else {
+            mAdapter = new DiaryListAdapter(query);
+            mDiaryList.setAdapter(mAdapter);
         }
-        mAdapter = new DiaryListAdapter(query);
-        mDiaryList.setAdapter(mAdapter);
 
         ((DiaryListAdapter) mAdapter).setOnItemClickListener(new DiaryListAdapter.OnItemClickListener() {
             @Override
