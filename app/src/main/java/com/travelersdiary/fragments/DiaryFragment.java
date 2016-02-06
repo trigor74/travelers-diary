@@ -97,6 +97,7 @@ public class DiaryFragment extends Fragment {
     TextView mTxtTravel;
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int PICK_IMAGE_REQUEST = 2;
 
     private ActionBar mSupportActionBar;
 
@@ -386,6 +387,9 @@ public class DiaryFragment extends Fragment {
             case R.id.action_add_photo:
                 takePhoto();
                 return true;
+            case R.id.action_add_image:
+                pickImage();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -428,13 +432,36 @@ public class DiaryFragment extends Fragment {
         }
     }
 
+    private void pickImage() {
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Complete action using");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE_REQUEST);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            mImages.add("file:" + mImagePath);
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == Activity.RESULT_OK) {
+                mImages.add("file:" + mImagePath);
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+            } else {
+                new File(mImagePath).delete();
+            }
+        }
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK &&
+                data != null && data.getData() != null) {
+            mImages.add(data.getDataString());
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-        } else {
-            new File(mImagePath).delete();
+            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
         }
     }
 
