@@ -23,7 +23,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
-import android.text.method.ArrowKeyMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -220,9 +219,10 @@ public class DiaryFragment extends Fragment {
         retrieveData();
 
         // make edit text field not editable
-//        mRtEditText.setTextIsSelectable(true);
-//        mRtEditText.setInputType(InputType.TYPE_NULL);
-        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        mRtEditText.setClickable(false);
+        mRtEditText.setLongClickable(false);
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         mRtEditText.setFocusable(false);
 
         //setup title field
@@ -251,9 +251,6 @@ public class DiaryFragment extends Fragment {
         isEditingMode = true;
 
         // reset edit text field to editable mode
-        mRtEditText.setTextIsSelectable(false);
-        mRtEditText.setMovementMethod(ArrowKeyMovementMethod.getInstance());
-        mRtEditText.setCursorVisible(true);
         mRtEditText.setFocusable(true);
         mRtEditText.setFocusableInTouchMode(true);
         mRtEditText.setClickable(true);
