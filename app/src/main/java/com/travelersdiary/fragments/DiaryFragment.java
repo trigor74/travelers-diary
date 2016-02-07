@@ -47,6 +47,8 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
+import com.sangcomz.fishbun.FishBun;
+import com.sangcomz.fishbun.define.Define;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -433,16 +435,12 @@ public class DiaryFragment extends Fragment {
     }
 
     private void pickImage() {
-        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        getIntent.setType("image/*");
-
-        Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        pickIntent.setType("image/*");
-
-        Intent chooserIntent = Intent.createChooser(getIntent, "Complete action using");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
-
-        startActivityForResult(chooserIntent, PICK_IMAGE_REQUEST);
+        FishBun.with(DiaryFragment.this)
+                .setAlbumThumnaliSize(150)
+                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
+                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
+                .setPickerCount(15)
+                .startAlbum();
     }
 
     @Override
@@ -457,9 +455,11 @@ public class DiaryFragment extends Fragment {
             }
         }
 
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK &&
-                data != null && data.getData() != null) {
-            mImages.add(data.getDataString());
+        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
+            for (int i = 0; i < path.size(); i++) {
+                mImages.add("file:" + path.get(i));
+            }
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
         }
