@@ -30,4 +30,16 @@
     <string name="login_activity_error_message_invalid_provider">Invalid login provider: %s</string>
 
     <string name="travel_activity_title">A Travel</string>
+
+    <string-array name="reminder_type_names">
+        <item>Dont remind</item>
+        <item>Remind at time</item>
+        <item>Remind at location</item>
+    </string-array>
+    <array name="reminder_type_icons">
+        <item>@drawable/ic_alarm_off_black_24dp</item>
+        <item>@drawable/ic_alarm_black_24dp</item>
+        <item>@drawable/ic_location_on_black_24dp</item>
+    </array>
+
 </resources>

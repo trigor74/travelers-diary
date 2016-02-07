@@ -32,16 +32,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:paddingLeft="16dp"
             android:paddingTop="8dp">
 
-            <ImageView
-                android:id="@+id/todo_item_type_icon"
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/todo_item_remind_type_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:alpha=".5"
-                android:paddingRight="8sp"
-                android:src="@drawable/ic_alarm_black_24dp" />
+                android:background="?attr/editTextBackground" />
 
             <TextView
                 android:id="@+id/todo_item_remind_info_text_view"
@@ -49,6 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:paddingLeft="8sp"
                 android:text="A todo item place or time info" />
 
         </LinearLayout>

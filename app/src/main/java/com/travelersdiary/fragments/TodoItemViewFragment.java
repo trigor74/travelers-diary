@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +16,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.adapters.RemindTypesAdapter;
 import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.TodoItem;
 
@@ -47,8 +49,8 @@ public class TodoItemViewFragment extends Fragment {
 
     @Bind(R.id.todo_item_remind_info_text_view)
     TextView textViewInfo;
-    @Bind(R.id.todo_item_type_icon)
-    ImageView imageViewItemTypeIcon;
+    @Bind(R.id.todo_item_remind_type_spinner)
+    Spinner remindTypeSpinner;
 
     private Context mContext;
 
@@ -108,17 +110,22 @@ public class TodoItemViewFragment extends Fragment {
 
                 mTodoItemTask.setAdapter(mAdapter);
 
+                RemindTypesAdapter adapter = new RemindTypesAdapter(mContext);
+                remindTypeSpinner.setAdapter(adapter);
+
                 long time = mTodoItem.getTime();
                 if (time > 0) {
                     // remind at time
                     String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
-                    imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
                     textViewInfo.setText(timeText);
+                    remindTypeSpinner.setSelection(1);
                 } else {
                     // remind at location
                     textViewInfo.setText(mTodoItem.getWaypoint().getTitle());
-                    imageViewItemTypeIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
+                    remindTypeSpinner.setSelection(2);
                 }
+                remindTypeSpinner.setEnabled(false);
+                remindTypeSpinner.setBackground(null);
             }
 
             @Override
@@ -142,11 +149,15 @@ public class TodoItemViewFragment extends Fragment {
     public void onClick(View v) {
         if (mIsEditingMode) {
             mIsEditingMode = false;
+            remindTypeSpinner.setEnabled(false);
+            remindTypeSpinner.setBackground(null);
             ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
             //hide keyboard
             mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
         } else {
             mIsEditingMode = true;
+            remindTypeSpinner.setEnabled(true);
+            remindTypeSpinner.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
             ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
 
             mTodoItemTask.scrollToPosition(0);
