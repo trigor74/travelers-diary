@@ -254,6 +254,7 @@ public class DiaryFragment extends Fragment {
         isEditingMode = true;
 
         // reset edit text field to editable mode
+        mRtEditText.setVisibility(View.VISIBLE);
         mRtEditText.setFocusable(true);
         mRtEditText.setFocusableInTouchMode(true);
         mRtEditText.setClickable(true);
@@ -296,6 +297,12 @@ public class DiaryFragment extends Fragment {
                 mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                 mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
 
+                if (isEmpty(mRtEditText)) {
+                    mRtEditText.setVisibility(View.GONE);
+                } else {
+                    mRtEditText.setVisibility(View.VISIBLE);
+                }
+
                 if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                     mImages = mDiaryNote.getPhotos();
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
@@ -330,6 +337,10 @@ public class DiaryFragment extends Fragment {
                         mTxtTravel.setText(mDiaryNote.getTravelTitle());
 
                         mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+
+                        if (isEmpty(mRtEditText)) {
+                            mRtEditText.setVisibility(View.GONE);
+                        }
 
                         if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                             mImages = mDiaryNote.getPhotos();
