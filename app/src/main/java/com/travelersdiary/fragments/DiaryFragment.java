@@ -325,6 +325,7 @@ public class DiaryFragment extends Fragment {
                         mTxtDate.setText(new SimpleDateFormat("dd").format(time));
                         mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
                         mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
+                        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
 
                         mTxtTravel.setText(mDiaryNote.getTravelTitle());
 
