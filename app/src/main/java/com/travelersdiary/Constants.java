@@ -20,6 +20,9 @@ public final class Constants {
     public static final String FIREBASE_REMINDER_TASK = "task";
     public static final String FIREBASE_REMINDER_TASK_ITEM = "item";
     public static final String FIREBASE_REMINDER_TASK_ITEM_CHECKED = "checked";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE = "type";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME = "time";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION = "location";
     public static final String FIREBASE_WAYPOINTS = "waypoints";
     public static final String FIREBASE_DIARY_TRAVELID = "travelId";
     public static final String FIREBASE_DIARY_TRAVEL_TITLE = "travelTitle";

@@ -39,16 +39,65 @@
                 android:id="@+id/todo_item_remind_type_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?attr/editTextBackground" />
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:visibility="gone" />
 
             <TextView
-                android:id="@+id/todo_item_remind_info_text_view"
-                style="@style/ListItemSecondaryText"
-                android:layout_width="match_parent"
+                android:id="@+id/todo_item_dont_remind_text_view"
+                style="@style/ListItemPrimaryText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="8sp"
-                android:text="A todo item place or time info" />
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:paddingLeft="16sp"
+                android:text="@string/reminder_dont_remind_text"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/todo_item_date_text_view"
+                style="@style/ListItemPrimaryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:paddingLeft="16sp"
+                android:text="01 JAN 2016"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/todo_item_time_text_view"
+                style="@style/ListItemPrimaryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:paddingLeft="16sp"
+                android:text="08:35:00 PM"
+                android:visibility="gone" />
+
+
+            <TextView
+                android:id="@+id/todo_item_waypoint_title_text_view"
+                style="@style/ListItemPrimaryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:paddingLeft="16sp"
+                android:text="Location title"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/todo_item_waypoint_distance_text_view"
+                style="@style/ListItemPrimaryText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="?attr/editTextBackground"
+                android:paddingLeft="16sp"
+                android:text="500"
+                android:visibility="gone" />
 
         </LinearLayout>
 

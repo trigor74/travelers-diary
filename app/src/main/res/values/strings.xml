@@ -31,8 +31,9 @@
 
     <string name="travel_activity_title">A Travel</string>
 
+    <string name="reminder_dont_remind_text">Don\'t remind</string>
     <string-array name="reminder_type_names">
-        <item>Dont remind</item>
+        <item>Don\'t remind</item>
         <item>Remind at time</item>
         <item>Remind at location</item>
     </string-array>

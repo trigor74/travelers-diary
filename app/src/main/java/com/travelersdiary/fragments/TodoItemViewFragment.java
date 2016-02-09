@@ -47,10 +47,18 @@ public class TodoItemViewFragment extends Fragment {
     private String mUserUID;
     private String mKey;
 
-    @Bind(R.id.todo_item_remind_info_text_view)
-    TextView textViewInfo;
+    @Bind(R.id.todo_item_dont_remind_text_view)
+    TextView dontRemindTextView;
     @Bind(R.id.todo_item_remind_type_spinner)
     Spinner remindTypeSpinner;
+    @Bind(R.id.todo_item_date_text_view)
+    TextView dateTextView;
+    @Bind(R.id.todo_item_time_text_view)
+    TextView timeTextView;
+    @Bind(R.id.todo_item_waypoint_title_text_view)
+    TextView waypointTitle;
+    @Bind(R.id.todo_item_waypoint_distance_text_view)
+    TextView waypointDistance;
 
     private Context mContext;
 
@@ -103,29 +111,35 @@ public class TodoItemViewFragment extends Fragment {
                 mTodoItem = dataSnapshot.getValue(TodoItem.class);
                 mSupportActionBar.setTitle(mTodoItem.getTitle());
 
-                mAdapter = new TodoTaskAdapter(mTodoItem.getTask(), mTodoItem.isViewAsCheckboxes());
-
-                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
-                mTodoItemTask.setLayoutManager(layoutManager);
-
-                mTodoItemTask.setAdapter(mAdapter);
-
+                // item type
                 RemindTypesAdapter adapter = new RemindTypesAdapter(mContext);
                 remindTypeSpinner.setAdapter(adapter);
 
-                long time = mTodoItem.getTime();
-                if (time > 0) {
+                // task text
+                mAdapter = new TodoTaskAdapter(mTodoItem.getTask(), mTodoItem.isViewAsCheckboxes());
+                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                mTodoItemTask.setLayoutManager(layoutManager);
+                mTodoItemTask.setAdapter(mAdapter);
+
+                // item remind data
+                if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mTodoItem.getType())) {
                     // remind at time
+                    long time = mTodoItem.getTime();
                     String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
-                    textViewInfo.setText(timeText);
-                    remindTypeSpinner.setSelection(1);
-                } else {
+                    dateTextView.setText(timeText);
+                    timeTextView.setText("00:00:00");
+                } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mTodoItem.getType())) {
                     // remind at location
-                    textViewInfo.setText(mTodoItem.getWaypoint().getTitle());
-                    remindTypeSpinner.setSelection(2);
+                    waypointTitle.setText(mTodoItem.getWaypoint().getTitle());
+                    waypointDistance.setText("100");
+                } else {
+                    // don't remind
                 }
-                remindTypeSpinner.setEnabled(false);
-                remindTypeSpinner.setBackground(null);
+
+                setRemindTypeViewVisibility(mTodoItem.getType());
+                remindTypeSpinner.setVisibility(View.VISIBLE);
+                setOnClickListeners();
+                setEditingMode(false);
             }
 
             @Override
@@ -142,23 +156,121 @@ public class TodoItemViewFragment extends Fragment {
         super.onDestroyView();
     }
 
-    // test edit
+    private void setOnClickListeners() {
+        dontRemindTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    remindTypeSpinner.requestFocus();
+                }
+            }
+        });
+
+        dateTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "TEST DATE", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        timeTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "TEST TIME", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        waypointTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "TEST WAYPOINT", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        waypointDistance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "TEST DISTANCE", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setRemindTypeViewVisibility(String type) {
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
+            // remind at time
+            dontRemindTextView.setVisibility(View.GONE);
+            dateTextView.setVisibility(View.VISIBLE);
+            timeTextView.setVisibility(View.VISIBLE);
+            waypointTitle.setVisibility(View.GONE);
+            waypointDistance.setVisibility(View.GONE);
+            remindTypeSpinner.setSelection(1);
+        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
+            // remind at location
+            dontRemindTextView.setVisibility(View.GONE);
+            dateTextView.setVisibility(View.GONE);
+            timeTextView.setVisibility(View.GONE);
+            waypointTitle.setVisibility(View.VISIBLE);
+            waypointDistance.setVisibility(View.VISIBLE);
+            remindTypeSpinner.setSelection(2);
+        } else {
+            // don't remind
+            dontRemindTextView.setVisibility(View.VISIBLE);
+            dateTextView.setVisibility(View.GONE);
+            timeTextView.setVisibility(View.GONE);
+            waypointTitle.setVisibility(View.GONE);
+            waypointDistance.setVisibility(View.GONE);
+            remindTypeSpinner.setSelection(0);
+        }
+    }
+
+    private void setViewEditMode(View v, boolean editMode) {
+        if (editMode) {
+            v.setClickable(true);
+            v.setLongClickable(true);
+            v.setFocusable(true);
+            v.setFocusableInTouchMode(true);
+            v.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
+        } else {
+            v.setClickable(false);
+            v.setLongClickable(false);
+            v.setFocusable(false);
+            v.setFocusableInTouchMode(false);
+            v.setBackground(null);
+        }
+    }
+
+    private void setSpinnerEditMode(Spinner spinner, boolean editMode) {
+        if (editMode) {
+            spinner.setEnabled(true);
+            spinner.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
+        } else {
+            spinner.setEnabled(false);
+            spinner.setBackground(null);
+        }
+    }
+
+    private void setEditingMode(boolean editingMode) {
+        setViewEditMode(dontRemindTextView, editingMode);
+        setViewEditMode(dateTextView, editingMode);
+        setViewEditMode(timeTextView, editingMode);
+        setViewEditMode(waypointTitle, editingMode);
+        setViewEditMode(waypointDistance, editingMode);
+        setSpinnerEditMode(remindTypeSpinner, editingMode);
+        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(editingMode);
+    }
+
     private boolean mIsEditingMode = false;
 
     @OnClick(R.id.todo_item_edit_button)
-    public void onClick(View v) {
+    public void onClickEdit(View v) {
         if (mIsEditingMode) {
             mIsEditingMode = false;
-            remindTypeSpinner.setEnabled(false);
-            remindTypeSpinner.setBackground(null);
-            ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
+            setEditingMode(false);
             //hide keyboard
             mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
         } else {
             mIsEditingMode = true;
-            remindTypeSpinner.setEnabled(true);
-            remindTypeSpinner.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
-            ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
+            setEditingMode(true);
 
             mTodoItemTask.scrollToPosition(0);
             ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setSelectedItem(0);
@@ -180,7 +292,7 @@ public class TodoItemViewFragment extends Fragment {
     }
 
     @OnClick(R.id.todo_item_as_checkboxes_button)
-    public void onClickAsCheckboxes(View v) {
+    public void onClickViewAsCheckboxes(View v) {
         if (mTodoItem.isViewAsCheckboxes()) {
             mTodoItem.setViewAsCheckboxes(false);
             ((Button) v).setText("Show checkboxes");
