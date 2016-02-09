@@ -57,7 +57,7 @@ android {
     task indexAssets {
         description 'Index Build Variant assets for faster lookup by AssetManager'
 
-        ext.assetsSrcDir = file( "${projectDir}/src/main/assets" )
+        ext.assetsSrcDir = file("${projectDir}/src/main/assets")
 
         inputs.dir assetsSrcDir
 
@@ -80,10 +80,10 @@ android {
     }
 
     indexAssets.dependsOn {
-        tasks.matching { task -> task.name.startsWith( 'merge' ) && task.name.endsWith( 'Assets' ) }
+        tasks.matching { task -> task.name.startsWith('merge') && task.name.endsWith('Assets') }
     }
 
-    tasks.withType( JavaCompile ) {
+    tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn indexAssets
     }
 
@@ -110,7 +110,7 @@ dependencies {
     /*Custom views*/
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.1gravity:android-rteditor:1.4.0'
-    compile 'com.github.darsh2:MultipleImageSelect:v0.0.3'
+    compile 'com.github.lawloretienne:imagegallery:0.0.12'
     compile 'com.sangcomz:FishBun:0.3.0@aar'
 
     /*Firebase*/

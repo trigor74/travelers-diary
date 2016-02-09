@@ -35,6 +35,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -593,6 +594,13 @@ public class DiaryFragment extends Fragment {
                     })
                     .show();
         }
+    }
+
+    @OnClick(R.id.btn_view_all_images)
+    public void viewAllImages() {
+        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
+        intent.putStringArrayListExtra("images", mImages);
+        startActivity(intent);
     }
 
 }

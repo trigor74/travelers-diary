@@ -1,6 +1,7 @@
 package com.travelersdiary.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.etiennelawlor.imagegallery.library.activities.FullScreenImageGalleryActivity;
 import com.travelersdiary.R;
 
 import java.util.ArrayList;
@@ -43,7 +45,19 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_diary_note_image, parent, false);
-        return new ViewHolder(view);
+
+        final ViewHolder viewHolder = new ViewHolder(view);
+        viewHolder.image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, FullScreenImageGalleryActivity.class);
+                intent.putStringArrayListExtra("images", mImagesList);
+                intent.putExtra("position", viewHolder.getAdapterPosition());
+                mContext.startActivity(intent);
+            }
+        });
+
+        return viewHolder;
     }
 
     @Override

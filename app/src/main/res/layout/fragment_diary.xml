@@ -45,6 +45,12 @@
                         android:paddingRight="16dp"
                         android:scrollbars="horizontal" />
 
+                    <Button
+                        android:id="@+id/btn_view_all_images"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="View all images" />
+
                     <include
                         android:id="@+id/diary_note_footer_layout"
                         layout="@layout/diary_note_footer" />
