@@ -13,7 +13,6 @@ import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 
 import butterknife.Bind;
-import butterknife.ButterKnife;
 
 public class TravelActivity extends BaseActivity {
 
@@ -30,8 +29,6 @@ public class TravelActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_travel);
-
-        ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
 

@@ -23,6 +23,8 @@ import com.firebase.client.Firebase;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 
+import butterknife.ButterKnife;
+
 public class BaseActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
 
@@ -71,6 +73,7 @@ public class BaseActivity extends AppCompatActivity implements
         getLayoutInflater().inflate(layoutResID, activityContainer, true);
 
         super.setContentView(mDrawerLayout);
+        ButterKnife.bind(this);
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
     }

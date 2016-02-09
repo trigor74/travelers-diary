@@ -7,7 +7,6 @@ import android.support.v7.widget.Toolbar;
 import com.travelersdiary.R;
 
 import butterknife.Bind;
-import butterknife.ButterKnife;
 
 public class AddDiaryNoteActivity extends BaseActivity {
     @Bind(R.id.add_diary_note_activity_toolbar)
@@ -17,8 +16,6 @@ public class AddDiaryNoteActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_diary_note);
-
-        ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
