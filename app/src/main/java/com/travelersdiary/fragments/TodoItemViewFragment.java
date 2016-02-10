@@ -44,6 +44,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class TodoItemViewFragment extends Fragment {
+    private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
+    private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
+
     private ActionBar mSupportActionBar;
     private Firebase mItemRef;
     private TodoItem mTodoItem;
@@ -101,6 +104,11 @@ public class TodoItemViewFragment extends Fragment {
     public void onResume() {
         super.onResume();
         retrieveData(mKey);
+
+        DatePickerDialog datePickerDialog = (DatePickerDialog) getActivity().getFragmentManager().findFragmentByTag(DATE_PICKER_DIALOG_TAG);
+        TimePickerDialog timePickerDialog = (TimePickerDialog) getActivity().getFragmentManager().findFragmentByTag(TIME_PICKER_DIALOG_TAG);
+        if (datePickerDialog != null) datePickerDialog.setOnDateSetListener(mDateSetListener);
+        if (timePickerDialog != null) timePickerDialog.setOnTimeSetListener(mTimeSetListener);
     }
 
     @Override
@@ -162,6 +170,21 @@ public class TodoItemViewFragment extends Fragment {
         super.onDestroyView();
     }
 
+    DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+            Calendar c = Calendar.getInstance();
+            long time = mTodoItem.getTime();
+            if (time > 0) {
+                c.setTimeInMillis(time);
+            }
+            c.set(year, monthOfYear, dayOfMonth);
+            mTodoItem.setTime(c.getTimeInMillis());
+            // TODO: 10.02.16 change date format!!!
+            dateTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+        }
+    };
+
     private void openDatePicker() {
         Calendar c = Calendar.getInstance();
         long time = mTodoItem.getTime();
@@ -172,22 +195,29 @@ public class TodoItemViewFragment extends Fragment {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog.newInstance(new DatePickerDialog.OnDateSetListener() {
-                                         @Override
-                                         public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                                             Calendar c = Calendar.getInstance();
-                                             long time = mTodoItem.getTime();
-                                             if (time > 0) {
-                                                 c.setTimeInMillis(time);
-                                             }
-                                             c.set(year, monthOfYear, dayOfMonth);
-                                             mTodoItem.setTime(c.getTimeInMillis());
-                                             dateTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
-                                         }
-                                     },
-                year, month, day)
-                .show(getActivity().getFragmentManager(), "DatePickerDialog");
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(mDateSetListener, year, month, day);
+//        datePickerDialog.dismissOnPause(true);
+        datePickerDialog.vibrate(false);
+        datePickerDialog.show(getActivity().getFragmentManager(), DATE_PICKER_DIALOG_TAG);
     }
+
+    TimePickerDialog.OnTimeSetListener mTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int second) {
+            Calendar c = Calendar.getInstance();
+            long time = mTodoItem.getTime();
+            if (time > 0) {
+                c.setTimeInMillis(time);
+            }
+            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            c.set(Calendar.MINUTE, minute);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            mTodoItem.setTime(c.getTimeInMillis());
+            // TODO: 10.02.16 change time format!!!
+            timeTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+        }
+    };
 
     private void openTimePicker() {
         Calendar c = Calendar.getInstance();
@@ -198,25 +228,10 @@ public class TodoItemViewFragment extends Fragment {
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
 
-        TimePickerDialog.newInstance(new TimePickerDialog.OnTimeSetListener() {
-                                         @Override
-                                         public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int second) {
-                                             Calendar c = Calendar.getInstance();
-                                             long time = mTodoItem.getTime();
-                                             if (time > 0) {
-                                                 c.setTimeInMillis(time);
-                                             }
-                                             c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                             c.set(Calendar.MINUTE, minute);
-                                             c.set(Calendar.SECOND, 0);
-                                             c.set(Calendar.MILLISECOND, 0);
-                                             mTodoItem.setTime(c.getTimeInMillis());
-                                             // TODO: 10.02.16 change time format!!!
-                                             timeTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
-                                         }
-                                     },
-                hour, minute, true)
-                .show(getActivity().getFragmentManager(), "TimePickerDialog");
+        TimePickerDialog timePickerDialog = TimePickerDialog.newInstance(mTimeSetListener, hour, minute, true);
+//        timePickerDialog.dismissOnPause(true);
+        timePickerDialog.vibrate(false);
+        timePickerDialog.show(getActivity().getFragmentManager(), TIME_PICKER_DIALOG_TAG);
     }
 
     private void setOnClickListeners() {
