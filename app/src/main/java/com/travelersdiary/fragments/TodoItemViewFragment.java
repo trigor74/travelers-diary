@@ -1,6 +1,5 @@
 package com.travelersdiary.fragments;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,6 +30,9 @@ import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.RemindTypesAdapter;
 import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.TodoItem;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import org.solovyev.android.views.llm.LinearLayoutManager;
 
@@ -49,6 +50,8 @@ public class TodoItemViewFragment extends Fragment {
 
     private String mUserUID;
     private String mKey;
+
+    private boolean mIsEditingMode = false;
 
     @Bind(R.id.todo_item_dont_remind_text_view)
     TextView dontRemindTextView;
@@ -142,7 +145,7 @@ public class TodoItemViewFragment extends Fragment {
                 setRemindTypeViewVisibility(mTodoItem.getType());
                 remindTypeSpinner.setVisibility(View.VISIBLE);
                 setOnClickListeners();
-                setEditingMode(false);
+                setEditingMode(mIsEditingMode);
             }
 
             @Override
@@ -159,20 +162,64 @@ public class TodoItemViewFragment extends Fragment {
         super.onDestroyView();
     }
 
-    private DatePickerDialog datePicker;
+    private void openDatePicker() {
+        Calendar c = Calendar.getInstance();
+        long time = mTodoItem.getTime();
+        if (time > 0) {
+            c.setTimeInMillis(time);
+        }
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog.newInstance(new DatePickerDialog.OnDateSetListener() {
+                                         @Override
+                                         public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+                                             Calendar c = Calendar.getInstance();
+                                             long time = mTodoItem.getTime();
+                                             if (time > 0) {
+                                                 c.setTimeInMillis(time);
+                                             }
+                                             c.set(year, monthOfYear, dayOfMonth);
+                                             mTodoItem.setTime(c.getTimeInMillis());
+                                             dateTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+                                         }
+                                     },
+                year, month, day)
+                .show(getActivity().getFragmentManager(), "DatePickerDialog");
+    }
+
+    private void openTimePicker() {
+        Calendar c = Calendar.getInstance();
+        long time = mTodoItem.getTime();
+        if (time > 0) {
+            c.setTimeInMillis(time);
+        }
+        int hour = c.get(Calendar.HOUR_OF_DAY);
+        int minute = c.get(Calendar.MINUTE);
+
+        TimePickerDialog.newInstance(new TimePickerDialog.OnTimeSetListener() {
+                                         @Override
+                                         public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int second) {
+                                             Calendar c = Calendar.getInstance();
+                                             long time = mTodoItem.getTime();
+                                             if (time > 0) {
+                                                 c.setTimeInMillis(time);
+                                             }
+                                             c.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                             c.set(Calendar.MINUTE, minute);
+                                             c.set(Calendar.SECOND, 0);
+                                             c.set(Calendar.MILLISECOND, 0);
+                                             mTodoItem.setTime(c.getTimeInMillis());
+                                             // TODO: 10.02.16 change time format!!!
+                                             timeTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+                                         }
+                                     },
+                hour, minute, true)
+                .show(getActivity().getFragmentManager(), "TimePickerDialog");
+    }
 
     private void setOnClickListeners() {
-        dontRemindTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    dontRemindTextView.clearFocus();
-                    remindTypeSpinner.requestFocus();
-                    remindTypeSpinner.performClick();
-                }
-            }
-        });
-
         dontRemindTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,37 +232,14 @@ public class TodoItemViewFragment extends Fragment {
         dateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                long time = mTodoItem.getTime();
-                if (time > 0) {
-                    c.setTimeInMillis(time);
-                }
-                int year = c.get(Calendar.YEAR);
-                int month = c.get(Calendar.MONTH);
-                int day = c.get(Calendar.DAY_OF_MONTH);
-
-                datePicker = new DatePickerDialog(mContext, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        Calendar c = Calendar.getInstance();
-                        long time = mTodoItem.getTime();
-                        if (time > 0) {
-                            c.setTimeInMillis(time);
-                        }
-                        c.set(year, monthOfYear, dayOfMonth);
-                        mTodoItem.setTime(c.getTimeInMillis());
-                        dateTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
-                    }
-                }, year, month, day);
-
-                datePicker.show();
+                openDatePicker();
             }
         });
 
         timeTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "TEST TIME", Toast.LENGTH_SHORT).show();
+                openTimePicker();
             }
         });
 
@@ -266,14 +290,14 @@ public class TodoItemViewFragment extends Fragment {
         if (editMode) {
             v.setClickable(true);
             v.setLongClickable(true);
-            v.setFocusable(true);
-            v.setFocusableInTouchMode(true);
+//            v.setFocusable(true);
+//            v.setFocusableInTouchMode(true);
             v.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
         } else {
             v.setClickable(false);
             v.setLongClickable(false);
-            v.setFocusable(false);
-            v.setFocusableInTouchMode(false);
+//            v.setFocusable(false);
+//            v.setFocusableInTouchMode(false);
             v.setBackground(null);
         }
     }
@@ -297,8 +321,6 @@ public class TodoItemViewFragment extends Fragment {
         setSpinnerEditMode(remindTypeSpinner, editingMode);
         ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(editingMode);
     }
-
-    private boolean mIsEditingMode = false;
 
     @OnClick(R.id.todo_item_edit_button)
     public void onClickEdit(View v) {

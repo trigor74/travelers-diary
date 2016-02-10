@@ -111,6 +111,9 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.1gravity:android-rteditor:1.4.0'
 
+    /*Material DateTime Picker*/
+    compile 'com.wdullaer:materialdatetimepicker:2.1.1'
+
     /*Firebase*/
     compile 'com.firebase:firebase-client-android:2.5.0+'
     compile 'com.firebaseui:firebase-ui:0.3.0'

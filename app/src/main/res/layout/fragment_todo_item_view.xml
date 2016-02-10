@@ -50,6 +50,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="?attr/editTextBackground"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
                 android:text="@string/reminder_dont_remind_text"
                 android:visibility="gone" />
@@ -61,6 +63,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="?attr/editTextBackground"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
                 android:text="01 JAN 2016"
                 android:visibility="gone" />
@@ -72,6 +76,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="?attr/editTextBackground"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
                 android:text="08:35:00 PM"
                 android:visibility="gone" />
@@ -84,6 +90,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="?attr/editTextBackground"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
                 android:text="Location title"
                 android:visibility="gone" />
@@ -95,6 +103,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:background="?attr/editTextBackground"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
                 android:text="500"
                 android:visibility="gone" />
