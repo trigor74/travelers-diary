@@ -48,11 +48,11 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
-import com.sangcomz.fishbun.FishBun;
-import com.sangcomz.fishbun.define.Define;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.activities.AlbumImagesActivity;
+import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Travel;
@@ -101,6 +101,7 @@ public class DiaryFragment extends Fragment {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int PICK_IMAGE_REQUEST = 2;
+    private static final int GALLERY_REQUEST_CODE = 21;
 
     private ActionBar mSupportActionBar;
 
@@ -448,12 +449,15 @@ public class DiaryFragment extends Fragment {
     }
 
     private void pickImage() {
-        FishBun.with(DiaryFragment.this)
-                .setAlbumThumnaliSize(150)
-                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
-                .setPickerCount(15)
-                .startAlbum();
+//        FishBun.with(DiaryFragment.this)
+//                .setAlbumThumnaliSize(150)
+//                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
+//                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
+//                .setPickerCount(15)
+//                .startAlbum();
+
+        Intent intent = new Intent(getActivity(), GalleryAlbumActivity.class);
+        startActivityForResult(intent, GALLERY_REQUEST_CODE);
     }
 
     @Override
@@ -468,14 +472,22 @@ public class DiaryFragment extends Fragment {
             }
         }
 
-        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
-            for (int i = 0; i < path.size(); i++) {
-                mImages.add("file:" + path.get(i));
-            }
+        if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
+            mImages.addAll(path);
+
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
         }
+
+//        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+//            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
+//            for (int i = 0; i < path.size(); i++) {
+//                mImages.add("file:" + path.get(i));
+//            }
+//            mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+//            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+//        }
     }
 
     private File createImageFile() throws IOException {

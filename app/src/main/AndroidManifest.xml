@@ -60,6 +60,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/ImageGalleryTheme" />
 
+        <activity
+            android:name=".activities.GalleryAlbumActivity"
+            android:label="Albums" />
+
+        <activity android:name=".activities.AlbumImagesActivity" />
+
     </application>
 
 </manifest>
