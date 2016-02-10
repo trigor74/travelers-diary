@@ -1,12 +1,16 @@
 package com.travelersdiary.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -15,8 +19,11 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
-import android.text.method.ArrowKeyMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +35,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -40,13 +48,19 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
+import com.sangcomz.fishbun.FishBun;
+import com.sangcomz.fishbun.define.Define;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Travel;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import butterknife.Bind;
@@ -60,6 +74,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.rt_editor)
     RTEditText mRtEditText;
+
+    @Bind(R.id.images_list)
+    RecyclerView mImagesRecyclerView;
 
     @Bind(R.id.rte_toolbar_container)
     ViewGroup mToolbarContainer;
@@ -82,6 +99,9 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int PICK_IMAGE_REQUEST = 2;
+
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -90,10 +110,15 @@ public class DiaryFragment extends Fragment {
 
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
+    private RecyclerView.LayoutManager mLayoutManager;
+
+    private ArrayList<String> mImages = new ArrayList<>();
+    private String mImagePath;
 
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
     private FirebaseListAdapter<Travel> mAdapter;
+    private DiaryImagesListAdapter mImagesAdapter;
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
@@ -180,9 +205,49 @@ public class DiaryFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true);
+        mImagesRecyclerView.setLayoutManager(mLayoutManager);
+
+        mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        mImagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
+        mImagesRecyclerView.setAdapter(mImagesAdapter);
+    }
+
+    private void enableReviewingMode() {
+        isEditingMode = false;
+
+        retrieveData();
+
+        // make edit text field not editable
+        mRtEditText.setClickable(false);
+        mRtEditText.setLongClickable(false);
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        mRtEditText.setFocusable(false);
+
+        //setup title field
+        mEdtDiaryNoteTitle.setFocusable(false);
+        tintWidget(mEdtDiaryNoteTitle, android.R.color.transparent);
+
+        //setup rte toolbar
+        mToolbarContainer.setVisibility(View.GONE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+
+        //hide travel title drop down arrow
+        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+
+        //hide keyboard
+        mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
+
+        //show fab
+        mFabEditDiaryNote.setVisibility(View.VISIBLE);
+
+        //refresh toolbar
+        mSupportActionBar.invalidateOptionsMenu();
     }
 
     @OnClick(R.id.fab_edit_diary_note)
@@ -190,9 +255,7 @@ public class DiaryFragment extends Fragment {
         isEditingMode = true;
 
         // reset edit text field to editable mode
-        mRtEditText.setTextIsSelectable(false);
-        mRtEditText.setMovementMethod(ArrowKeyMovementMethod.getInstance());
-        mRtEditText.setCursorVisible(true);
+        mRtEditText.setVisibility(View.VISIBLE);
         mRtEditText.setFocusable(true);
         mRtEditText.setFocusableInTouchMode(true);
         mRtEditText.setClickable(true);
@@ -224,38 +287,6 @@ public class DiaryFragment extends Fragment {
         mSupportActionBar.invalidateOptionsMenu();
     }
 
-    private void enableReviewingMode() {
-        isEditingMode = false;
-
-        retrieveData();
-
-        // make edit text field not editable
-//        mRtEditText.setTextIsSelectable(true);
-//        mRtEditText.setInputType(InputType.TYPE_NULL);
-        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-        mRtEditText.setFocusable(false);
-
-        //setup title field
-        mEdtDiaryNoteTitle.setFocusable(false);
-        tintWidget(mEdtDiaryNoteTitle, android.R.color.transparent);
-
-        //setup rte toolbar
-        mToolbarContainer.setVisibility(View.GONE);
-        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
-
-        //hide travel title drop down arrow
-        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-
-        //hide keyboard
-        mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
-
-        //show fab
-        mFabEditDiaryNote.setVisibility(View.VISIBLE);
-
-        //refresh toolbar
-        mSupportActionBar.invalidateOptionsMenu();
-    }
-
     private void addDataChangeListener() {
         mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                 .child(mKey);
@@ -264,9 +295,20 @@ public class DiaryFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-//                mSupportActionBar.setTitle(mDiaryNote.getTitle());
                 mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                 mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+
+                if (isEmpty(mRtEditText)) {
+                    mRtEditText.setVisibility(View.GONE);
+                } else {
+                    mRtEditText.setVisibility(View.VISIBLE);
+                }
+
+                if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
+                    mImages = mDiaryNote.getPhotos();
+                    ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
+                    mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                }
             }
 
             @Override
@@ -285,17 +327,27 @@ public class DiaryFragment extends Fragment {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-//                        mSupportActionBar.setTitle(mDiaryNote.getTitle());
                         mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
 
                         Date time = new Date(mDiaryNote.getTime());
                         mTxtDate.setText(new SimpleDateFormat("dd").format(time));
                         mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
                         mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
+                        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
 
                         mTxtTravel.setText(mDiaryNote.getTravelTitle());
 
                         mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+
+                        if (isEmpty(mRtEditText)) {
+                            mRtEditText.setVisibility(View.GONE);
+                        }
+
+                        if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
+                            mImages = mDiaryNote.getPhotos();
+                            ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
+                            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                        }
                     }
 
                     @Override
@@ -305,35 +357,10 @@ public class DiaryFragment extends Fragment {
                 });
     }
 
-    private String getStringExtra(Intent intent, String key) {
-        String s = intent.getStringExtra(key);
-        return s == null ? "" : s;
-    }
-
-    private void tintWidget(View view, int color) {
-        Drawable wrappedDrawable = DrawableCompat.wrap(view.getBackground());
-        DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(getContext(), color));
-        view.setBackground(wrappedDrawable);
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mRtManager.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mRtManager != null) {
-            mRtManager.onDestroy(true);
-        }
-
-        if (mItemRef != null) {
-            mItemRef.removeEventListener(mValueEventListener);
-        }
-
-        mAdapter.cleanup();
     }
 
     @Override
@@ -344,33 +371,15 @@ public class DiaryFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-
         if (isEditingMode) {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
-            menu.getItem(0).setIcon(R.drawable.ic_save_white_24dp);
+            menu.setGroupVisible(R.id.editor_menu, true);
         } else {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
-            menu.getItem(0).setVisible(false);
+            menu.setGroupVisible(R.id.editor_menu, false);
         }
 
         super.onPrepareOptionsMenu(menu);
-    }
-
-    public void showDiscardDialog() {
-        new AlertDialog.Builder(getContext())
-                .setMessage(R.string.discard_changes_text)
-                .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // go to review
-                        enableReviewingMode();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        //do nothing
-                    }
-                })
-                .show();
     }
 
     @Override
@@ -390,12 +399,118 @@ public class DiaryFragment extends Fragment {
             case R.id.action_save:
                 saveChanges();
                 return true;
+            case R.id.action_add_photo:
+                takePhoto();
+                return true;
+            case R.id.action_add_image:
+                pickImage();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    public void showDiscardDialog() {
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.discard_changes_text)
+                .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // go to review
+                        enableReviewingMode();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing
+                    }
+                })
+                .show();
+    }
+
+    private void takePhoto() {
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePhotoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                Log.e("MyLog", "Error while creating file. " + ex.getMessage());
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private void pickImage() {
+        FishBun.with(DiaryFragment.this)
+                .setAlbumThumnaliSize(150)
+                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
+                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
+                .setPickerCount(15)
+                .startAlbum();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == Activity.RESULT_OK) {
+                mImages.add("file:" + mImagePath);
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+            } else {
+                new File(mImagePath).delete();
+            }
+        }
+
+        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
+            for (int i = 0; i < path.size(); i++) {
+                mImages.add("file:" + path.get(i));
+            }
+            mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        String travelTitle = mDiaryNote.getTravelTitle();
+        travelTitle = travelTitle.replaceAll(" ", "_");
+        travelTitle = travelTitle.toUpperCase();
+
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = travelTitle + "_" + timeStamp;
+        File picturesFolder = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+
+        File appPicturesFolder = new File(picturesFolder, getString(R.string.app_name));
+        if (!appPicturesFolder.exists()) {
+            appPicturesFolder.mkdirs();
+        }
+
+        File travelPicturesFolder = new File(appPicturesFolder, mDiaryNote.getTravelTitle());
+        if (!travelPicturesFolder.exists()) {
+            travelPicturesFolder.mkdirs();
+        }
+
+        File image = File.createTempFile(
+                imageFileName,          /* prefix */
+                ".jpg",                 /* suffix */
+                travelPicturesFolder    /* directory */
+        );
+
+        mImagePath = image.getAbsolutePath();
+        return image;
+    }
+
     private void saveChanges() {
+        //save title
         if (!isEmpty(mEdtDiaryNoteTitle)) {
             mDiaryNote.setTitle(mEdtDiaryNoteTitle.getText().toString());
         } else {
@@ -404,12 +519,17 @@ public class DiaryFragment extends Fragment {
             return;
         }
 
+        //save text
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
 
+        //save travel
         if (mTravelId != null) {
             mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
             mDiaryNote.setTravelId(mTravelId);
         }
+
+        //save images
+        mDiaryNote.setPhotos(mImages);
 
         mItemRef.setValue(mDiaryNote);
 
@@ -419,8 +539,39 @@ public class DiaryFragment extends Fragment {
         enableReviewingMode();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mRtManager != null) {
+            mRtManager.onDestroy(true);
+        }
+
+        if (mItemRef != null) {
+            mItemRef.removeEventListener(mValueEventListener);
+        }
+
+        mAdapter.cleanup();
+    }
+
+    private String getStringExtra(Intent intent, String key) {
+        String s = intent.getStringExtra(key);
+        return s == null ? "" : s;
+    }
+
     private boolean isEmpty(EditText etText) {
         return etText.getText().toString().trim().length() == 0;
+    }
+
+    private void tintWidget(View view, int color) {
+        Drawable wrappedDrawable = DrawableCompat.wrap(view.getBackground());
+        DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(getContext(), color));
+        view.setBackground(wrappedDrawable);
     }
 
     @OnClick(R.id.txt_travel)
@@ -443,6 +594,13 @@ public class DiaryFragment extends Fragment {
                     })
                     .show();
         }
+    }
+
+    @OnClick(R.id.btn_view_all_images)
+    public void viewAllImages() {
+        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
+        intent.putStringArrayListExtra("images", mImages);
+        startActivity(intent);
     }
 
 }

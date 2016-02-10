@@ -9,7 +9,6 @@ import com.travelersdiary.R;
 import com.travelersdiary.fragments.DiaryFragment;
 
 import butterknife.Bind;
-import butterknife.ButterKnife;
 
 public class DiaryActivity extends BaseActivity {
 
@@ -20,8 +19,6 @@ public class DiaryActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
-
-        ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
 

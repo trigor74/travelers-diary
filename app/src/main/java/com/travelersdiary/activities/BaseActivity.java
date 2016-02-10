@@ -17,11 +17,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
-import com.squareup.picasso.Picasso;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+
+import butterknife.ButterKnife;
 
 public class BaseActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
@@ -71,6 +73,7 @@ public class BaseActivity extends AppCompatActivity implements
         getLayoutInflater().inflate(layoutResID, activityContainer, true);
 
         super.setContentView(mDrawerLayout);
+        ButterKnife.bind(this);
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
     }
@@ -92,12 +95,12 @@ public class BaseActivity extends AppCompatActivity implements
 
         String coverImageUrl = mSharedPreferences.getString(Constants.KEY_COVER_IMAGE, null);
         if (coverImageUrl != null) {
-            Picasso.with(this).load(coverImageUrl).into(mCoverImage);
+            Glide.with(this).load(coverImageUrl).into(mCoverImage);
         }
 
         String profileImageUrl = mSharedPreferences.getString(Constants.KEY_PROFILE_IMAGE, null);
         if (profileImageUrl != null) {
-            Picasso.with(this).load(profileImageUrl).into(mProfileImage);
+            Glide.with(this).load(profileImageUrl).into(mProfileImage);
         }
 
         mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
