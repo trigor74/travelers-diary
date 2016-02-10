@@ -1,20 +1,22 @@
 package com.travelersdiary.models;
 
 import java.io.Serializable;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
 
 public class AlbumsModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public TreeSet<String> folderImages;
+//    public TreeSet<String> folderImages;
+
+    public LinkedHashSet<String> folderImages;
     protected String folderName;
     protected String folderImagePath;
 
     private boolean isSelected;
 
     public AlbumsModel() {
-        folderImages = new TreeSet<String>();
+        folderImages = new LinkedHashSet<>();
     }
 
     public boolean isSelected() {

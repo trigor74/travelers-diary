@@ -35,7 +35,7 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
     public GalleryAlbumAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
         View itemLayoutView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.row_gallery_albums, null);
+                .inflate(R.layout.gallery_album_item, null);
 
         // create ViewHolder
         ViewHolder viewHolder = new ViewHolder(itemLayoutView);
@@ -48,10 +48,10 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
 
         final int pos = position;
 
-        viewHolder.tvName.setText(mGalleryImagesList.get(position).getFolderName());
+        viewHolder.albumName.setText(mGalleryImagesList.get(position).getFolderName());
+        viewHolder.albumCount.setText(String.valueOf(mGalleryImagesList.get(position).folderImages.size()));
 
         Log.i("--->folderpath", mGalleryImagesList.get(position).getFolderImagePath());
-
 
         Glide.with(mContext)
                 .load("file://" + mGalleryImagesList.get(position).getFolderImagePath())
@@ -69,8 +69,10 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        @Bind(R.id.tvName)
-        TextView tvName;
+        @Bind(R.id.txt_album_name)
+        TextView albumName;
+        @Bind(R.id.txt_album_count)
+        TextView albumCount;
         @Bind(R.id.img_album)
         ImageView imgAlbum;
 
@@ -80,7 +82,6 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
             super(view);
             ButterKnife.bind(this, view);
             view.setOnClickListener(this);
-
         }
 
         @Override

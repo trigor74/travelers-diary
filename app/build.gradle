@@ -111,7 +111,6 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.1gravity:android-rteditor:1.4.0'
     compile 'com.github.lawloretienne:imagegallery:0.0.12'
-    compile 'com.sangcomz:FishBun:0.3.0@aar'
 
     /*Firebase*/
     compile 'com.firebase:firebase-client-android:2.5.0+'

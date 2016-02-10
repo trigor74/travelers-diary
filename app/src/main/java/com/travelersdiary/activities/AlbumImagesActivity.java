@@ -133,6 +133,7 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
             albumImages.setAlbumImages((String) abc[i]);
             paths.add(albumImages);
         }
+
         return paths;
 
     }

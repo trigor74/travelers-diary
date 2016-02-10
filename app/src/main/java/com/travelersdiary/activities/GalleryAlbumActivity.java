@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -14,6 +14,7 @@ import android.view.View;
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.GalleryAlbumAdapter;
 import com.travelersdiary.models.AlbumsModel;
+import com.travelersdiary.recyclerview.DividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +57,11 @@ public class GalleryAlbumActivity extends AppCompatActivity {
 
         //TODO: mb change to list
         // use a linear layout manager
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this));
 
         // create an Object for Adapter
         mAdapter = new GalleryAlbumAdapter(GalleryAlbumActivity.this, getGalleryAlbumImages());
@@ -81,7 +86,7 @@ public class GalleryAlbumActivity extends AppCompatActivity {
 
     private ArrayList<AlbumsModel> getGalleryAlbumImages() {
         final String[] columns = {MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media._ID};
+                MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_TAKEN};
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         Cursor imageCursor = managedQuery(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
@@ -90,8 +95,7 @@ public class GalleryAlbumActivity extends AppCompatActivity {
         return mAlbumsModels;
     }
 
-    public static ArrayList<AlbumsModel> getAllDirectoriesWithImages(
-            Cursor cursor) {
+    public static ArrayList<AlbumsModel> getAllDirectoriesWithImages(Cursor cursor) {
         if (cursor == null) {
             return null;
         }
@@ -104,9 +108,18 @@ public class GalleryAlbumActivity extends AppCompatActivity {
 
         String imgPath, folderPath;
         AlbumsModel tempAlbumsModel;
+
+        AlbumsModel totalAlbum = new AlbumsModel();
+        totalAlbum.setFolderName("All images");
+        totalAlbum.setFolderImagePath(cursor.getString(0).trim());
+        albumsModels.add(totalAlbum);
+
         for (int i = 0; i < size; i++) {
             imgPath = cursor.getString(0).trim();
             folderPath = imgPath.substring(0, imgPath.lastIndexOf("/"));
+
+            totalAlbum.folderImages.add(imgPath);
+
             if (folderPathList.add(folderPath)) {
                 AlbumsModel gm = new AlbumsModel();
                 String folderName = gm.getFolderName();
