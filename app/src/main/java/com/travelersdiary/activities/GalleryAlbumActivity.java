@@ -2,8 +2,10 @@ package com.travelersdiary.activities;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.GalleryAlbumAdapter;
 import com.travelersdiary.models.AlbumsModel;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
@@ -48,7 +51,10 @@ public class GalleryAlbumActivity extends AppCompatActivity {
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-//            getSupportActionBar().setTitle("Albums");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
         // use this setting to improve performance if you know that changes

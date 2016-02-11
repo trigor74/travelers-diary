@@ -4,8 +4,10 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -17,6 +19,7 @@ import android.widget.Button;
 
 import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
 import com.travelersdiary.models.AlbumImages;
 import com.travelersdiary.models.AlbumsModel;
@@ -63,6 +66,10 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(albumsModels.get(mPosition).getFolderName());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
         // use this setting to improve performance if you know that changes
