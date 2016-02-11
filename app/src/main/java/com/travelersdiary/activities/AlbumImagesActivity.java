@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
 import com.travelersdiary.models.AlbumImages;
@@ -29,6 +30,7 @@ import butterknife.ButterKnife;
 public class AlbumImagesActivity extends AppCompatActivity implements AlbumImagesAdapter.ViewHolder.ClickListener {
 
     public static final String SELECTED_IMAGES = "selected_images";
+    public static int PHOTO_SPAN_COUNT = 3;
 
     @Bind(R.id.album_images_activity_toolbar)
     Toolbar mToolbar;
@@ -40,7 +42,6 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
     Button btnSelection;
 
     private AlbumImagesAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<AlbumsModel> albumsModels;
     private int mPosition;
@@ -69,12 +70,12 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, PHOTO_SPAN_COUNT));
 
         // create an Object for Adapter
-        mAdapter = new AlbumImagesAdapter(AlbumImagesActivity.this, getAlbumImages(), this);
+        mAdapter = new AlbumImagesAdapter(this, getAlbumImages(), this);
 
-        // set the adapter object to the Recyclerview
+        // set the adapter object to the RecyclerView
         mRecyclerView.setAdapter(mAdapter);
 
         btnSelection.setOnClickListener(new View.OnClickListener() {
@@ -151,6 +152,12 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
         toggleSelection(position);
 
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Glide.get(this).clearMemory();
     }
 
     private void toggleSelection(int position) {

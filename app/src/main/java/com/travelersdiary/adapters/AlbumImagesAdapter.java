@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
+import com.travelersdiary.activities.AlbumImagesActivity;
 import com.travelersdiary.models.AlbumImages;
 import com.travelersdiary.models.AlbumsModel;
 
@@ -25,11 +26,15 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
     public boolean mShowCheckBox;
     private ViewHolder.ClickListener clickListener;
 
+    static RelativeLayout.LayoutParams params;
+    int width;
+    int height;
+
     public AlbumImagesAdapter(Context context, ArrayList<AlbumImages> galleryImagesList, ViewHolder.ClickListener clickListener) {
         this.mAlbumImages = galleryImagesList;
         this.mContext = context;
         this.clickListener = clickListener;
-
+        setSize(context);
     }
 
     // Create new views
@@ -71,9 +76,8 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
 
         @Bind(R.id.selected_overlay)
         RelativeLayout selectedOverlay;
-
         @Bind(R.id.img_album)
-        public ImageView imgAlbum;
+        ImageView imgAlbum;
 
         public AlbumsModel singleItem;
         private ClickListener listener;
@@ -81,6 +85,9 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
         public ViewHolder(View view, ClickListener listener) {
             super(view);
             ButterKnife.bind(this, view);
+
+            imgAlbum.setLayoutParams(params);
+            selectedOverlay.setLayoutParams(params);
 
             this.listener = listener;
 
@@ -113,6 +120,22 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
     // method to access in activity after updating selection
     public ArrayList<AlbumImages> getAlbumImagesList() {
         return mAlbumImages;
+    }
+
+    private void setSize(Context context) {
+        width = context.getResources().getDisplayMetrics().widthPixels;
+
+        final float scale = context.getResources().getDisplayMetrics().density;
+        float dip = 20.0f;
+
+        width = width / AlbumImagesActivity.PHOTO_SPAN_COUNT;
+        int thWidth = 50;
+        int thHeight = 30;
+
+//        height = width * thHeight / thWidth;
+        height = width;
+
+        params = new RelativeLayout.LayoutParams(width, height);
     }
 
 }

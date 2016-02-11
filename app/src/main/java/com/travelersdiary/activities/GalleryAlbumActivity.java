@@ -55,7 +55,6 @@ public class GalleryAlbumActivity extends AppCompatActivity {
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
-        //TODO: mb change to list
         // use a linear layout manager
 //        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 

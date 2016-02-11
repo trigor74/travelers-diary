@@ -73,7 +73,7 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
         TextView albumName;
         @Bind(R.id.txt_album_count)
         TextView albumCount;
-        @Bind(R.id.img_album)
+        @Bind(R.id.img_gallery_album)
         ImageView imgAlbum;
 
         public AlbumsModel singleItem;
