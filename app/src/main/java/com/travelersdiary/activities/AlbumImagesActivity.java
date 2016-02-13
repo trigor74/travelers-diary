@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
@@ -163,8 +162,8 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
 
     @Override
     protected void onDestroy() {
+        Utils.clearImageCache(this); // clears all glide cache
         super.onDestroy();
-        Glide.get(this).clearMemory();
     }
 
     private void toggleSelection(int position) {
