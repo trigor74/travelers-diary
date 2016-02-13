@@ -14,8 +14,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.view.MenuItem;
 
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -40,9 +39,7 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
     @Bind(R.id.album_images_list)
     RecyclerView mRecyclerView;
 
-    @Bind(R.id.btnShow)
-    Button btnSelection;
-
+    private ActionBar mSupportActionBar;
     private AlbumImagesAdapter mAdapter;
 
     private ArrayList<AlbumsModel> albumsModels;
@@ -61,11 +58,14 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
 
         setSupportActionBar(mToolbar);
 
-        ActionBar supportActionBar = getSupportActionBar();
-        if (supportActionBar != null) {
-            supportActionBar.setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(albumsModels.get(mPosition).getFolderName());
+        mSupportActionBar = getSupportActionBar();
+        if (mSupportActionBar != null) {
+            mSupportActionBar.setDisplayHomeAsUpEnabled(true);
+            mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_done_white_24dp);
+            setToolbarTitle();
+//            mSupportActionBar.setTitle(albumsModels.get(mPosition).getFolderName());
         }
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
@@ -83,24 +83,6 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
 
         // set the adapter object to the RecyclerView
         mRecyclerView.setAdapter(mAdapter);
-
-        btnSelection.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-//                Intent intent = new Intent();
-//                intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-//                intent.putExtra(Intent.EXTRA_SUBJECT, "Here are some files.");
-//                intent.setType("image/jpeg"); /* This example is sharing jpeg images. */
-//                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, mShareImages);
-//                startActivity(intent);
-
-                Intent i = new Intent();
-                i.putStringArrayListExtra(SELECTED_IMAGES, mShareImages);
-                setResult(RESULT_OK, i);
-                finish();
-            }
-        });
 
     }
 
@@ -147,17 +129,21 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
 
     @Override
     public void onItemClicked(int position) {
-
         toggleSelection(position);
-
+        setToolbarTitle();
     }
 
     @Override
     public boolean onItemLongClicked(int position) {
-
         toggleSelection(position);
+        setToolbarTitle();
 
         return true;
+    }
+
+    private void setToolbarTitle() {
+        int count = mShareImages.size();
+        mSupportActionBar.setTitle(albumsModels.get(mPosition).getFolderName() + " (" + count + ")");
     }
 
     @Override
@@ -183,6 +169,21 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
             mShareImages.remove(uri);
         }
         Log.i("uri path", "" + mShareImages);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Intent intent = new Intent();
+                intent.putStringArrayListExtra(SELECTED_IMAGES, mShareImages);
+                setResult(RESULT_OK, intent);
+                finish();
+                return true;
+            default:
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }
