@@ -11,7 +11,6 @@ import android.widget.RelativeLayout;
 import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
 import com.travelersdiary.activities.AlbumImagesActivity;
-import com.travelersdiary.models.AlbumImages;
 import com.travelersdiary.models.AlbumsModel;
 
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import butterknife.ButterKnife;
 public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.ViewHolder> {
 
     public Context mContext;
-    private ArrayList<AlbumImages> mAlbumImages;
+    private ArrayList<String> mAlbumImages;
     public boolean mShowCheckBox;
     private ViewHolder.ClickListener clickListener;
 
@@ -30,7 +29,7 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
     int width;
     int height;
 
-    public AlbumImagesAdapter(Context context, ArrayList<AlbumImages> galleryImagesList, ViewHolder.ClickListener clickListener) {
+    public AlbumImagesAdapter(Context context, ArrayList<String> galleryImagesList, ViewHolder.ClickListener clickListener) {
         this.mAlbumImages = galleryImagesList;
         this.mContext = context;
         this.clickListener = clickListener;
@@ -57,7 +56,8 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
         final int pos = position;
 
         Glide.with(mContext)
-                .load("file://" + mAlbumImages.get(position).getAlbumImages())
+//                .load("file://" + mAlbumImages.get(position))
+                .load(mAlbumImages.get(position))
                 .centerCrop()
                 .placeholder(R.drawable.image_loading)
                 .crossFade()
@@ -118,24 +118,16 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
     }
 
     // method to access in activity after updating selection
-    public ArrayList<AlbumImages> getAlbumImagesList() {
+    public ArrayList<String> getAlbumImagesList() {
         return mAlbumImages;
     }
 
     private void setSize(Context context) {
         width = context.getResources().getDisplayMetrics().widthPixels;
 
-        final float scale = context.getResources().getDisplayMetrics().density;
-        float dip = 20.0f;
-
         width = width / AlbumImagesActivity.PHOTO_SPAN_COUNT;
-        int thWidth = 50;
-        int thHeight = 30;
 
-//        height = width * thHeight / thWidth;
-        height = width;
-
-        params = new RelativeLayout.LayoutParams(width, height);
+        params = new RelativeLayout.LayoutParams(width, width);
     }
 
 }

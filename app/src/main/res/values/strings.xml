@@ -16,6 +16,9 @@
     <string name="title">Title</string>
     <string name="text">Text</string>
     <string name="discard_changes_text">Discard changes?</string>
+    <string name="images">Images</string>
+    <string name="albums">Albums</string>
+
 
     <string name="edit_travel_dialog_title_create">Create new travel</string>
     <string name="edit_travel_dialog_title_edit">Edit travel</string>

@@ -167,4 +167,10 @@ public class GalleryAlbumActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy() {
+        Utils.clearImageCache(this); // clears all glide cache
+        super.onDestroy();
+    }
+
 }

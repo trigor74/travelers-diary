@@ -35,7 +35,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -52,6 +51,7 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.AlbumImagesActivity;
+import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
@@ -610,7 +610,8 @@ public class DiaryFragment extends Fragment {
 
     @OnClick(R.id.btn_view_all_images)
     public void viewAllImages() {
-        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
+//        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
+        Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
         intent.putStringArrayListExtra("images", mImages);
         startActivity(intent);
     }

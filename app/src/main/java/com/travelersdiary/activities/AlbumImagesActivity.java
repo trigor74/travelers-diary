@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
-import com.travelersdiary.models.AlbumImages;
 import com.travelersdiary.models.AlbumsModel;
 
 import java.io.File;
@@ -111,20 +110,18 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
     }
 
 
-    private ArrayList<AlbumImages> getAlbumImages() {
+    private ArrayList<String> getAlbumImages() {
         Object[] abc = albumsModels.get(mPosition).folderImages.toArray();
 
         Log.i("imagesLength", "" + abc.length);
-        ArrayList<AlbumImages> paths = new ArrayList<>();
+        ArrayList<String> paths = new ArrayList<>();
         int size = abc.length;
         for (int i = 0; i < size; i++) {
-            AlbumImages albumImages = new AlbumImages();
-            albumImages.setAlbumImages((String) abc[i]);
+            String albumImages = (String) abc[i];
             paths.add(albumImages);
         }
 
         return paths;
-
     }
 
     @Override
@@ -146,19 +143,13 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
         mSupportActionBar.setTitle(albumsModels.get(mPosition).getFolderName() + " (" + count + ")");
     }
 
-    @Override
-    protected void onDestroy() {
-        Utils.clearImageCache(this); // clears all glide cache
-        super.onDestroy();
-    }
-
     private void toggleSelection(int position) {
         mAdapter.toggleSelection(position);
         int count = mAdapter.getSelectedItemCount();
 
-        Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position).getAlbumImages());
+        Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
 
-        Uri uriPath = Uri.parse(mAdapter.getAlbumImagesList().get(position).getAlbumImages());
+        Uri uriPath = Uri.parse(mAdapter.getAlbumImagesList().get(position));
         String path = uriPath.getPath();
         File imageFile = new File(path);
         String uri = getImageContentUri(imageFile).toString();
