@@ -29,6 +29,24 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private ArrayList<String> mImages;
     private int mPosition;
 
+    private final ViewPager.OnPageChangeListener mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            if (mViewPager != null) {
+                mViewPager.setCurrentItem(position);
+                setActionBarTitle(position);
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,33 +65,14 @@ public class FullScreenImageActivity extends AppCompatActivity {
         }
 
         setupViewPager();
+        setActionBarTitle(mPosition);
     }
-
-    private final ViewPager.OnPageChangeListener mViewPagerOnPageChangeListener = new ViewPager.OnPageChangeListener() {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            if (mViewPager != null) {
-                mViewPager.setCurrentItem(position);
-                setActionBarTitle(position);
-            }
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-        }
-    };
 
     private void setupViewPager() {
         mViewPager.setAdapter(new FullScreenImageViewPagerAdapter(this, mImages));
         mViewPager.setPageMargin(40);
-        mViewPager.addOnPageChangeListener(mViewPagerOnPageChangeListener);
+        mViewPager.addOnPageChangeListener(mOnPageChangeListener);
         mViewPager.setCurrentItem(mPosition);
-
-        setActionBarTitle(mPosition);
     }
 
     private void setActionBarTitle(int position) {

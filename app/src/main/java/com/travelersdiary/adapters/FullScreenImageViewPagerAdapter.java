@@ -40,7 +40,6 @@ public class FullScreenImageViewPagerAdapter extends PagerAdapter {
                 .into(mImageFullScreen);
 
         container.addView(view);
-
         return view;
     }
 
@@ -58,4 +57,5 @@ public class FullScreenImageViewPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((View) object);
     }
+
 }

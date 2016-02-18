@@ -99,10 +99,6 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int PICK_IMAGE_REQUEST = 2;
-    private static final int GALLERY_REQUEST_CODE = 21;
-
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -111,7 +107,6 @@ public class DiaryFragment extends Fragment {
 
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<String> mImages = new ArrayList<>();
     private String mImagePath;
@@ -119,7 +114,6 @@ public class DiaryFragment extends Fragment {
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
     private FirebaseListAdapter<Travel> mAdapter;
-    private DiaryImagesListAdapter mImagesAdapter;
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
@@ -209,13 +203,14 @@ public class DiaryFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true);
-        mImagesRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.HORIZONTAL, true);
+        mImagesRecyclerView.setLayoutManager(layoutManager);
 
         mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mImagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
-        mImagesRecyclerView.setAdapter(mImagesAdapter);
+        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
+        mImagesRecyclerView.setAdapter(imagesAdapter);
     }
 
     private void enableReviewingMode() {
@@ -443,26 +438,19 @@ public class DiaryFragment extends Fragment {
             if (photoFile != null) {
                 takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
-                startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
+                startActivityForResult(takePhotoIntent, Constants.REQUEST_IMAGE_CAPTURE);
             }
         }
     }
 
     private void pickImage() {
-//        FishBun.with(DiaryFragment.this)
-//                .setAlbumThumnaliSize(150)
-//                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-//                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
-//                .setPickerCount(15)
-//                .startAlbum();
-
         Intent intent = new Intent(getActivity(), GalleryAlbumActivity.class);
-        startActivityForResult(intent, GALLERY_REQUEST_CODE);
+        startActivityForResult(intent, Constants.GALLERY_REQUEST_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+        if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 mImages.add("file:" + mImagePath);
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
@@ -472,22 +460,13 @@ public class DiaryFragment extends Fragment {
             }
         }
 
-        if (requestCode == GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
             mImages.addAll(path);
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
         }
-
-//        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-//            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
-//            for (int i = 0; i < path.size(); i++) {
-//                mImages.add("file:" + path.get(i));
-//            }
-//            mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-//            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
-//        }
     }
 
     private File createImageFile() throws IOException {
@@ -610,7 +589,6 @@ public class DiaryFragment extends Fragment {
 
     @OnClick(R.id.btn_view_all_images)
     public void viewAllImages() {
-//        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
         Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
         intent.putStringArrayListExtra("images", mImages);
         startActivity(intent);

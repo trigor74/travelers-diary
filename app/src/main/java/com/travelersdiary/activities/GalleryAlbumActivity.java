@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.GalleryAlbumAdapter;
@@ -29,17 +30,11 @@ import butterknife.ButterKnife;
 
 public class GalleryAlbumActivity extends AppCompatActivity {
 
-    public static final int ENTER_ALBUM_REQUEST_CODE = 22;
-
     @Bind(R.id.gallery_albums_activity_toolbar)
     Toolbar mToolbar;
 
     @Bind(R.id.albums_list)
     RecyclerView mRecyclerView;
-    private GalleryAlbumAdapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-
-    private ArrayList<AlbumsModel> mAlbumsModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,47 +53,34 @@ public class GalleryAlbumActivity extends AppCompatActivity {
             Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this));
 
-        // create an Object for Adapter
-        mAdapter = new GalleryAlbumAdapter(GalleryAlbumActivity.this, getGalleryAlbumImages());
+        GalleryAlbumAdapter adapter = new GalleryAlbumAdapter(GalleryAlbumActivity.this, getGalleryAlbumImages());
+        mRecyclerView.setAdapter(adapter);
 
-        // set the adapter object to the RecyclerView
-        mRecyclerView.setAdapter(mAdapter);
-
-        mAdapter.SetOnItemClickListener(new GalleryAlbumAdapter.OnItemClickListener() {
+        adapter.SetOnItemClickListener(new GalleryAlbumAdapter.OnItemClickListener() {
 
             @Override
             public void onItemClick(View v, int position) {
-                // do something with position
-
                 Intent galleryAlbumsIntent = new Intent(GalleryAlbumActivity.this, AlbumImagesActivity.class);
                 galleryAlbumsIntent.putExtra("position", position);
                 galleryAlbumsIntent.putExtra("albumsList", getGalleryAlbumImages());
-                startActivityForResult(galleryAlbumsIntent, ENTER_ALBUM_REQUEST_CODE);
+                startActivityForResult(galleryAlbumsIntent, Constants.ENTER_ALBUM_REQUEST_CODE);
             }
         });
-
     }
 
     private ArrayList<AlbumsModel> getGalleryAlbumImages() {
         final String[] columns = {MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_TAKEN};
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        Cursor imageCursor = managedQuery(
+        Cursor imageCursor = this.getContentResolver().query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
                 null, null, orderBy + " DESC");
-        mAlbumsModels = getAllDirectoriesWithImages(imageCursor);
-        return mAlbumsModels;
+        return getAllDirectoriesWithImages(imageCursor);
     }
 
     public static ArrayList<AlbumsModel> getAllDirectoriesWithImages(Cursor cursor) {
@@ -128,9 +110,6 @@ public class GalleryAlbumActivity extends AppCompatActivity {
 
             if (folderPathList.add(folderPath)) {
                 AlbumsModel gm = new AlbumsModel();
-                String folderName = gm.getFolderName();
-                String folderImagePath = gm.getFolderName();
-
                 gm.setFolderName(folderPath.substring(
                         folderPath.lastIndexOf("/") + 1, folderPath.length()));
                 gm.folderImages.add(imgPath);
@@ -149,7 +128,7 @@ public class GalleryAlbumActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ENTER_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == Constants.ENTER_ALBUM_REQUEST_CODE && resultCode == RESULT_OK) {
             setResult(RESULT_OK, data);
             finish();
         }

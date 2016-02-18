@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
@@ -27,10 +28,10 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class AlbumImagesActivity extends AppCompatActivity implements AlbumImagesAdapter.ViewHolder.ClickListener {
+public class AlbumImagesActivity extends AppCompatActivity
+        implements AlbumImagesAdapter.ViewHolder.ClickListener {
 
     public static final String SELECTED_IMAGES = "selected_images";
-    public static int PHOTO_SPAN_COUNT = 3;
 
     @Bind(R.id.album_images_activity_toolbar)
     Toolbar mToolbar;
@@ -62,7 +63,6 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_done_white_24dp);
             setToolbarTitle();
-//            mSupportActionBar.setTitle(albumsModels.get(mPosition).getFolderName());
         }
 
 
@@ -70,19 +70,11 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
             Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));
 
-        // use a linear layout manager
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, PHOTO_SPAN_COUNT));
-
-        // create an Object for Adapter
         mAdapter = new AlbumImagesAdapter(this, getAlbumImages(), this);
-
-        // set the adapter object to the RecyclerView
         mRecyclerView.setAdapter(mAdapter);
-
     }
 
     private Uri getImageContentUri(File imageFile) {
@@ -108,7 +100,6 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
             }
         }
     }
-
 
     private ArrayList<String> getAlbumImages() {
         Object[] abc = albumsModels.get(mPosition).folderImages.toArray();
@@ -145,7 +136,6 @@ public class AlbumImagesActivity extends AppCompatActivity implements AlbumImage
 
     private void toggleSelection(int position) {
         mAdapter.toggleSelection(position);
-        int count = mAdapter.getSelectedItemCount();
 
         Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
 

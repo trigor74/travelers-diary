@@ -2,7 +2,6 @@ package com.travelersdiary.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,36 +21,25 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
 
     private ArrayList<AlbumsModel> mGalleryImagesList;
     private Context mContext;
-    static OnItemClickListener mItemClickListener;
-
+    private static OnItemClickListener mItemClickListener;
 
     public GalleryAlbumAdapter(Context context, ArrayList<AlbumsModel> galleryImagesList) {
         this.mGalleryImagesList = galleryImagesList;
         this.mContext = context;
     }
 
-    // Create new views
     @Override
     public GalleryAlbumAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
         View itemLayoutView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.gallery_album_item, null);
 
-        // create ViewHolder
-        ViewHolder viewHolder = new ViewHolder(itemLayoutView);
-
-        return viewHolder;
+        return new ViewHolder(itemLayoutView);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-
-        final int pos = position;
-
         viewHolder.albumName.setText(mGalleryImagesList.get(position).getFolderName());
         viewHolder.albumCount.setText(String.valueOf(mGalleryImagesList.get(position).folderImages.size()));
-
-        Log.i("--->folderpath", mGalleryImagesList.get(position).getFolderImagePath());
 
         Glide.with(mContext)
                 .load("file://" + mGalleryImagesList.get(position).getFolderImagePath())
@@ -61,22 +49,18 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
                 .into(viewHolder.imgAlbum);
     }
 
-    // Return the size arraylist
     @Override
     public int getItemCount() {
         return mGalleryImagesList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
         @Bind(R.id.txt_album_name)
         TextView albumName;
         @Bind(R.id.txt_album_count)
         TextView albumCount;
         @Bind(R.id.img_gallery_album)
         ImageView imgAlbum;
-
-        public AlbumsModel singleItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -97,15 +81,11 @@ public class GalleryAlbumAdapter extends RecyclerView.Adapter<GalleryAlbumAdapte
     }
 
     public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
-        this.mItemClickListener = mItemClickListener;
+        GalleryAlbumAdapter.mItemClickListener = mItemClickListener;
     }
 
-
-
-    // method to access in activity after updating selection
     public ArrayList<AlbumsModel> getGalleryImagesList() {
         return mGalleryImagesList;
     }
-
 
 }

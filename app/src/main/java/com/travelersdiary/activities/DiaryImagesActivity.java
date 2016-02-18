@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
@@ -21,18 +22,14 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class DiaryImagesActivity extends AppCompatActivity implements AlbumImagesAdapter.ViewHolder.ClickListener {
-
-    public static int PHOTO_SPAN_COUNT = 3;
+public class DiaryImagesActivity extends AppCompatActivity
+        implements AlbumImagesAdapter.ViewHolder.ClickListener {
 
     @Bind(R.id.album_images_activity_toolbar)
     Toolbar mToolbar;
 
     @Bind(R.id.album_images_list)
     RecyclerView mRecyclerView;
-
-    private ActionBar mSupportActionBar;
-    private AlbumImagesAdapter mAdapter;
 
     private ArrayList<String> mImages;
 
@@ -46,34 +43,24 @@ public class DiaryImagesActivity extends AppCompatActivity implements AlbumImage
 
         setSupportActionBar(mToolbar);
 
-        mSupportActionBar = getSupportActionBar();
-        if (mSupportActionBar != null) {
-            mSupportActionBar.setDisplayHomeAsUpEnabled(true);
-//            mSupportActionBar.setTitle(albumsModels.get(mPosition).getFolderName());
+        ActionBar supportActionBar = getSupportActionBar();
+        if (supportActionBar != null) {
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));
 
-        // use a linear layout manager
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, PHOTO_SPAN_COUNT));
-
-        // create an Object for Adapter
-        mAdapter = new AlbumImagesAdapter(this, mImages, this);
-
-        // set the adapter object to the RecyclerView
-        mRecyclerView.setAdapter(mAdapter);
-
+        AlbumImagesAdapter adapter = new AlbumImagesAdapter(this, mImages, this);
+        mRecyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onItemClicked(int position) {
-//        Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
         Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
         intent.putStringArrayListExtra("images", mImages);
         intent.putExtra("position", position);

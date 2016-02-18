@@ -49,4 +49,11 @@ public final class Constants {
 
     // dairy
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";
+    public static final int PHOTO_SPAN_COUNT = 3;
+
+    // request codes
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
+    public static final int GALLERY_REQUEST_CODE = 21;
+    public static final int ENTER_ALBUM_REQUEST_CODE = 22;
+
 }
