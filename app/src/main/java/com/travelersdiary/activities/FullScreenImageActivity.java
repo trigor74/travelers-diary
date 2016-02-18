@@ -1,7 +1,9 @@
 package com.travelersdiary.activities;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.FullScreenImageViewPagerAdapter;
 
 import java.util.ArrayList;
@@ -62,6 +65,10 @@ public class FullScreenImageActivity extends AppCompatActivity {
         mSupportActionBar = getSupportActionBar();
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
         setupViewPager();
