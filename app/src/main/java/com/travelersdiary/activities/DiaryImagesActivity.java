@@ -9,8 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
@@ -32,6 +33,12 @@ public class DiaryImagesActivity extends AppCompatActivity
     RecyclerView mRecyclerView;
 
     private ArrayList<String> mImages;
+    private ActionBar mSupportActionBar;
+
+    private boolean isSelectMode;
+
+    private AlbumImagesAdapter mAdapter;
+    private ArrayList<String> mSelectedImages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +50,9 @@ public class DiaryImagesActivity extends AppCompatActivity
 
         setSupportActionBar(mToolbar);
 
-        ActionBar supportActionBar = getSupportActionBar();
-        if (supportActionBar != null) {
-            supportActionBar.setDisplayHomeAsUpEnabled(true);
+        mSupportActionBar = getSupportActionBar();
+        if (mSupportActionBar != null) {
+            mSupportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -55,22 +62,87 @@ public class DiaryImagesActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));
 
-        AlbumImagesAdapter adapter = new AlbumImagesAdapter(this, mImages, this);
-        mRecyclerView.setAdapter(adapter);
+        mAdapter = new AlbumImagesAdapter(this, mImages, this);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     public void onItemClicked(int position) {
-        Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
-        intent.putStringArrayListExtra("images", mImages);
-        intent.putExtra("position", position);
+        if (isSelectMode) {
+            toggleSelection(position);
+            setToolbarTitle();
+        } else {
+            Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
+            intent.putStringArrayListExtra("images", mImages);
+            intent.putExtra("position", position);
 
-        startActivity(intent);
+            startActivity(intent);
+        }
     }
 
     @Override
     public boolean onItemLongClicked(int position) {
-        Toast.makeText(this, "item" + position + "long clicked", Toast.LENGTH_SHORT).show();
+        if (!isSelectMode) {
+            enableSelectionMode();
+        }
+
+        toggleSelection(position);
+        setToolbarTitle();
+        return true;
+    }
+
+    private void setToolbarTitle() {
+        mSupportActionBar.setTitle(mSelectedImages.size() + "/" + mImages.size());
+    }
+
+
+    private void enableReviewMode() {
+        isSelectMode = false;
+        mSelectedImages.clear();
+        mAdapter.clearSelection();
+        mSupportActionBar.invalidateOptionsMenu();
+    }
+
+    private void enableSelectionMode() {
+        isSelectMode = true;
+        setToolbarTitle();
+        mSupportActionBar.invalidateOptionsMenu();
+    }
+
+    private void toggleSelection(int position) {
+        mAdapter.toggleSelection(position);
+
+        Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
+
+        String uri = mImages.get(position);
+
+        if (mAdapter.isSelected(position)) {
+            mSelectedImages.add(uri);
+        } else {
+            mSelectedImages.remove(uri);
+        }
+        Log.i("uri path", "" + mSelectedImages);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (isSelectMode) {
+            mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_done_white_24dp);
+            menu.setGroupVisible(R.id.review_mode_menu, false);
+            menu.setGroupVisible(R.id.select_mode_menu, true);
+        } else {
+            mSupportActionBar.setTitle(R.string.images);
+            mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+            menu.setGroupVisible(R.id.select_mode_menu, false);
+            menu.setGroupVisible(R.id.review_mode_menu, true);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.diary_images_menu, menu);
         return true;
     }
 
@@ -78,12 +150,28 @@ public class DiaryImagesActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                if (isSelectMode) {
+                    enableReviewMode();
+                } else {
+                    finish();
+                }
+                return true;
+            case R.id.action_select:
+                enableSelectionMode();
                 return true;
             default:
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSelectMode) {
+            enableReviewMode();
+        } else {
+            super.onBackPressed();
+        }
     }
 
 }
