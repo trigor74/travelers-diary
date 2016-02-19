@@ -10,7 +10,7 @@
         android:layout_height="match_parent" />
 
     <include
-        android:id="@+id/full_screen_image_activity2_toolbar"
+        android:id="@+id/full_screen_image_activity_toolbar"
         layout="@layout/toolbar" />
 
 </FrameLayout>

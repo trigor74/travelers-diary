@@ -4,14 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Diary list"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/diary_list"
         android:layout_width="match_parent"
