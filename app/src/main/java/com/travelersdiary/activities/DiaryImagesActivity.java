@@ -146,6 +146,15 @@ public class DiaryImagesActivity extends AppCompatActivity
         return true;
     }
 
+    private void selectAll() {
+        for (int i =0; i< mImages.size(); i++) {
+            if (!mAdapter.isSelected(i)) {
+                toggleSelection(i);
+            }
+        }
+        setToolbarTitle();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -158,6 +167,9 @@ public class DiaryImagesActivity extends AppCompatActivity
                 return true;
             case R.id.action_select:
                 enableSelectionMode();
+                return true;
+            case R.id.action_select_all:
+                selectAll();
                 return true;
             default:
         }
