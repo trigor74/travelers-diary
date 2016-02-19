@@ -591,6 +591,7 @@ public class DiaryFragment extends Fragment {
     public void viewAllImages() {
         Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
         intent.putStringArrayListExtra("images", mImages);
+        intent.putExtra("title", mDiaryNote.getTitle());
         startActivity(intent);
     }
 

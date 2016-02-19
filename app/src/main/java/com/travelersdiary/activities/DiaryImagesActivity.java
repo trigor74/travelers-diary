@@ -1,6 +1,7 @@
 package com.travelersdiary.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -12,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
@@ -33,6 +35,7 @@ public class DiaryImagesActivity extends AppCompatActivity
     RecyclerView mRecyclerView;
 
     private ArrayList<String> mImages;
+    private String mDiaryTitle;
     private ActionBar mSupportActionBar;
 
     private boolean isSelectMode;
@@ -46,7 +49,9 @@ public class DiaryImagesActivity extends AppCompatActivity
         setContentView(R.layout.activity_album_images);
         ButterKnife.bind(this);
 
-        mImages = getIntent().getStringArrayListExtra("images");
+        Intent intent = getIntent();
+        mImages = intent.getStringArrayListExtra("images");
+        mDiaryTitle = intent.getStringExtra("title");
 
         setSupportActionBar(mToolbar);
 
@@ -95,7 +100,6 @@ public class DiaryImagesActivity extends AppCompatActivity
         mSupportActionBar.setTitle(mSelectedImages.size() + "/" + mImages.size());
     }
 
-
     private void enableReviewMode() {
         isSelectMode = false;
         mSelectedImages.clear();
@@ -124,6 +128,35 @@ public class DiaryImagesActivity extends AppCompatActivity
         Log.i("uri path", "" + mSelectedImages);
     }
 
+    private void selectAll() {
+        for (int i = 0; i < mImages.size(); i++) {
+            if (!mAdapter.isSelected(i)) {
+                toggleSelection(i);
+            }
+        }
+        setToolbarTitle();
+    }
+
+    private void share() {
+        ArrayList<Uri> shareImages = new ArrayList<>();
+
+        if (mSelectedImages.size() > 0) {
+            for (int i = 0; i < mSelectedImages.size(); i++) {
+                Uri uri = Uri.parse(mSelectedImages.get(i));
+                shareImages.add(uri);
+            }
+
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND_MULTIPLE);
+            intent.putExtra(Intent.EXTRA_SUBJECT, mDiaryTitle);
+            intent.setType("image/jpeg");
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, shareImages);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, R.string.nothing_selected, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (isSelectMode) {
@@ -146,15 +179,6 @@ public class DiaryImagesActivity extends AppCompatActivity
         return true;
     }
 
-    private void selectAll() {
-        for (int i =0; i< mImages.size(); i++) {
-            if (!mAdapter.isSelected(i)) {
-                toggleSelection(i);
-            }
-        }
-        setToolbarTitle();
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -167,6 +191,9 @@ public class DiaryImagesActivity extends AppCompatActivity
                 return true;
             case R.id.action_select:
                 enableSelectionMode();
+                return true;
+            case R.id.action_share:
+                share();
                 return true;
             case R.id.action_select_all:
                 selectAll();
