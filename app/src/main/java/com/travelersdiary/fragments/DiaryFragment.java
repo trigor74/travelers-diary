@@ -104,6 +104,7 @@ public class DiaryFragment extends Fragment {
     private EditText mEdtDiaryNoteTitle;
 
     private boolean isEditingMode;
+    private boolean isNewDiaryNote;
 
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
@@ -192,9 +193,17 @@ public class DiaryFragment extends Fragment {
             }
         };
 
-        addDataChangeListener();
+        isNewDiaryNote = getArguments().getBoolean("editing mode", false);
 
-        enableReviewingMode();
+        if (isNewDiaryNote) {
+            mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID));
+            mDiaryNote = new DiaryNote();
+            initNewDiaryNote(mDiaryNote);
+            enableEditingMode();
+        } else {
+            addDataChangeListener();
+            enableReviewingMode();
+        }
 
         return view;
     }
@@ -282,6 +291,24 @@ public class DiaryFragment extends Fragment {
         //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
     }
+
+    private void initNewDiaryNote(DiaryNote diaryNote) {
+        diaryNote.setTitle("New Diary Note");
+        diaryNote.setTravelId("default"); // change to active
+        diaryNote.setTravelTitle("Uncategorized"); // change to active
+        diaryNote.setTime(System.currentTimeMillis());
+
+        mEdtDiaryNoteTitle.setText(diaryNote.getTitle());
+
+        Date time = new Date(diaryNote.getTime());
+        mTxtDate.setText(new SimpleDateFormat("dd").format(time));
+        mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
+        mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
+        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
+
+        mTxtTravel.setText(diaryNote.getTravelTitle());
+    }
+
 
     private void addDataChangeListener() {
         mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
@@ -382,7 +409,7 @@ public class DiaryFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isEditingMode) {
+                if (isEditingMode && !isNewDiaryNote) {
                     if (mRtEditText.hasChanged()) {
                         showDiscardDialog();
                     } else {
@@ -522,7 +549,15 @@ public class DiaryFragment extends Fragment {
         //save images
         mDiaryNote.setPhotos(mImages);
 
-        mItemRef.setValue(mDiaryNote);
+        if (mKey != null) {
+            mItemRef.setValue(mDiaryNote);
+        } else {
+//            mDiaryNote.setTime(System.currentTimeMillis());
+            Firebase newTravelRef = mItemRef.push();
+            newTravelRef.setValue(mDiaryNote);
+            mKey = newTravelRef.getKey();
+            addDataChangeListener();
+        }
 
         mRtEditText.resetHasChanged();
         Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
@@ -543,7 +578,7 @@ public class DiaryFragment extends Fragment {
             mRtManager.onDestroy(true);
         }
 
-        if (mItemRef != null) {
+        if (mItemRef != null && mValueEventListener != null) {
             mItemRef.removeEventListener(mValueEventListener);
         }
 
