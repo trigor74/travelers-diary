@@ -110,8 +110,7 @@ dependencies {
     /*Custom views*/
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.1gravity:android-rteditor:1.4.0'
-    compile 'com.github.lawloretienne:imagegallery:0.0.12'
-    compile 'com.sangcomz:FishBun:0.3.0@aar'
+    compile 'com.commit451:PhotoView:1.2.4'
 
     /*Material DateTime Picker*/
     compile 'com.wdullaer:materialdatetimepicker:2.1.1'

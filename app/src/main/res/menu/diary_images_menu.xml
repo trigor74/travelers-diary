@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/review_mode_menu">
+        <item
+            android:id="@+id/action_select"
+            android:icon="@drawable/ic_select_white_24dp"
+            android:title="@string/select"
+            app:showAsAction="always" />
+    </group>
+
+    <group
+        android:id="@+id/select_mode_menu"
+        android:visible="false">
+        <item
+            android:id="@+id/action_share"
+            android:icon="@drawable/ic_share_white_24dp"
+            android:title="@string/share"
+            app:showAsAction="always" />
+        <item
+            android:id="@+id/action_delete"
+            android:icon="@drawable/ic_delete_white_24dp"
+            android:title="@string/delete"
+            app:showAsAction="ifRoom" />
+        <item
+            android:id="@+id/action_select_all"
+            android:icon="@drawable/ic_select_all_white_24dp"
+            android:title="@string/select_all"
+            app:showAsAction="ifRoom" />
+    </group>
+
+</menu>

@@ -44,15 +44,16 @@
         <activity android:name=".activities.AddDiaryNoteActivity" />
 
         <activity
-            android:name="com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="Images"
-            android:theme="@style/ImageGalleryTheme" />
+            android:name=".activities.GalleryAlbumActivity"
+            android:label="@string/albums" />
+
+        <activity android:name=".activities.AlbumImagesActivity" />
 
         <activity
-            android:name="com.etiennelawlor.imagegallery.library.activities.FullScreenImageGalleryActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/ImageGalleryTheme" />
+            android:name=".activities.DiaryImagesActivity"
+            android:label="@string/images" />
+
+        <activity android:name=".activities.FullScreenImageActivity" />
 
         <activity
             android:name=".activities.TodoItemActivity"

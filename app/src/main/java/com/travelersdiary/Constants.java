@@ -58,4 +58,11 @@ public final class Constants {
 
     // reminder
     public static final String KEY_TODO_ITEM_REF = "TODO_ITEM_REF";
+
+    public static final int PHOTO_SPAN_COUNT = 3;
+
+    // request codes
+    public static final int REQUEST_IMAGE_CAPTURE = 1;
+    public static final int GALLERY_REQUEST_CODE = 21;
+    public static final int ENTER_ALBUM_REQUEST_CODE = 22;
 }

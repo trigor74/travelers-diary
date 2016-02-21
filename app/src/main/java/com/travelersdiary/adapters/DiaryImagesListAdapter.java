@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.etiennelawlor.imagegallery.library.activities.FullScreenImageGalleryActivity;
 import com.travelersdiary.R;
+import com.travelersdiary.activities.FullScreenImageActivity;
 
 import java.util.ArrayList;
 
@@ -50,7 +50,7 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
         viewHolder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mContext, FullScreenImageGalleryActivity.class);
+                Intent intent = new Intent(mContext, FullScreenImageActivity.class);
                 intent.putStringArrayListExtra("images", mImagesList);
                 intent.putExtra("position", viewHolder.getAdapterPosition());
                 mContext.startActivity(intent);

@@ -6,7 +6,7 @@
 
     <include
         android:id="@+id/add_diary_note_activity_toolbar"
-        layout="@layout/toolbar" />
+        layout="@layout/toolbar_diary_activity" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

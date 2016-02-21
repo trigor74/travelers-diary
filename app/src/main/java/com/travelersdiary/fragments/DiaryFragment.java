@@ -35,7 +35,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -48,11 +47,12 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
-import com.sangcomz.fishbun.FishBun;
-import com.sangcomz.fishbun.define.Define;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.activities.AlbumImagesActivity;
+import com.travelersdiary.activities.DiaryImagesActivity;
+import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Travel;
@@ -99,18 +99,15 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int PICK_IMAGE_REQUEST = 2;
-
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
 
     private boolean isEditingMode;
+    private boolean isNewDiaryNote;
 
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private ArrayList<String> mImages = new ArrayList<>();
     private String mImagePath;
@@ -118,7 +115,6 @@ public class DiaryFragment extends Fragment {
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
     private FirebaseListAdapter<Travel> mAdapter;
-    private DiaryImagesListAdapter mImagesAdapter;
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
@@ -197,9 +193,17 @@ public class DiaryFragment extends Fragment {
             }
         };
 
-        addDataChangeListener();
+        isNewDiaryNote = getArguments().getBoolean("editing mode", false);
 
-        enableReviewingMode();
+        if (isNewDiaryNote) {
+            mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID));
+            mDiaryNote = new DiaryNote();
+            initNewDiaryNote(mDiaryNote);
+            enableEditingMode();
+        } else {
+            addDataChangeListener();
+            enableReviewingMode();
+        }
 
         return view;
     }
@@ -208,13 +212,14 @@ public class DiaryFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, true);
-        mImagesRecyclerView.setLayoutManager(mLayoutManager);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.HORIZONTAL, true);
+        mImagesRecyclerView.setLayoutManager(layoutManager);
 
         mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mImagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
-        mImagesRecyclerView.setAdapter(mImagesAdapter);
+        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
+        mImagesRecyclerView.setAdapter(imagesAdapter);
     }
 
     private void enableReviewingMode() {
@@ -286,6 +291,24 @@ public class DiaryFragment extends Fragment {
         //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
     }
+
+    private void initNewDiaryNote(DiaryNote diaryNote) {
+        diaryNote.setTitle("New Diary Note");
+        diaryNote.setTravelId("default"); // change to active
+        diaryNote.setTravelTitle("Uncategorized"); // change to active
+        diaryNote.setTime(System.currentTimeMillis());
+
+        mEdtDiaryNoteTitle.setText(diaryNote.getTitle());
+
+        Date time = new Date(diaryNote.getTime());
+        mTxtDate.setText(new SimpleDateFormat("dd").format(time));
+        mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
+        mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
+        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
+
+        mTxtTravel.setText(diaryNote.getTravelTitle());
+    }
+
 
     private void addDataChangeListener() {
         mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
@@ -386,7 +409,7 @@ public class DiaryFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isEditingMode) {
+                if (isEditingMode && !isNewDiaryNote) {
                     if (mRtEditText.hasChanged()) {
                         showDiscardDialog();
                     } else {
@@ -442,23 +465,19 @@ public class DiaryFragment extends Fragment {
             if (photoFile != null) {
                 takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                         Uri.fromFile(photoFile));
-                startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
+                startActivityForResult(takePhotoIntent, Constants.REQUEST_IMAGE_CAPTURE);
             }
         }
     }
 
     private void pickImage() {
-        FishBun.with(DiaryFragment.this)
-                .setAlbumThumnaliSize(150)
-                .setActionBarColor(ContextCompat.getColor(getContext(), R.color.colorPrimary),
-                        ContextCompat.getColor(getContext(), R.color.colorPrimaryDark))
-                .setPickerCount(15)
-                .startAlbum();
+        Intent intent = new Intent(getActivity(), GalleryAlbumActivity.class);
+        startActivityForResult(intent, Constants.GALLERY_REQUEST_CODE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+        if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 mImages.add("file:" + mImagePath);
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
@@ -468,11 +487,10 @@ public class DiaryFragment extends Fragment {
             }
         }
 
-        if (requestCode == Define.ALBUM_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<String> path = data.getStringArrayListExtra(Define.INTENT_PATH);
-            for (int i = 0; i < path.size(); i++) {
-                mImages.add("file:" + path.get(i));
-            }
+        if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
+            mImages.addAll(path);
+
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
         }
@@ -531,7 +549,15 @@ public class DiaryFragment extends Fragment {
         //save images
         mDiaryNote.setPhotos(mImages);
 
-        mItemRef.setValue(mDiaryNote);
+        if (mKey != null) {
+            mItemRef.setValue(mDiaryNote);
+        } else {
+//            mDiaryNote.setTime(System.currentTimeMillis());
+            Firebase newTravelRef = mItemRef.push();
+            newTravelRef.setValue(mDiaryNote);
+            mKey = newTravelRef.getKey();
+            addDataChangeListener();
+        }
 
         mRtEditText.resetHasChanged();
         Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
@@ -552,7 +578,7 @@ public class DiaryFragment extends Fragment {
             mRtManager.onDestroy(true);
         }
 
-        if (mItemRef != null) {
+        if (mItemRef != null && mValueEventListener != null) {
             mItemRef.removeEventListener(mValueEventListener);
         }
 
@@ -598,8 +624,9 @@ public class DiaryFragment extends Fragment {
 
     @OnClick(R.id.btn_view_all_images)
     public void viewAllImages() {
-        Intent intent = new Intent(getActivity(), ImageGalleryActivity.class);
+        Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
         intent.putStringArrayListExtra("images", mImages);
+        intent.putExtra("title", mDiaryNote.getTitle());
         startActivity(intent);
     }
 
