@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -52,7 +53,7 @@ public class TodoItemViewFragment extends Fragment {
     private TodoItem mTodoItem;
 
     private String mUserUID;
-    private String mKey;
+    private String mItemKey;
 
     private boolean mIsEditingMode = false;
 
@@ -87,7 +88,7 @@ public class TodoItemViewFragment extends Fragment {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-        mKey = getArguments().getString(Constants.KEY_TODO_ITEM_REF);
+        mItemKey = getArguments().getString(Constants.KEY_TODO_ITEM_REF);
 
         //get toolbar
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -103,7 +104,12 @@ public class TodoItemViewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        retrieveData(mKey);
+        if (mItemKey != null && !mItemKey.isEmpty()) {
+            retrieveData(mItemKey);
+        } else {
+            // create new empty item
+            mTodoItem = new TodoItem();
+        }
 
         DatePickerDialog datePickerDialog = (DatePickerDialog) getActivity().getFragmentManager().findFragmentByTag(DATE_PICKER_DIALOG_TAG);
         TimePickerDialog timePickerDialog = (TimePickerDialog) getActivity().getFragmentManager().findFragmentByTag(TIME_PICKER_DIALOG_TAG);
@@ -138,14 +144,10 @@ public class TodoItemViewFragment extends Fragment {
                 // item remind data
                 if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mTodoItem.getType())) {
                     // remind at time
-                    long time = mTodoItem.getTime();
-                    String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
-                    dateTextView.setText(timeText);
-                    timeTextView.setText("00:00:00");
+                    setDateTimeText();
                 } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mTodoItem.getType())) {
                     // remind at location
-                    waypointTitle.setText(mTodoItem.getWaypoint().getTitle());
-                    waypointDistance.setText("100");
+                    setLocationAndDistanceText();
                 } else {
                     // don't remind
                 }
@@ -180,10 +182,22 @@ public class TodoItemViewFragment extends Fragment {
             }
             c.set(year, monthOfYear, dayOfMonth);
             mTodoItem.setTime(c.getTimeInMillis());
-            // TODO: 10.02.16 change date format!!!
-            dateTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+            setDateTimeText();
         }
     };
+
+    private void setDateTimeText() {
+        long timestamp = mTodoItem.getTime();
+        String dateText = SimpleDateFormat.getDateInstance().format(timestamp);
+        String timeText = SimpleDateFormat.getTimeInstance().format(timestamp);
+        dateTextView.setText(dateText);
+        timeTextView.setText(timeText);
+    }
+
+    private void setLocationAndDistanceText() {
+        waypointTitle.setText(mTodoItem.getWaypoint().getTitle());
+        waypointDistance.setText(Integer.toString(mTodoItem.getDistance()));
+    }
 
     private void openDatePicker() {
         Calendar c = Calendar.getInstance();
@@ -214,8 +228,7 @@ public class TodoItemViewFragment extends Fragment {
             c.set(Calendar.SECOND, 0);
             c.set(Calendar.MILLISECOND, 0);
             mTodoItem.setTime(c.getTimeInMillis());
-            // TODO: 10.02.16 change time format!!!
-            timeTextView.setText(SimpleDateFormat.getDateTimeInstance().format(mTodoItem.getTime()));
+            setDateTimeText();
         }
     };
 
@@ -235,6 +248,33 @@ public class TodoItemViewFragment extends Fragment {
     }
 
     private void setOnClickListeners() {
+
+        remindTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // don't remind
+                        mTodoItem.setType("");
+                        break;
+                    case 1: // remind at time
+                        mTodoItem.setType(Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME);
+                        if (mTodoItem.getTime() <= 0) {
+                            mTodoItem.setTime(System.currentTimeMillis());
+                        }
+                        break;
+                    case 2: // remind at location
+                        mTodoItem.setType(Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
+                        break;
+                }
+                setRemindTypeViewVisibility(mTodoItem.getType());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         dontRemindTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -276,28 +316,28 @@ public class TodoItemViewFragment extends Fragment {
     private void setRemindTypeViewVisibility(String type) {
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
             // remind at time
+            remindTypeSpinner.setSelection(1);
             dontRemindTextView.setVisibility(View.GONE);
             dateTextView.setVisibility(View.VISIBLE);
             timeTextView.setVisibility(View.VISIBLE);
             waypointTitle.setVisibility(View.GONE);
             waypointDistance.setVisibility(View.GONE);
-            remindTypeSpinner.setSelection(1);
         } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
             // remind at location
+            remindTypeSpinner.setSelection(2);
             dontRemindTextView.setVisibility(View.GONE);
             dateTextView.setVisibility(View.GONE);
             timeTextView.setVisibility(View.GONE);
             waypointTitle.setVisibility(View.VISIBLE);
             waypointDistance.setVisibility(View.VISIBLE);
-            remindTypeSpinner.setSelection(2);
         } else {
             // don't remind
+            remindTypeSpinner.setSelection(0);
             dontRemindTextView.setVisibility(View.VISIBLE);
             dateTextView.setVisibility(View.GONE);
             timeTextView.setVisibility(View.GONE);
             waypointTitle.setVisibility(View.GONE);
             waypointDistance.setVisibility(View.GONE);
-            remindTypeSpinner.setSelection(0);
         }
     }
 
@@ -377,5 +417,20 @@ public class TodoItemViewFragment extends Fragment {
             ((Button) v).setText("Hide checkboxes");
         }
         ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mTodoItem.isViewAsCheckboxes());
+    }
+
+    @OnClick(R.id.todo_item_save_button)
+    public void saveItem(){
+        Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
+        if (mItemKey != null && !mItemKey.isEmpty()){
+            // update item
+            Firebase updateItemRef = firebaseRef.child(mItemKey);
+            updateItemRef.setValue(mTodoItem);
+        } else {
+            // create item
+            Firebase newItemRef = firebaseRef.push();
+            newItemRef.setValue(mTodoItem);
+            mItemKey = newItemRef.getKey();
+        }
     }
 }
