@@ -7,6 +7,7 @@
     <string name="reminder_text">Reminder</string>
     <string name="map_text">Map</string>
     <string name="settings">Settings</string>
+    <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="create">Create</string>
     <string name="discard">Discard</string>
@@ -42,6 +43,9 @@
     <string name="travel_activity_title">A Travel</string>
 
     <string name="reminder_dont_remind_text">Don\'t remind</string>
+    <string name="reminder_new_remind_item_default_title">New remind item</string>
+    <string name="remind_item_show_checkboxes">Show Checkboxes</string>
+    <string name="remind_item_hide_checkboxes">Hide Checkboxes</string>
     <string-array name="reminder_type_names">
         <item>Don\'t remind</item>
         <item>Remind at time</item>

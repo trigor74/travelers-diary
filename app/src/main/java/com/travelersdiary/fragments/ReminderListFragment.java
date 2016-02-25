@@ -19,7 +19,7 @@ import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
-import com.travelersdiary.activities.TodoItemActivity;
+import com.travelersdiary.activities.RemindItemActivity;
 import com.travelersdiary.adapters.ReminderListAdapter;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
 
@@ -90,7 +90,7 @@ public class ReminderListFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 String key = mAdapter.getRef(position).getKey();
 
-                Intent intent = new Intent(getActivity(), TodoItemActivity.class);
+                Intent intent = new Intent(getActivity(), RemindItemActivity.class);
                 intent.putExtra(Constants.KEY_TODO_ITEM_REF, key);
                 startActivity(intent);
             }

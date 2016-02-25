@@ -5,8 +5,8 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/todo_item_activity_toolbar"
-        layout="@layout/toolbar" />
+        android:id="@+id/remind_item_activity_toolbar"
+        layout="@layout/toolbar_remind_item_activity" />
 
     <FrameLayout
         android:id="@+id/fragment_container"

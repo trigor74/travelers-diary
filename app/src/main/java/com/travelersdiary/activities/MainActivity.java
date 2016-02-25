@@ -31,7 +31,7 @@ public class MainActivity extends BaseActivity {
     ViewPager mViewPager;
 
     @OnClick(R.id.main_activity_fab)
-    public void onClick(View v) {
+    public void onClickFAB(View v) {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();

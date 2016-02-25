@@ -8,14 +8,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/todo_item_as_checkboxes_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Show checkboxes" />
-
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/todo_item_task"
+            android:id="@+id/remind_item_task"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:descendantFocusability="afterDescendants"
@@ -36,7 +30,7 @@
             android:paddingTop="8dp">
 
             <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/todo_item_remind_type_spinner"
+                android:id="@+id/remind_item_remind_type_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
@@ -44,7 +38,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/todo_item_dont_remind_text_view"
+                android:id="@+id/remind_item_dont_remind_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -57,7 +51,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/todo_item_date_text_view"
+                android:id="@+id/remind_item_date_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,7 +64,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/todo_item_time_text_view"
+                android:id="@+id/remind_item_time_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -84,7 +78,7 @@
 
 
             <TextView
-                android:id="@+id/todo_item_waypoint_title_text_view"
+                android:id="@+id/remind_item_waypoint_title_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,7 +91,7 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/todo_item_waypoint_distance_text_view"
+                android:id="@+id/remind_item_waypoint_distance_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -110,18 +104,6 @@
                 android:visibility="gone" />
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/todo_item_edit_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Edit" />
-
-        <Button
-            android:id="@+id/todo_item_save_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save" />
 
     </LinearLayout>
 
