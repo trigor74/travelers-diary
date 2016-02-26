@@ -203,26 +203,11 @@ public class RemindItemFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                if (isEditingMode) {
-                    if (hasChanged) {
-                        // TODO: 25.02.16 show discard dialog
-                        showDiscardDialog();
-                    } else {
-                        if (isNewItem) {
-                            getActivity().finish();
-                        } else {
-                            enableReviewingMode();
-                            //hide keyboard
-                            mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
-                        }
-                    }
-                } else {
-                    getActivity().finish();
-                }
-                return true;
             case R.id.action_save_remind_item:
                 hasChanged = !saveItem();
+                // no return or break - simulate home button click
+            case android.R.id.home:
+                onBackPressed();
                 return true;
             case R.id.action_edit_remind_item:
                 enableEditingMode();
@@ -240,6 +225,25 @@ public class RemindItemFragment extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void onBackPressed() {
+        if (isEditingMode) {
+            if (hasChanged) {
+                // TODO: 25.02.16 show discard dialog
+                showDiscardDialog();
+            } else {
+                if (isNewItem) {
+                    getActivity().finish();
+                } else {
+                    enableReviewingMode();
+                    //hide keyboard
+                    mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
+                }
+            }
+        } else {
+            getActivity().finish();
         }
     }
 
