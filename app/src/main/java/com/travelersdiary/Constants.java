@@ -57,7 +57,7 @@ public final class Constants {
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";
 
     // reminder
-    public static final String KEY_TODO_ITEM_REF = "TODO_ITEM_REF";
+    public static final String KEY_REMINDER_ITEM_REF = "REMINDER_ITEM_REF";
 
     public static final int PHOTO_SPAN_COUNT = 3;
 

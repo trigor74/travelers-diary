@@ -1,6 +1,7 @@
 package com.travelersdiary.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -8,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -53,14 +55,15 @@ public class RemindItemFragment extends Fragment {
 
     private ActionBar mSupportActionBar;
     private Menu mMenu;
-    private Firebase mItemRef;
+    private Firebase mItemRef = null;
     private TodoItem mRemindItem;
 
     private String mUserUID;
-    private String mItemKey;
+    private String mItemKey = null;
 
     private boolean isEditingMode = false;
     private boolean hasChanged = false;
+    private boolean isNewItem = false;
 
     @Bind(R.id.remind_item_dont_remind_text_view)
     TextView dontRemindTextView;
@@ -88,6 +91,7 @@ public class RemindItemFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        hasChanged = false;
     }
 
     @Nullable
@@ -99,7 +103,13 @@ public class RemindItemFragment extends Fragment {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-        mItemKey = getArguments().getString(Constants.KEY_TODO_ITEM_REF);
+
+        Bundle args = getArguments();
+        if (args != null && args.containsKey(Constants.KEY_REMINDER_ITEM_REF)) {
+            mItemKey = getArguments().getString(Constants.KEY_REMINDER_ITEM_REF, null);
+        }
+
+        isNewItem = mItemKey == null || mItemKey.isEmpty();
 
         //get toolbar
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -131,7 +141,8 @@ public class RemindItemFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mItemKey != null && !mItemKey.isEmpty()) {
+        if (!isNewItem) {
+            hasChanged = false;
             retrieveData(mItemKey);
         } else {
             // create new empty item
@@ -139,9 +150,20 @@ public class RemindItemFragment extends Fragment {
             mRemindItem.setTitle(mContext.getString(R.string.reminder_new_remind_item_default_title));
             mRemindItem.setViewAsCheckboxes(false);
             ArrayList<TodoTask> task = new ArrayList<>();
-            task.add(new TodoTask("", false));
+            task.add(new TodoTask(mContext.getString(R.string.reminder_new_remind_item_default_text), false));
             mRemindItem.setTask(task);
+            // TODO: 26.02.2016 set current active travelId
+            mRemindItem.setTravelId("default");
+            // TODO: 26.02.2016 set active to true only if travelId is default or current
+            mRemindItem.setActive(true);
+            mRemindItem.setCompleted(false);
+
+            hasChanged = true;
+            setViews();
+            enableEditingMode();
         }
+
+        setOnClickListeners();
 
         DatePickerDialog datePickerDialog = (DatePickerDialog) getActivity().getFragmentManager().findFragmentByTag(DATE_PICKER_DIALOG_TAG);
         TimePickerDialog timePickerDialog = (TimePickerDialog) getActivity().getFragmentManager().findFragmentByTag(TIME_PICKER_DIALOG_TAG);
@@ -185,16 +207,22 @@ public class RemindItemFragment extends Fragment {
                 if (isEditingMode) {
                     if (hasChanged) {
                         // TODO: 25.02.16 show discard dialog
-//                        showDiscardDialog();
+                        showDiscardDialog();
                     } else {
-                        enableReviewingMode();
+                        if (isNewItem) {
+                            getActivity().finish();
+                        } else {
+                            enableReviewingMode();
+                            //hide keyboard
+                            mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
+                        }
                     }
                 } else {
                     getActivity().finish();
                 }
                 return true;
             case R.id.action_save_remind_item:
-                saveItem();
+                hasChanged = !saveItem();
                 return true;
             case R.id.action_edit_remind_item:
                 enableEditingMode();
@@ -208,14 +236,40 @@ public class RemindItemFragment extends Fragment {
                     item.setTitle(R.string.remind_item_hide_checkboxes);
                 }
                 ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mRemindItem.isViewAsCheckboxes());
+                // TODO: 26.02.2016 add save logic for view as checkboxes state in review mode
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void showDiscardDialog() {
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.discard_changes_text)
+                .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!isNewItem) {
+                            // go to review if item exists
+                            enableReviewingMode();
+                            //hide keyboard
+                            mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
+                        } else {
+                            // close if item not exists
+                            getActivity().finish();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing
+                    }
+                })
+                .show();
+    }
+
     @Override
     public void onPause() {
+        clearOnClickListeners();
         super.onPause();
     }
 
@@ -226,39 +280,12 @@ public class RemindItemFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mRemindItem = dataSnapshot.getValue(TodoItem.class);
-                mRemindItemTitleEditText.setText(mRemindItem.getTitle());
-                if (mMenu != null && mRemindItem.isViewAsCheckboxes()) {
-                    mMenu.findItem(R.id.action_switch_checkboxes_remind_item)
-                            .setTitle(R.string.remind_item_hide_checkboxes);
-                    //refresh toolbar
-                    mSupportActionBar.invalidateOptionsMenu();
-                }
-
-                // item type
-                RemindTypesAdapter adapter = new RemindTypesAdapter(mContext);
-                remindTypeSpinner.setAdapter(adapter);
-
-                // task text
-                mAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
-                LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
-                mTodoItemTask.setLayoutManager(layoutManager);
-                mTodoItemTask.setAdapter(mAdapter);
-
-                // item remind data
-                if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {
-                    // remind at time
-                    setDateTimeText();
-                } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType())) {
-                    // remind at location
-                    setLocationAndDistanceText();
+                setViews();
+                if (isEditingMode) {
+                    enableEditingMode();
                 } else {
-                    // don't remind
+                    enableReviewingMode();
                 }
-
-                setRemindTypeViewVisibility(mRemindItem.getType());
-                remindTypeSpinner.setVisibility(View.VISIBLE);
-                setOnClickListeners();
-                setEditingMode(isEditingMode);
             }
 
             @Override
@@ -268,6 +295,51 @@ public class RemindItemFragment extends Fragment {
         });
     }
 
+    private void setViews() {
+        mRemindItemTitleEditText.setText(mRemindItem.getTitle());
+        if (mMenu != null && mRemindItem.isViewAsCheckboxes()) {
+            mMenu.findItem(R.id.action_switch_checkboxes_remind_item)
+                    .setTitle(R.string.remind_item_hide_checkboxes);
+            //refresh toolbar
+            mSupportActionBar.invalidateOptionsMenu();
+        }
+
+        // item type
+        RemindTypesAdapter adapter = new RemindTypesAdapter(mContext);
+        remindTypeSpinner.setAdapter(adapter);
+
+        // task text
+        mAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
+        ((TodoTaskAdapter) mAdapter).setOnHasChangedListener(new TodoTaskAdapter.OnHasCangedListener() {
+            @Override
+            public void onHasChanged(boolean text) {
+                if (text) {
+                    // text changed
+                    hasChanged = true;
+                } else {
+                    // checkbox state changed
+                    // TODO: 26.02.2016 add save logic if check changed in review mode
+                }
+            }
+        });
+        LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+        mTodoItemTask.setLayoutManager(layoutManager);
+        mTodoItemTask.setAdapter(mAdapter);
+
+        // item remind data
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {
+            // remind at time
+            setDateTimeText();
+        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType())) {
+            // remind at location
+            setLocationAndDistanceText();
+        } else {
+            // don't remind
+        }
+
+        setRemindTypeViewVisibility(mRemindItem.getType());
+        remindTypeSpinner.setVisibility(View.VISIBLE);
+    }
 
     @Override
     public void onDestroyView() {
@@ -363,10 +435,13 @@ public class RemindItemFragment extends Fragment {
                         mRemindItem.setType(Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME);
                         if (mRemindItem.getTime() <= 0) {
                             mRemindItem.setTime(System.currentTimeMillis());
+                            setDateTimeText();
                         }
                         break;
                     case 2: // remind at location
                         mRemindItem.setType(Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
+                        // TODO: 26.02.2016 add logic for default values if not exists
+                        setLocationAndDistanceText();
                         break;
                 }
                 setRemindTypeViewVisibility(mRemindItem.getType());
@@ -416,6 +491,14 @@ public class RemindItemFragment extends Fragment {
         });
     }
 
+    private void clearOnClickListeners() {
+        remindTypeSpinner.setOnItemSelectedListener(null);
+        dontRemindTextView.setOnClickListener(null);
+        dateTextView.setOnClickListener(null);
+        timeTextView.setOnClickListener(null);
+        waypointTitle.setOnClickListener(null);
+    }
+
     private void setRemindTypeViewVisibility(String type) {
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
             // remind at time
@@ -444,8 +527,8 @@ public class RemindItemFragment extends Fragment {
         }
     }
 
-    private void setViewEditMode(View v, boolean editMode) {
-        if (editMode) {
+    private void setViewEditMode(View v, boolean editable) {
+        if (editable) {
             v.setClickable(true);
             v.setLongClickable(true);
 //            v.setFocusable(true);
@@ -470,56 +553,61 @@ public class RemindItemFragment extends Fragment {
         }
     }
 
-    private void setEditingMode(boolean editingMode) {
-        isEditingMode = editingMode;
-        if (editingMode) {
-            mRemindItemTitleEditText.setFocusable(true);
-            mRemindItemTitleEditText.setFocusableInTouchMode(true);
-            Utils.tintWidget(getContext(), mRemindItemTitleEditText, R.color.white);
-
-        } else {
-            mRemindItemTitleEditText.setFocusable(false);
-            Utils.tintWidget(getContext(), mRemindItemTitleEditText, android.R.color.transparent);
-        }
-
-        setViewEditMode(dontRemindTextView, editingMode);
-        setViewEditMode(dateTextView, editingMode);
-        setViewEditMode(timeTextView, editingMode);
-        setViewEditMode(waypointTitle, editingMode);
-        setViewEditMode(waypointDistance, editingMode);
-        setSpinnerEditMode(remindTypeSpinner, editingMode);
-        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(editingMode);
-    }
-
     private void enableReviewingMode() {
-        setEditingMode(false);
-        //hide keyboard
-        mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
+        isEditingMode = false;
+
+        mRemindItemTitleEditText.setFocusable(false);
+        Utils.tintWidget(getContext(), mRemindItemTitleEditText, android.R.color.transparent);
         //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
+
+        setViewEditMode(dontRemindTextView, false);
+        setViewEditMode(dateTextView, false);
+        setViewEditMode(timeTextView, false);
+        setViewEditMode(waypointTitle, false);
+        setViewEditMode(waypointDistance, false);
+        setSpinnerEditMode(remindTypeSpinner, false);
+        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
     }
 
     private void enableEditingMode() {
-        setEditingMode(true);
-        mTodoItemTask.scrollToPosition(0);
-        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setSelectedItem(0);
-        EditText et = (EditText) mTodoItemTask
-                .findViewHolderForLayoutPosition(0)
-                .itemView
-                .findViewById(R.id.task_item_edit_text);
-        et.setFocusable(true);
-        et.setFocusableInTouchMode(true);
-        et.setSelection(1);
-        et.setCursorVisible(true);
-        et.setSelected(true);
-        et.requestFocus();
-        //show keyboard
-        mInputMethodManager.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
+        isEditingMode = true;
+
+        mRemindItemTitleEditText.setFocusable(true);
+        mRemindItemTitleEditText.setFocusableInTouchMode(true);
+        Utils.tintWidget(getContext(), mRemindItemTitleEditText, R.color.white);
         //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
+
+        setViewEditMode(dontRemindTextView, true);
+        setViewEditMode(dateTextView, true);
+        setViewEditMode(timeTextView, true);
+        setViewEditMode(waypointTitle, true);
+        setViewEditMode(waypointDistance, true);
+        setSpinnerEditMode(remindTypeSpinner, true);
+        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
+
+        mTodoItemTask.scrollToPosition(0);
+        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setSelectedItem(0);
+
+        TodoTaskAdapter.ViewHolder viewHolder = (TodoTaskAdapter.ViewHolder) mTodoItemTask
+                .findViewHolderForLayoutPosition(0);
+        if (viewHolder != null) {
+            EditText et = (EditText) viewHolder
+                    .itemView
+                    .findViewById(R.id.task_item_edit_text);
+            et.setFocusable(true);
+            et.setFocusableInTouchMode(true);
+            et.setSelection(1);
+            et.setCursorVisible(true);
+            et.setSelected(true);
+            et.requestFocus();
+            //show keyboard
+            mInputMethodManager.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
-    public void saveItem() {
+    public boolean saveItem() {
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
         if (mItemKey != null && !mItemKey.isEmpty()) {
@@ -532,5 +620,6 @@ public class RemindItemFragment extends Fragment {
             newItemRef.setValue(mRemindItem);
             mItemKey = newItemRef.getKey();
         }
+        return true;
     }
 }

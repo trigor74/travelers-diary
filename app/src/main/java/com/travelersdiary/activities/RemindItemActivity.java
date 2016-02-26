@@ -33,13 +33,15 @@ public class RemindItemActivity extends BaseActivity {
         }
 
         if (savedInstanceState == null) {
-            String key = getIntent().getStringExtra(Constants.KEY_TODO_ITEM_REF);
+            String key = getIntent().getStringExtra(Constants.KEY_REMINDER_ITEM_REF);
 
             RemindItemFragment todoItemFragment = new RemindItemFragment();
 
-            Bundle bundle = new Bundle();
-            bundle.putString(Constants.KEY_TODO_ITEM_REF, key);
-            todoItemFragment.setArguments(bundle);
+            if (key != null && !key.isEmpty()) {
+                Bundle bundle = new Bundle();
+                bundle.putString(Constants.KEY_REMINDER_ITEM_REF, key);
+                todoItemFragment.setArguments(bundle);
+            }
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, todoItemFragment)

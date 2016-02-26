@@ -34,6 +34,16 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         this.onItemClickListener = onItemClickListener;
     }
 
+    public interface OnHasCangedListener {
+        void onHasChanged(boolean text);
+    }
+
+    private static OnHasCangedListener onHasChangedListener;
+
+    public void setOnHasChangedListener(OnHasCangedListener onHasChangedListener) {
+        this.onHasChangedListener =onHasChangedListener;
+    }
+
     private boolean mViewAsCheckboxes;
 
     public void setViewAsCheckboxes(boolean viewAsCheckboxes) {
@@ -83,6 +93,9 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                     }
                     mTodoTaskItemList.get(position).setChecked(((AppCompatCheckBox) v).isChecked());
                     notifyItemChanged(position);
+                    if (onHasChangedListener != null) {
+                        onHasChangedListener.onHasChanged(false);
+                    }
                 }
             });
 
@@ -95,6 +108,9 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     mTodoTaskItemList.get(getLayoutPosition()).setItem(s.toString());
+                    if (onHasChangedListener != null) {
+                        onHasChangedListener.onHasChanged(true);
+                    }
                 }
 
                 @Override
@@ -122,6 +138,9 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                                 notifyItemChanged(index - 1);
                                 setSelectedItem(index - 1);
                                 setEditTextCursorPosition(previousText.length());
+                                if (onHasChangedListener != null) {
+                                    onHasChangedListener.onHasChanged(true);
+                                }
                                 return true;
                             } else {
                                 if (enteredText.length() == 0) {
@@ -129,6 +148,9 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                                     notifyItemChanged(0);
                                     setSelectedItem(0);
                                     setEditTextCursorPosition(0);
+                                    if (onHasChangedListener != null) {
+                                        onHasChangedListener.onHasChanged(true);
+                                    }
                                     return true;
                                 }
                             }
@@ -147,6 +169,9 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                         notifyItemRangeChanged(index, 2);
                         setSelectedItem(index + 1);
                         setEditTextCursorPosition(0);
+                        if (onHasChangedListener != null) {
+                            onHasChangedListener.onHasChanged(true);
+                        }
                         return true;
                     }
                     return false;
@@ -165,18 +190,27 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         TodoTask todoTask = new TodoTask(line, checked);
         mTodoTaskItemList.add(todoTask);
         notifyItemInserted(mTodoTaskItemList.size() - 1);
+        if (onHasChangedListener != null) {
+            onHasChangedListener.onHasChanged(true);
+        }
     }
 
     public void addItem(int index, String line, boolean checked) {
         TodoTask todoTask = new TodoTask(line, checked);
         mTodoTaskItemList.add(index, todoTask);
         notifyItemInserted(index);
+        if (onHasChangedListener != null) {
+            onHasChangedListener.onHasChanged(true);
+        }
     }
 
     public void remove(int index) {
         mTodoTaskItemList.remove(index);
         notifyItemRemoved(index);
         notifyItemRangeChanged(index, mTodoTaskItemList.size());
+        if (onHasChangedListener != null) {
+            onHasChangedListener.onHasChanged(true);
+        }
     }
 
     public TodoTaskAdapter(ArrayList<TodoTask> itemList) {

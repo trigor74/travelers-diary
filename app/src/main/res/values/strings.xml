@@ -44,6 +44,7 @@
 
     <string name="reminder_dont_remind_text">Don\'t remind</string>
     <string name="reminder_new_remind_item_default_title">New remind item</string>
+    <string name="reminder_new_remind_item_default_text">Write text here to remind</string>
     <string name="remind_item_show_checkboxes">Show Checkboxes</string>
     <string name="remind_item_hide_checkboxes">Hide Checkboxes</string>
     <string-array name="reminder_type_names">

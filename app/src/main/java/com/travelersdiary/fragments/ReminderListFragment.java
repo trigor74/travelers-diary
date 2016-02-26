@@ -91,7 +91,7 @@ public class ReminderListFragment extends Fragment {
                 String key = mAdapter.getRef(position).getKey();
 
                 Intent intent = new Intent(getActivity(), RemindItemActivity.class);
-                intent.putExtra(Constants.KEY_TODO_ITEM_REF, key);
+                intent.putExtra(Constants.KEY_REMINDER_ITEM_REF, key);
                 startActivity(intent);
             }
 
