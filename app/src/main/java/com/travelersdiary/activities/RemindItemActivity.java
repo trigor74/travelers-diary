@@ -12,7 +12,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class RemindItemActivity extends BaseActivity {
-    private static final String REMIND_ITEM_FRAGMENT = "REMIND_ITEM_FRAGMENT";
+    private static final String REMIND_ITEM_FRAGMENT_TAG = "REMIND_ITEM_FRAGMENT_TAG";
 
     @Bind(R.id.remind_item_activity_toolbar)
     Toolbar mToolbar;
@@ -46,7 +46,7 @@ public class RemindItemActivity extends BaseActivity {
             }
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, remindItemFragment, REMIND_ITEM_FRAGMENT)
+                    .add(R.id.fragment_container, remindItemFragment, REMIND_ITEM_FRAGMENT_TAG)
                     .commit();
         }
     }
@@ -54,7 +54,7 @@ public class RemindItemActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         RemindItemFragment remindItemFragment = (RemindItemFragment) getSupportFragmentManager()
-                .findFragmentByTag(REMIND_ITEM_FRAGMENT);
+                .findFragmentByTag(REMIND_ITEM_FRAGMENT_TAG);
         if (remindItemFragment != null) {
             remindItemFragment.onBackPressed();
         } else {

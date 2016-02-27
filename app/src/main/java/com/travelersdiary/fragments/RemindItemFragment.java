@@ -34,8 +34,10 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.RemindTypesAdapter;
 import com.travelersdiary.adapters.TodoTaskAdapter;
+import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.TodoItem;
 import com.travelersdiary.models.TodoTask;
+import com.travelersdiary.models.Waypoint;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -205,6 +207,10 @@ public class RemindItemFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_save_remind_item:
                 hasChanged = !saveItem();
+                if (hasChanged) {
+                    // error save data - do nothing
+                    return true;
+                }
                 // no return or break - simulate home button click
             case android.R.id.home:
                 onBackPressed();
@@ -231,7 +237,6 @@ public class RemindItemFragment extends Fragment {
     public void onBackPressed() {
         if (isEditingMode) {
             if (hasChanged) {
-                // TODO: 25.02.16 show discard dialog
                 showDiscardDialog();
             } else {
                 if (isNewItem) {
@@ -304,7 +309,6 @@ public class RemindItemFragment extends Fragment {
         if (mMenu != null && mRemindItem.isViewAsCheckboxes()) {
             mMenu.findItem(R.id.action_switch_checkboxes_remind_item)
                     .setTitle(R.string.remind_item_hide_checkboxes);
-            //refresh toolbar
             mSupportActionBar.invalidateOptionsMenu();
         }
 
@@ -374,7 +378,14 @@ public class RemindItemFragment extends Fragment {
     }
 
     private void setLocationAndDistanceText() {
-        waypointTitle.setText(mRemindItem.getWaypoint().getTitle());
+        Waypoint waypoint = mRemindItem.getWaypoint();
+        if (waypoint != null) {
+            waypointTitle.setText(waypoint.getTitle());
+        } else {
+            waypointTitle.setText(R.string.reminder_choose_location_text);
+            // TODO: 27.02.16 set default distance from settings
+            mRemindItem.setDistance(100);
+        }
         waypointDistance.setText(Integer.toString(mRemindItem.getDistance()));
     }
 
@@ -483,6 +494,7 @@ public class RemindItemFragment extends Fragment {
         waypointTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO: 27.02.16 add logic for choose location if not exists
                 Toast.makeText(getContext(), "TEST WAYPOINT", Toast.LENGTH_SHORT).show();
             }
         });
@@ -490,6 +502,7 @@ public class RemindItemFragment extends Fragment {
         waypointDistance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO: 27.02.16 add logic for choose remind distance for location
                 Toast.makeText(getContext(), "TEST DISTANCE", Toast.LENGTH_SHORT).show();
             }
         });
@@ -535,14 +548,10 @@ public class RemindItemFragment extends Fragment {
         if (editable) {
             v.setClickable(true);
             v.setLongClickable(true);
-//            v.setFocusable(true);
-//            v.setFocusableInTouchMode(true);
             v.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
         } else {
             v.setClickable(false);
             v.setLongClickable(false);
-//            v.setFocusable(false);
-//            v.setFocusableInTouchMode(false);
             v.setBackground(null);
         }
     }
@@ -562,7 +571,6 @@ public class RemindItemFragment extends Fragment {
 
         mRemindItemTitleEditText.setFocusable(false);
         Utils.tintWidget(getContext(), mRemindItemTitleEditText, android.R.color.transparent);
-        //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
 
         setViewEditMode(dontRemindTextView, false);
@@ -580,7 +588,6 @@ public class RemindItemFragment extends Fragment {
         mRemindItemTitleEditText.setFocusable(true);
         mRemindItemTitleEditText.setFocusableInTouchMode(true);
         Utils.tintWidget(getContext(), mRemindItemTitleEditText, R.color.white);
-        //refresh toolbar
         mSupportActionBar.invalidateOptionsMenu();
 
         setViewEditMode(dontRemindTextView, true);
@@ -613,6 +620,9 @@ public class RemindItemFragment extends Fragment {
 
     public boolean saveItem() {
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
+        if (!validateData()) {
+            return false;
+        }
         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
         if (mItemKey != null && !mItemKey.isEmpty()) {
             // update item
@@ -625,5 +635,58 @@ public class RemindItemFragment extends Fragment {
             mItemKey = newItemRef.getKey();
         }
         return true;
+    }
+
+    private boolean validateData() {
+        if (mRemindItem == null) {
+            showErrorDialog("Invalid data");
+            return false;
+        }
+
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {
+            // validate time
+            if (mRemindItem.getTime() <= 0) {
+                showErrorDialog("Invalid time");
+                return false;
+            }
+        }
+
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType())) {
+            // validate waypoint
+
+            Waypoint waypoint = mRemindItem.getWaypoint();
+            if (waypoint == null) {
+                showErrorDialog("Invalid location");
+                return false;
+            }
+
+            String waypointTitle = waypoint.getTitle();
+            if (waypointTitle == null || waypointTitle.isEmpty()) {
+                showErrorDialog("Invalid location");
+                return false;
+            }
+
+            LocationPoint locationPoint = waypoint.getLocation();
+            if (locationPoint == null) {
+                showErrorDialog("Invalid location");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void showErrorDialog(String errorMessage) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle(R.string.error)
+                .setMessage(errorMessage)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(R.string.close,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        })
+                .create()
+                .show();
     }
 }
