@@ -1,7 +1,9 @@
 package com.travelersdiary.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,6 +31,12 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -54,6 +62,7 @@ import butterknife.ButterKnife;
 public class RemindItemFragment extends Fragment {
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
+    private static int PLACE_PICKER_REQUEST = 1;
 
     private ActionBar mSupportActionBar;
     private Menu mMenu;
@@ -141,29 +150,39 @@ public class RemindItemFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (savedInstanceState == null) {
+            if (!isNewItem) {
+                hasChanged = false;
+                retrieveData(mItemKey);
+            } else {
+                // create new empty item
+                mRemindItem = new TodoItem();
+                mRemindItem.setTitle(mContext.getString(R.string.reminder_new_remind_item_default_title));
+                mRemindItem.setViewAsCheckboxes(false);
+                ArrayList<TodoTask> task = new ArrayList<>();
+                task.add(new TodoTask(mContext.getString(R.string.reminder_new_remind_item_default_text), false));
+                mRemindItem.setTask(task);
+                // TODO: 26.02.2016 set current active travelId
+                mRemindItem.setTravelId("default");
+                // TODO: 26.02.2016 set active to true only if travelId is default or current
+                mRemindItem.setActive(true);
+                mRemindItem.setCompleted(false);
+
+                hasChanged = true;
+                setViews();
+                enableEditingMode();
+            }
+        } else {
+            // TODO: 28.02.16 add restoring data
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        if (!isNewItem) {
-            hasChanged = false;
-            retrieveData(mItemKey);
-        } else {
-            // create new empty item
-            mRemindItem = new TodoItem();
-            mRemindItem.setTitle(mContext.getString(R.string.reminder_new_remind_item_default_title));
-            mRemindItem.setViewAsCheckboxes(false);
-            ArrayList<TodoTask> task = new ArrayList<>();
-            task.add(new TodoTask(mContext.getString(R.string.reminder_new_remind_item_default_text), false));
-            mRemindItem.setTask(task);
-            // TODO: 26.02.2016 set current active travelId
-            mRemindItem.setTravelId("default");
-            // TODO: 26.02.2016 set active to true only if travelId is default or current
-            mRemindItem.setActive(true);
-            mRemindItem.setCompleted(false);
-
-            hasChanged = true;
-            setViews();
-            enableEditingMode();
-        }
 
         setOnClickListeners();
 
@@ -389,6 +408,31 @@ public class RemindItemFragment extends Fragment {
         waypointDistance.setText(Integer.toString(mRemindItem.getDistance()));
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == Activity.RESULT_OK) {
+                Place place = PlacePicker.getPlace(mContext, data);
+                if (place != null) {
+                    String title = place.getName().toString();
+                    LatLng latLng = place.getLatLng();
+                    LocationPoint locationPoint = new LocationPoint(latLng.latitude, latLng.longitude, 0);
+
+                    if (mRemindItem.getWaypoint() == null) {
+                        mRemindItem.setWaypoint(new Waypoint("default", title, locationPoint));
+                    } else {
+                        mRemindItem.getWaypoint().setTitle(title);
+                        mRemindItem.getWaypoint().setLocation(locationPoint);
+                    }
+
+                    setLocationAndDistanceText();
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
     private void openDatePicker() {
         Calendar c = Calendar.getInstance();
         long time = mRemindItem.getTime();
@@ -494,8 +538,23 @@ public class RemindItemFragment extends Fragment {
         waypointTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 27.02.16 add logic for choose location if not exists
-                Toast.makeText(getContext(), "TEST WAYPOINT", Toast.LENGTH_SHORT).show();
+                PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+                if (mRemindItem.getWaypoint() != null) {
+                    LocationPoint locationPoint = mRemindItem.getWaypoint().getLocation();
+                    LatLng latLng = new LatLng(locationPoint.getLatitude(), locationPoint.getLongitude());
+                    LatLngBounds latLngBounds = new LatLngBounds(latLng, latLng);
+                    builder.setLatLngBounds(latLngBounds);
+                }
+
+                Intent intent = null;
+                try {
+                    intent = builder.build(getActivity());
+                } catch (GooglePlayServicesRepairableException e) {
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    e.printStackTrace();
+                }
+                startActivityForResult(intent, PLACE_PICKER_REQUEST);
             }
         });
 
