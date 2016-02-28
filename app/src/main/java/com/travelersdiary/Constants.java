@@ -37,6 +37,8 @@ public final class Constants {
     public static final String KEY_PROVIDER = "PROVIDER";
     public static final String KEY_USER_UID = "USER_UID";
     public static final String KEY_EMAIL = "EMAIL";
+    public static final String KEY_USER_GOOGLE_TOKEN = "USER_GOOGLE_TOKEN";
+    public static final String KEY_USER_GOOGLE_ID = "USER_GOOGLE_ID";
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";

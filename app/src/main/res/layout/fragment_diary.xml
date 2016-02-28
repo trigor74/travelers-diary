@@ -51,6 +51,12 @@
                         android:layout_height="wrap_content"
                         android:text="View all images" />
 
+                    <Button
+                        android:id="@+id/btn_picasa_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Picasa test" />
+
                     <include
                         android:id="@+id/diary_note_footer_layout"
                         layout="@layout/diary_note_footer" />
