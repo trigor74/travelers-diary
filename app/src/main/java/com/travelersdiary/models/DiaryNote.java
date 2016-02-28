@@ -1,11 +1,9 @@
 package com.travelersdiary.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * Created by itrifonov on 30.12.2015.
- */
-public class DiaryNote {
+public class DiaryNote implements Serializable {
     private String travelId;
     private String travelTitle;
     private long time;

@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,6 +65,11 @@ public class RemindItemFragment extends Fragment {
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
 
+    private static String KEY_IS_EDITING_MODE = "KEY_IS_EDITING_MODE";
+    private static String KEY_HAS_CHANGED = "KEY_HAS_CHANGED";
+    private static String KEY_IS_NEW_ITEM = "KEY_IS_NEW_ITEM";
+    private static String KEY_REMIND_ITEM = "KEY_REMIND_ITEM";
+
     private ActionBar mSupportActionBar;
     private Menu mMenu;
     private Firebase mItemRef = null;
@@ -102,7 +108,6 @@ public class RemindItemFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        hasChanged = false;
     }
 
     @Nullable
@@ -176,7 +181,17 @@ public class RemindItemFragment extends Fragment {
                 enableEditingMode();
             }
         } else {
-            // TODO: 28.02.16 add restoring data
+            isEditingMode = savedInstanceState.getBoolean(KEY_IS_EDITING_MODE, false);
+            hasChanged = savedInstanceState.getBoolean(KEY_HAS_CHANGED, false);
+            isNewItem = savedInstanceState.getBoolean(KEY_IS_NEW_ITEM, false);
+            mRemindItem = (TodoItem) savedInstanceState.getSerializable(KEY_REMIND_ITEM);
+
+            setViews();
+            if (isEditingMode) {
+                enableEditingMode();
+            } else {
+                enableReviewingMode();
+            }
         }
     }
 
@@ -276,15 +291,7 @@ public class RemindItemFragment extends Fragment {
                 .setMessage(R.string.discard_changes_text)
                 .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if (!isNewItem) {
-                            // go to review if item exists
-                            enableReviewingMode();
-                            //hide keyboard
-                            mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
-                        } else {
-                            // close if item not exists
-                            getActivity().finish();
-                        }
+                        getActivity().finish();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -293,6 +300,16 @@ public class RemindItemFragment extends Fragment {
                     }
                 })
                 .show();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_IS_EDITING_MODE, isEditingMode);
+        outState.putBoolean(KEY_HAS_CHANGED, hasChanged);
+        outState.putBoolean(KEY_IS_NEW_ITEM, isNewItem);
+        mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
+        outState.putSerializable(KEY_REMIND_ITEM, mRemindItem);
     }
 
     @Override

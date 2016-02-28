@@ -1,6 +1,8 @@
 package com.travelersdiary.models;
 
-public class TodoTask {
+import java.io.Serializable;
+
+public class TodoTask implements Serializable {
     private String item;
     private boolean checked;
 

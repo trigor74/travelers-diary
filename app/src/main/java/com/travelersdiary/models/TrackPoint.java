@@ -1,9 +1,8 @@
 package com.travelersdiary.models;
 
-/**
- * Created by itrifonov on 30.12.2015.
- */
-public class TrackPoint {
+import java.io.Serializable;
+
+public class TrackPoint implements Serializable {
     private String travelId;
     private long time;
     private LocationPoint location;

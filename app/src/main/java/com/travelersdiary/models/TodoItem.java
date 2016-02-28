@@ -1,8 +1,9 @@
 package com.travelersdiary.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class TodoItem {
+public class TodoItem implements Serializable {
     private String travelId;
     private String title;
     private ArrayList<TodoTask> task;
