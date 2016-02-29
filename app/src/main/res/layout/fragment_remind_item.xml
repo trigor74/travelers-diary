@@ -100,8 +100,15 @@
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:paddingLeft="16sp"
-                android:text="500"
-                android:visibility="gone" />
+                android:text="100"
+                android:visibility="visible" />
+
+            <android.support.v7.widget.AppCompatSpinner
+                android:id="@+id/remind_item_waypoint_distance_spinner"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:visibility="visible" />
 
         </LinearLayout>
 

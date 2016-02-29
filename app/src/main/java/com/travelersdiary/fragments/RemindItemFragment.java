@@ -14,7 +14,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -72,7 +72,6 @@ public class RemindItemFragment extends Fragment {
 
     private ActionBar mSupportActionBar;
     private Menu mMenu;
-    private Firebase mItemRef = null;
     private TodoItem mRemindItem;
 
     private String mUserUID;
@@ -94,13 +93,14 @@ public class RemindItemFragment extends Fragment {
     TextView waypointTitle;
     @Bind(R.id.remind_item_waypoint_distance_text_view)
     TextView waypointDistance;
+    @Bind(R.id.remind_item_waypoint_distance_spinner)
+    Spinner waypointDistanceSpinner;
     @Bind(R.id.remind_item_task)
     RecyclerView mTodoItemTask;
 
     private Context mContext;
 
     private EditText mRemindItemTitleEditText;
-    private RecyclerView.Adapter mAdapter;
 
     private InputMethodManager mInputMethodManager;
 
@@ -150,6 +150,25 @@ public class RemindItemFragment extends Fragment {
         });
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        ArrayAdapter<?> spinnerAdapter = ArrayAdapter.createFromResource(mContext, R.array.reminder_distance_values,
+                R.layout.spinner_remind_distance_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        waypointDistanceSpinner.setAdapter(spinnerAdapter);
+        waypointDistanceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String distance = (String) parent.getItemAtPosition(position);
+                if (mRemindItem != null)
+                    mRemindItem.setDistance(Integer.parseInt(distance));
+                waypointDistance.setText(distance);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return view;
     }
@@ -319,9 +338,9 @@ public class RemindItemFragment extends Fragment {
     }
 
     private void retrieveData(String key) {
-        mItemRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))
+        Firebase itemRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))
                 .child(key);
-        mItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mRemindItem = dataSnapshot.getValue(TodoItem.class);
@@ -349,12 +368,12 @@ public class RemindItemFragment extends Fragment {
         }
 
         // item type
-        RemindTypesAdapter adapter = new RemindTypesAdapter(mContext);
-        remindTypeSpinner.setAdapter(adapter);
+        RemindTypesAdapter remindTypesAdapter = new RemindTypesAdapter(mContext);
+        remindTypeSpinner.setAdapter(remindTypesAdapter);
 
         // task text
-        mAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
-        ((TodoTaskAdapter) mAdapter).setOnHasChangedListener(new TodoTaskAdapter.OnHasCangedListener() {
+        RecyclerView.Adapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
+        ((TodoTaskAdapter) todoTaskAdapter).setOnHasChangedListener(new TodoTaskAdapter.OnHasCangedListener() {
             @Override
             public void onHasChanged(boolean text) {
                 if (text) {
@@ -368,7 +387,7 @@ public class RemindItemFragment extends Fragment {
         });
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         mTodoItemTask.setLayoutManager(layoutManager);
-        mTodoItemTask.setAdapter(mAdapter);
+        mTodoItemTask.setAdapter(todoTaskAdapter);
 
         // item remind data
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {

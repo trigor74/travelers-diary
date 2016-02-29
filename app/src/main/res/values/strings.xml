@@ -59,5 +59,14 @@
         <item>@drawable/ic_alarm_black_24dp</item>
         <item>@drawable/ic_location_on_black_24dp</item>
     </array>
+    <string-array name="reminder_distance_values">
+        <item>50</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
+        <item>300</item>
+        <item>500</item>
+        <item>1000</item>
+    </string-array>
 
 </resources>
