@@ -38,7 +38,7 @@ android {
     defaultConfig {
         applicationId "com.travelersdiary"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
@@ -126,6 +126,7 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'com.1gravity:android-rteditor:1.4.0'
     compile 'com.commit451:PhotoView:1.2.4'
+    compile 'com.wdullaer:materialdatetimepicker:2.1.1'
 
     /*Firebase*/
     compile 'com.firebase:firebase-client-android:2.5.0+'
@@ -143,6 +144,9 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
+
+    /*Implementation of LinearLayoutManager which wraps its contents*/
+    compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
 }
 
 apply plugin: 'com.google.gms.google-services'

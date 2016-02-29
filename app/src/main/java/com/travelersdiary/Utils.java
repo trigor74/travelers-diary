@@ -3,8 +3,12 @@ package com.travelersdiary;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -58,4 +62,9 @@ public class Utils {
         task.execute();
     }
 
+    public static void tintWidget(Context context, View view, int color) {
+        Drawable wrappedDrawable = DrawableCompat.wrap(view.getBackground());
+        DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(context, color));
+        view.setBackground(wrappedDrawable);
+    }
 }

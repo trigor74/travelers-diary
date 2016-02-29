@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,8 +13,6 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -159,10 +156,10 @@ public class DiaryFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
-                    tintWidget(mEdtDiaryNoteTitle, R.color.colorAccent);
+                    Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.colorAccent);
                 } else {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
-                    tintWidget(mEdtDiaryNoteTitle, R.color.white);
+                    Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
                     if (isEmpty(mEdtDiaryNoteTitle)) {
                         mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                     }
@@ -236,7 +233,7 @@ public class DiaryFragment extends Fragment {
 
         //setup title field
         mEdtDiaryNoteTitle.setFocusable(false);
-        tintWidget(mEdtDiaryNoteTitle, android.R.color.transparent);
+        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, android.R.color.transparent);
 
         //setup rte toolbar
         mToolbarContainer.setVisibility(View.GONE);
@@ -277,7 +274,7 @@ public class DiaryFragment extends Fragment {
         //setup title field
         mEdtDiaryNoteTitle.setFocusable(true);
         mEdtDiaryNoteTitle.setFocusableInTouchMode(true);
-        tintWidget(mEdtDiaryNoteTitle, R.color.white);
+        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
 
         //show travel title drop down arrow
         mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.drop_down_arrow, 0);
@@ -592,12 +589,6 @@ public class DiaryFragment extends Fragment {
 
     private boolean isEmpty(EditText etText) {
         return etText.getText().toString().trim().length() == 0;
-    }
-
-    private void tintWidget(View view, int color) {
-        Drawable wrappedDrawable = DrawableCompat.wrap(view.getBackground());
-        DrawableCompat.setTint(wrappedDrawable, ContextCompat.getColor(getContext(), color));
-        view.setBackground(wrappedDrawable);
     }
 
     @OnClick(R.id.txt_travel)

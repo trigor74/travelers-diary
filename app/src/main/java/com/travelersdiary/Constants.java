@@ -17,6 +17,12 @@ public final class Constants {
     public static final String FIREBASE_REMINDER = "reminder";
     public static final String FIREBASE_REMINDER_TRAVELID = "travelId";
     public static final String FIREBASE_REMINDER_ACTIVE = "active";
+    public static final String FIREBASE_REMINDER_TASK = "task";
+    public static final String FIREBASE_REMINDER_TASK_ITEM = "item";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_CHECKED = "checked";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE = "type";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME = "time";
+    public static final String FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION = "location";
     public static final String FIREBASE_WAYPOINTS = "waypoints";
     public static final String FIREBASE_DIARY_TRAVELID = "travelId";
     public static final String FIREBASE_DIARY_TRAVEL_TITLE = "travelTitle";
@@ -49,11 +55,14 @@ public final class Constants {
 
     // dairy
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";
+
+    // reminder
+    public static final String KEY_REMINDER_ITEM_REF = "REMINDER_ITEM_REF";
+
     public static final int PHOTO_SPAN_COUNT = 3;
 
     // request codes
     public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final int GALLERY_REQUEST_CODE = 21;
     public static final int ENTER_ALBUM_REQUEST_CODE = 22;
-
 }

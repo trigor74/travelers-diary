@@ -139,8 +139,7 @@ public class AlbumImagesActivity extends AppCompatActivity
 
         Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
 
-        Uri uriPath = Uri.parse(mAdapter.getAlbumImagesList().get(position));
-        String path = uriPath.getPath();
+        String path = Uri.parse(mAdapter.getAlbumImagesList().get(position)).toString();
         File imageFile = new File(path);
         String uri = getImageContentUri(imageFile).toString();
 
