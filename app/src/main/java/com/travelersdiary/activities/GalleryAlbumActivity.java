@@ -13,11 +13,13 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.GalleryAlbumAdapter;
+import com.travelersdiary.fragments.NoItemsFragment;
 import com.travelersdiary.models.AlbumsModel;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
 
@@ -36,6 +38,9 @@ public class GalleryAlbumActivity extends AppCompatActivity {
     @Bind(R.id.albums_list)
     RecyclerView mRecyclerView;
 
+    @Bind(R.id.fragment_no_items_container)
+    LinearLayout mNoItemsContainer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +58,23 @@ public class GalleryAlbumActivity extends AppCompatActivity {
             Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
+        ArrayList<AlbumsModel> albumsModels = getGalleryAlbumImages();
+
+        if (albumsModels == null) {
+            mNoItemsContainer.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_no_items_container, new NoItemsFragment())
+                    .commit();
+            return;
+        }
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this));
 
-        GalleryAlbumAdapter adapter = new GalleryAlbumAdapter(GalleryAlbumActivity.this, getGalleryAlbumImages());
+        GalleryAlbumAdapter adapter = new GalleryAlbumAdapter(GalleryAlbumActivity.this, albumsModels);
         mRecyclerView.setAdapter(adapter);
 
         adapter.SetOnItemClickListener(new GalleryAlbumAdapter.OnItemClickListener() {
@@ -71,6 +87,7 @@ public class GalleryAlbumActivity extends AppCompatActivity {
                 startActivityForResult(galleryAlbumsIntent, Constants.ENTER_ALBUM_REQUEST_CODE);
             }
         });
+
     }
 
     private ArrayList<AlbumsModel> getGalleryAlbumImages() {
@@ -89,6 +106,10 @@ public class GalleryAlbumActivity extends AppCompatActivity {
         }
         cursor.moveToFirst();
         int size = cursor.getCount();
+
+        if (size == 0) {
+            return null;
+        }
 
         TreeSet<String> folderPathList = new TreeSet<>();
         ArrayList<AlbumsModel> albumsModels = new ArrayList<>();

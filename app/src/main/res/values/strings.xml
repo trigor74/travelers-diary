@@ -26,6 +26,8 @@
     <string name="select_all">Select all</string>
     <string name="nothing_selected">Nothing selected</string>
     <string name="error">Error</string>
+    <string name="no_images">No images</string>
+
 
     <string name="edit_travel_dialog_title_create">Create new travel</string>
     <string name="edit_travel_dialog_title_edit">Edit travel</string>
