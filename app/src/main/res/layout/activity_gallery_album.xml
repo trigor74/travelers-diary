@@ -14,4 +14,11 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical" />
 
+    <LinearLayout
+        android:id="@+id/fragment_no_items_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:orientation="vertical" />
+
 </LinearLayout>

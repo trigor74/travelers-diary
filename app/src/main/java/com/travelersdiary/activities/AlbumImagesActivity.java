@@ -142,7 +142,14 @@ public class AlbumImagesActivity extends AppCompatActivity
         Uri uriPath = Uri.parse(mAdapter.getAlbumImagesList().get(position));
         String path = uriPath.getPath();
         File imageFile = new File(path);
-        String uri = getImageContentUri(imageFile).toString();
+
+        Uri contentUri = getImageContentUri(imageFile);
+
+        if (contentUri == null) {
+            return;
+        }
+
+        String uri = contentUri.toString();
 
         if (mAdapter.isSelected(position)) {
             mShareImages.add(uri);
