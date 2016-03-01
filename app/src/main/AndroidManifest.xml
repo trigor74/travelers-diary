@@ -27,6 +27,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d8d1756cffd2e4a36efbab0dcae68cdaf8c323d6" />
+
         <activity
             android:name=".activities.LoginActivity"
             android:theme="@style/AppTheme.FullScreen" />
