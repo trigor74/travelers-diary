@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -91,8 +90,6 @@ public class RemindItemFragment extends Fragment {
     TextView timeTextView;
     @Bind(R.id.remind_item_waypoint_title_text_view)
     TextView waypointTitle;
-    @Bind(R.id.remind_item_waypoint_distance_text_view)
-    TextView waypointDistance;
     @Bind(R.id.remind_item_waypoint_distance_spinner)
     Spinner waypointDistanceSpinner;
     @Bind(R.id.remind_item_task)
@@ -151,24 +148,7 @@ public class RemindItemFragment extends Fragment {
 
         mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        ArrayAdapter<?> spinnerAdapter = ArrayAdapter.createFromResource(mContext, R.array.reminder_distance_values,
-                R.layout.spinner_remind_distance_item);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        waypointDistanceSpinner.setAdapter(spinnerAdapter);
-        waypointDistanceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String distance = (String) parent.getItemAtPosition(position);
-                if (mRemindItem != null)
-                    mRemindItem.setDistance(Integer.parseInt(distance));
-                waypointDistance.setText(distance);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        setWaypointDistanceSelections();
 
         return view;
     }
@@ -441,7 +421,7 @@ public class RemindItemFragment extends Fragment {
             // TODO: 27.02.16 set default distance from settings
             mRemindItem.setDistance(100);
         }
-        waypointDistance.setText(Integer.toString(mRemindItem.getDistance()));
+        setWaypointDistanceSelections();
     }
 
     @Override
@@ -594,11 +574,18 @@ public class RemindItemFragment extends Fragment {
             }
         });
 
-        waypointDistance.setOnClickListener(new View.OnClickListener() {
+        waypointDistanceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
-                // TODO: 27.02.16 add logic for choose remind distance for location
-                Toast.makeText(getContext(), "TEST DISTANCE", Toast.LENGTH_SHORT).show();
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String distance = (String) parent.getItemAtPosition(position);
+                if (mRemindItem != null) {
+                    mRemindItem.setDistance(Integer.parseInt(distance));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
     }
@@ -619,7 +606,7 @@ public class RemindItemFragment extends Fragment {
             dateTextView.setVisibility(View.VISIBLE);
             timeTextView.setVisibility(View.VISIBLE);
             waypointTitle.setVisibility(View.GONE);
-            waypointDistance.setVisibility(View.GONE);
+            waypointDistanceSpinner.setVisibility(View.GONE);
         } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
             // remind at location
             remindTypeSpinner.setSelection(2);
@@ -627,7 +614,7 @@ public class RemindItemFragment extends Fragment {
             dateTextView.setVisibility(View.GONE);
             timeTextView.setVisibility(View.GONE);
             waypointTitle.setVisibility(View.VISIBLE);
-            waypointDistance.setVisibility(View.VISIBLE);
+            waypointDistanceSpinner.setVisibility(View.VISIBLE);
         } else {
             // don't remind
             remindTypeSpinner.setSelection(0);
@@ -635,7 +622,7 @@ public class RemindItemFragment extends Fragment {
             dateTextView.setVisibility(View.GONE);
             timeTextView.setVisibility(View.GONE);
             waypointTitle.setVisibility(View.GONE);
-            waypointDistance.setVisibility(View.GONE);
+            waypointDistanceSpinner.setVisibility(View.GONE);
         }
     }
 
@@ -672,7 +659,7 @@ public class RemindItemFragment extends Fragment {
         setViewEditMode(dateTextView, false);
         setViewEditMode(timeTextView, false);
         setViewEditMode(waypointTitle, false);
-        setViewEditMode(waypointDistance, false);
+        setSpinnerEditMode(waypointDistanceSpinner, false);
         setSpinnerEditMode(remindTypeSpinner, false);
         ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
     }
@@ -689,7 +676,7 @@ public class RemindItemFragment extends Fragment {
         setViewEditMode(dateTextView, true);
         setViewEditMode(timeTextView, true);
         setViewEditMode(waypointTitle, true);
-        setViewEditMode(waypointDistance, true);
+        setSpinnerEditMode(waypointDistanceSpinner, true);
         setSpinnerEditMode(remindTypeSpinner, true);
         ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
 
@@ -749,6 +736,11 @@ public class RemindItemFragment extends Fragment {
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType())) {
             // validate waypoint
 
+            if (mRemindItem.getDistance() <= 0) {
+                showErrorDialog("Invalid distance");
+                return false;
+            }
+
             Waypoint waypoint = mRemindItem.getWaypoint();
             if (waypoint == null) {
                 showErrorDialog("Invalid location");
@@ -783,5 +775,19 @@ public class RemindItemFragment extends Fragment {
                         })
                 .create()
                 .show();
+    }
+
+    private void setWaypointDistanceSelections(){
+        int position = 1;
+        String[] distances = getResources().getStringArray(R.array.reminder_distance_values);
+        if (mRemindItem != null) {
+            int currentDistance = mRemindItem.getDistance();
+            for (int i = 0; i < distances.length; i++) {
+                if (currentDistance == Integer.parseInt(distances[i])){
+                    position = i;
+                }
+            }
+            waypointDistanceSpinner.setSelection(position);
+        }
     }
 }

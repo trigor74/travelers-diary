@@ -59,6 +59,7 @@
         <item>@drawable/ic_alarm_black_24dp</item>
         <item>@drawable/ic_location_on_black_24dp</item>
     </array>
+    <string name="reminder_choose_distance_text">Enter a distance, or select from the list</string>
     <string-array name="reminder_distance_values">
         <item>50</item>
         <item>100</item>
