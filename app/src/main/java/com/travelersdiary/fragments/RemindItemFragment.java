@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -64,7 +62,6 @@ public class RemindItemFragment extends Fragment {
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
 
-    private static String KEY_HAS_CHANGED = "KEY_HAS_CHANGED";
     private static String KEY_IS_NEW_ITEM = "KEY_IS_NEW_ITEM";
     private static String KEY_REMIND_ITEM = "KEY_REMIND_ITEM";
 
@@ -75,7 +72,6 @@ public class RemindItemFragment extends Fragment {
     private String mUserUID;
     private String mItemKey = null;
 
-    private boolean hasChanged = false;
     private boolean isNewItem = false;
 
     @Bind(R.id.remind_item_dont_remind_text_view)
@@ -96,8 +92,6 @@ public class RemindItemFragment extends Fragment {
     private Context mContext;
 
     private EditText mRemindItemTitleEditText;
-
-    private InputMethodManager mInputMethodManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -128,8 +122,7 @@ public class RemindItemFragment extends Fragment {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setDisplayShowTitleEnabled(false);
         }
-//        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
-        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
+        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
 
         mRemindItemTitleEditText = (EditText) (getActivity()).findViewById(R.id.remind_item_title_edit_text);
         mRemindItemTitleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -157,7 +150,6 @@ public class RemindItemFragment extends Fragment {
 
         if (savedInstanceState == null) {
             if (!isNewItem) {
-                hasChanged = false;
                 retrieveData(mItemKey);
             } else {
                 // create new empty item
@@ -173,11 +165,9 @@ public class RemindItemFragment extends Fragment {
                 mRemindItem.setActive(true);
                 mRemindItem.setCompleted(false);
 
-                hasChanged = true;
                 setViews();
             }
         } else {
-            hasChanged = savedInstanceState.getBoolean(KEY_HAS_CHANGED, false);
             isNewItem = savedInstanceState.getBoolean(KEY_IS_NEW_ITEM, false);
             mRemindItem = (TodoItem) savedInstanceState.getSerializable(KEY_REMIND_ITEM);
 
@@ -210,33 +200,26 @@ public class RemindItemFragment extends Fragment {
 
         if (mRemindItem != null && mRemindItem.isViewAsCheckboxes()) {
             menu.findItem(R.id.action_switch_checkboxes_remind_item)
-                    .setTitle(R.string.remind_item_hide_checkboxes);
+                    .setTitle(R.string.reminder_hide_checkboxes);
         } else {
             menu.findItem(R.id.action_switch_checkboxes_remind_item)
-                    .setTitle(R.string.remind_item_show_checkboxes);
+                    .setTitle(R.string.reminder_show_checkboxes);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_save_remind_item:
-                hasChanged = !saveItem();
-                if (hasChanged) {
-                    // error save data - do nothing
-                    return true;
-                }
-                // no return or break - simulate home button click
             case android.R.id.home:
                 onBackPressed();
                 return true;
             case R.id.action_switch_checkboxes_remind_item:
                 if (mRemindItem.isViewAsCheckboxes()) {
                     mRemindItem.setViewAsCheckboxes(false);
-                    item.setTitle(R.string.remind_item_show_checkboxes);
+                    item.setTitle(R.string.reminder_show_checkboxes);
                 } else {
                     mRemindItem.setViewAsCheckboxes(true);
-                    item.setTitle(R.string.remind_item_hide_checkboxes);
+                    item.setTitle(R.string.reminder_hide_checkboxes);
                 }
                 ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mRemindItem.isViewAsCheckboxes());
                 // TODO: 26.02.2016 add save logic for view as checkboxes state in review mode
@@ -247,33 +230,16 @@ public class RemindItemFragment extends Fragment {
     }
 
     public void onBackPressed() {
-        if (hasChanged) {
-            showDiscardDialog();
+        if (!saveItem()) {
+            showErrorDialog(mContext.getString(R.string.reminder_error_save_text));
         } else {
             getActivity().finish();
         }
     }
 
-    private void showDiscardDialog() {
-        new AlertDialog.Builder(getContext())
-                .setMessage(R.string.discard_changes_text)
-                .setPositiveButton(R.string.discard, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().finish();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        //do nothing
-                    }
-                })
-                .show();
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_HAS_CHANGED, hasChanged);
         outState.putBoolean(KEY_IS_NEW_ITEM, isNewItem);
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
         outState.putSerializable(KEY_REMIND_ITEM, mRemindItem);
@@ -306,7 +272,7 @@ public class RemindItemFragment extends Fragment {
         mRemindItemTitleEditText.setText(mRemindItem.getTitle());
         if (mMenu != null && mRemindItem.isViewAsCheckboxes()) {
             mMenu.findItem(R.id.action_switch_checkboxes_remind_item)
-                    .setTitle(R.string.remind_item_hide_checkboxes);
+                    .setTitle(R.string.reminder_hide_checkboxes);
             mSupportActionBar.invalidateOptionsMenu();
         }
 
@@ -316,18 +282,6 @@ public class RemindItemFragment extends Fragment {
 
         // task text
         RecyclerView.Adapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
-        ((TodoTaskAdapter) todoTaskAdapter).setOnHasChangedListener(new TodoTaskAdapter.OnHasCangedListener() {
-            @Override
-            public void onHasChanged(boolean text) {
-                if (text) {
-                    // text changed
-                    hasChanged = true;
-                } else {
-                    // checkbox state changed
-                    // TODO: 26.02.2016 add save logic if check changed in review mode
-                }
-            }
-        });
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         mTodoItemTask.setLayoutManager(layoutManager);
         mTodoItemTask.setAdapter(todoTaskAdapter);
@@ -589,18 +543,6 @@ public class RemindItemFragment extends Fragment {
         }
     }
 
-    private void setViewEditMode(View v, boolean editable) {
-        if (editable) {
-            v.setClickable(true);
-            v.setLongClickable(true);
-            v.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
-        } else {
-            v.setClickable(false);
-            v.setLongClickable(false);
-            v.setBackground(null);
-        }
-    }
-
     public boolean saveItem() {
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
         if (!validateData()) {
@@ -622,14 +564,14 @@ public class RemindItemFragment extends Fragment {
 
     private boolean validateData() {
         if (mRemindItem == null) {
-            showErrorDialog("Invalid data");
+            showErrorDialog(mContext.getString(R.string.reminder_error_data_text));
             return false;
         }
 
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {
             // validate time
             if (mRemindItem.getTime() <= 0) {
-                showErrorDialog("Invalid time");
+                showErrorDialog(mContext.getString(R.string.reminder_error_time_text));
                 return false;
             }
         }
@@ -638,25 +580,25 @@ public class RemindItemFragment extends Fragment {
             // validate waypoint
 
             if (mRemindItem.getDistance() <= 0) {
-                showErrorDialog("Invalid distance");
+                showErrorDialog(mContext.getString(R.string.reminder_error_distance_text));
                 return false;
             }
 
             Waypoint waypoint = mRemindItem.getWaypoint();
             if (waypoint == null) {
-                showErrorDialog("Invalid location");
+                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
                 return false;
             }
 
             String waypointTitle = waypoint.getTitle();
             if (waypointTitle == null || waypointTitle.isEmpty()) {
-                showErrorDialog("Invalid location");
+                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
                 return false;
             }
 
             LocationPoint locationPoint = waypoint.getLocation();
             if (locationPoint == null) {
-                showErrorDialog("Invalid location");
+                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
                 return false;
             }
         }

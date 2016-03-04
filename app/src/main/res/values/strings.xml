@@ -49,8 +49,13 @@
     <string name="reminder_choose_location_text">Choose location</string>
     <string name="reminder_new_remind_item_default_title">New remind item</string>
     <string name="reminder_new_remind_item_default_text">Write text here to remind</string>
-    <string name="remind_item_show_checkboxes">Show Checkboxes</string>
-    <string name="remind_item_hide_checkboxes">Hide Checkboxes</string>
+    <string name="reminder_show_checkboxes">Show Checkboxes</string>
+    <string name="reminder_hide_checkboxes">Hide Checkboxes</string>
+    <string name="reminder_error_save_text">Cannot save changes</string>
+    <string name="reminder_error_data_text">Invalid data</string>
+    <string name="reminder_error_time_text">Invalid time</string>
+    <string name="reminder_error_distance_text">Invalid distance</string>
+    <string name="reminder_error_location_text">Invalid location</string>
     <string-array name="reminder_type_names">
         <item>Don\'t remind</item>
         <item>Remind at time</item>
