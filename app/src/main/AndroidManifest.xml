@@ -65,7 +65,7 @@
 
         <activity
             android:name=".activities.RemindItemActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="stateHidden" />
 
     </application>
 

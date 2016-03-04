@@ -64,7 +64,6 @@ public class RemindItemFragment extends Fragment {
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
 
-    private static String KEY_IS_EDITING_MODE = "KEY_IS_EDITING_MODE";
     private static String KEY_HAS_CHANGED = "KEY_HAS_CHANGED";
     private static String KEY_IS_NEW_ITEM = "KEY_IS_NEW_ITEM";
     private static String KEY_REMIND_ITEM = "KEY_REMIND_ITEM";
@@ -76,7 +75,6 @@ public class RemindItemFragment extends Fragment {
     private String mUserUID;
     private String mItemKey = null;
 
-    private boolean isEditingMode = false;
     private boolean hasChanged = false;
     private boolean isNewItem = false;
 
@@ -130,6 +128,8 @@ public class RemindItemFragment extends Fragment {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setDisplayShowTitleEnabled(false);
         }
+//        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
 
         mRemindItemTitleEditText = (EditText) (getActivity()).findViewById(R.id.remind_item_title_edit_text);
         mRemindItemTitleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -145,8 +145,6 @@ public class RemindItemFragment extends Fragment {
                 }
             }
         });
-
-        mInputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         setWaypointDistanceSelections();
 
@@ -177,20 +175,13 @@ public class RemindItemFragment extends Fragment {
 
                 hasChanged = true;
                 setViews();
-                enableEditingMode();
             }
         } else {
-            isEditingMode = savedInstanceState.getBoolean(KEY_IS_EDITING_MODE, false);
             hasChanged = savedInstanceState.getBoolean(KEY_HAS_CHANGED, false);
             isNewItem = savedInstanceState.getBoolean(KEY_IS_NEW_ITEM, false);
             mRemindItem = (TodoItem) savedInstanceState.getSerializable(KEY_REMIND_ITEM);
 
             setViews();
-            if (isEditingMode) {
-                enableEditingMode();
-            } else {
-                enableReviewingMode();
-            }
         }
     }
 
@@ -216,15 +207,6 @@ public class RemindItemFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        if (isEditingMode) {
-            mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
-            menu.setGroupVisible(R.id.remind_item_menu_edit_mode, true);
-            menu.setGroupVisible(R.id.remind_item_menu_view_mode, false);
-        } else {
-            mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
-            menu.setGroupVisible(R.id.remind_item_menu_edit_mode, false);
-            menu.setGroupVisible(R.id.remind_item_menu_view_mode, true);
-        }
 
         if (mRemindItem != null && mRemindItem.isViewAsCheckboxes()) {
             menu.findItem(R.id.action_switch_checkboxes_remind_item)
@@ -248,9 +230,6 @@ public class RemindItemFragment extends Fragment {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.action_edit_remind_item:
-                enableEditingMode();
-                return true;
             case R.id.action_switch_checkboxes_remind_item:
                 if (mRemindItem.isViewAsCheckboxes()) {
                     mRemindItem.setViewAsCheckboxes(false);
@@ -268,18 +247,8 @@ public class RemindItemFragment extends Fragment {
     }
 
     public void onBackPressed() {
-        if (isEditingMode) {
-            if (hasChanged) {
-                showDiscardDialog();
-            } else {
-                if (isNewItem) {
-                    getActivity().finish();
-                } else {
-                    enableReviewingMode();
-                    //hide keyboard
-                    mInputMethodManager.hideSoftInputFromWindow(mTodoItemTask.findFocus().findViewById(R.id.task_item_edit_text).getWindowToken(), 0);
-                }
-            }
+        if (hasChanged) {
+            showDiscardDialog();
         } else {
             getActivity().finish();
         }
@@ -304,7 +273,6 @@ public class RemindItemFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_IS_EDITING_MODE, isEditingMode);
         outState.putBoolean(KEY_HAS_CHANGED, hasChanged);
         outState.putBoolean(KEY_IS_NEW_ITEM, isNewItem);
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
@@ -325,11 +293,6 @@ public class RemindItemFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mRemindItem = dataSnapshot.getValue(TodoItem.class);
                 setViews();
-                if (isEditingMode) {
-                    enableEditingMode();
-                } else {
-                    enableReviewingMode();
-                }
             }
 
             @Override
@@ -638,68 +601,6 @@ public class RemindItemFragment extends Fragment {
         }
     }
 
-    private void setSpinnerEditMode(Spinner spinner, boolean editMode) {
-        if (editMode) {
-            spinner.setEnabled(true);
-            spinner.setBackground(ContextCompat.getDrawable(mContext, R.drawable.abc_edit_text_material));
-        } else {
-            spinner.setEnabled(false);
-            spinner.setBackground(null);
-        }
-    }
-
-    private void enableReviewingMode() {
-        isEditingMode = false;
-
-        mRemindItemTitleEditText.setFocusable(false);
-        Utils.tintWidget(getContext(), mRemindItemTitleEditText, android.R.color.transparent);
-        mSupportActionBar.invalidateOptionsMenu();
-
-        setViewEditMode(dontRemindTextView, false);
-        setViewEditMode(dateTextView, false);
-        setViewEditMode(timeTextView, false);
-        setViewEditMode(waypointTitle, false);
-        setSpinnerEditMode(waypointDistanceSpinner, false);
-        setSpinnerEditMode(remindTypeSpinner, false);
-        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(false);
-    }
-
-    private void enableEditingMode() {
-        isEditingMode = true;
-
-        mRemindItemTitleEditText.setFocusable(true);
-        mRemindItemTitleEditText.setFocusableInTouchMode(true);
-        Utils.tintWidget(getContext(), mRemindItemTitleEditText, R.color.white);
-        mSupportActionBar.invalidateOptionsMenu();
-
-        setViewEditMode(dontRemindTextView, true);
-        setViewEditMode(dateTextView, true);
-        setViewEditMode(timeTextView, true);
-        setViewEditMode(waypointTitle, true);
-        setSpinnerEditMode(waypointDistanceSpinner, true);
-        setSpinnerEditMode(remindTypeSpinner, true);
-        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setEditable(true);
-
-        mTodoItemTask.scrollToPosition(0);
-        ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setSelectedItem(0);
-
-        TodoTaskAdapter.ViewHolder viewHolder = (TodoTaskAdapter.ViewHolder) mTodoItemTask
-                .findViewHolderForLayoutPosition(0);
-        if (viewHolder != null) {
-            EditText et = (EditText) viewHolder
-                    .itemView
-                    .findViewById(R.id.task_item_edit_text);
-            et.setFocusable(true);
-            et.setFocusableInTouchMode(true);
-            et.setSelection(1);
-            et.setCursorVisible(true);
-            et.setSelected(true);
-            et.requestFocus();
-            //show keyboard
-            mInputMethodManager.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
-        }
-    }
-
     public boolean saveItem() {
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
         if (!validateData()) {
@@ -777,13 +678,13 @@ public class RemindItemFragment extends Fragment {
                 .show();
     }
 
-    private void setWaypointDistanceSelections(){
+    private void setWaypointDistanceSelections() {
         int position = 1;
         String[] distances = getResources().getStringArray(R.array.reminder_distance_values);
         if (mRemindItem != null) {
             int currentDistance = mRemindItem.getDistance();
             for (int i = 0; i < distances.length; i++) {
-                if (currentDistance == Integer.parseInt(distances[i])){
+                if (currentDistance == Integer.parseInt(distances[i])) {
                     position = i;
                 }
             }
