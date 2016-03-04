@@ -6,14 +6,24 @@ public class BaseNetworkEvent {
     public static final int UNHANDLED_CODE = -1;
 
     protected static class OnStart<Rq> {
-        private Rq mRequest;
+        private Rq mUsername;
+        private Rq mAlbumId;
 
-        public OnStart(Rq request) {
-            mRequest = request;
+        public OnStart(Rq username) {
+            mUsername = username;
         }
 
-        public Rq getRequest() {
-            return mRequest;
+        public OnStart(Rq username, Rq albumId) {
+            mUsername = username;
+            mAlbumId = albumId;
+        }
+
+        public Rq getUsername() {
+            return mUsername;
+        }
+
+        public Rq getAlbumId() {
+            return mAlbumId;
         }
     }
 

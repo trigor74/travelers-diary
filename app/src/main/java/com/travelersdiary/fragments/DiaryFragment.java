@@ -58,8 +58,9 @@ import com.travelersdiary.activities.AlbumImagesActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
-import com.travelersdiary.events.LoadPicasaAlbumsEvent;
+import com.travelersdiary.events.PicasaEvent;
 import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.picasa_model.PicasaAlbum;
 
@@ -119,7 +120,7 @@ public class DiaryFragment extends Fragment {
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
 
-    private ArrayList<String> mImages = new ArrayList<>();
+    private ArrayList<Photo> mImages = new ArrayList<>();
     private String mImagePath;
 
     private Firebase mItemRef;
@@ -345,6 +346,7 @@ public class DiaryFragment extends Fragment {
 
                 if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                     mImages = mDiaryNote.getPhotos();
+
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                     mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
                 }
@@ -384,6 +386,7 @@ public class DiaryFragment extends Fragment {
 
                         if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                             mImages = mDiaryNote.getPhotos();
+
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
                         }
@@ -493,9 +496,12 @@ public class DiaryFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
-                mImages.add("file:" + mImagePath);
+                Photo photo = new Photo("file:" + mImagePath);
+
+                mImages.add(photo);
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
                 mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
             } else {
@@ -505,7 +511,10 @@ public class DiaryFragment extends Fragment {
 
         if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
-            mImages.addAll(path);
+
+            for (int i = 0; i < path.size(); i++) {
+                mImages.add(new Photo(path.get(i)));
+            }
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
@@ -641,7 +650,7 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.btn_view_all_images)
     public void viewAllImages() {
         Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
-        intent.putStringArrayListExtra("images", mImages);
+        intent.putExtra("images", mImages);
         intent.putExtra("title", mDiaryNote.getTitle());
         startActivity(intent);
     }
@@ -649,11 +658,23 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.btn_picasa_test)
     public void onPicasaButtonClicked() {
         Toast.makeText(getContext(), "Let's start!", Toast.LENGTH_LONG).show();
-        BusProvider.bus().post(new LoadPicasaAlbumsEvent.OnLoadingStart(mGoogleID));
+        BusProvider.bus().post(new PicasaEvent.OnLoadingStart(mGoogleID));
+    }
+
+    @OnClick(R.id.btn_picasa_create_album)
+    public void onPicasaCreateButtonClicked() {
+        Toast.makeText(getContext(), "Creating album...", Toast.LENGTH_LONG).show();
+        BusProvider.bus().post(new PicasaEvent.OnUploadingStart(mGoogleID));
+    }
+
+    @OnClick(R.id.btn_picasa_upload_photo)
+    public void onPicasaUploadPhotoButtonClicked() {
+        Toast.makeText(getContext(), "Uploading photo...", Toast.LENGTH_LONG).show();
+        BusProvider.bus().post(new PicasaEvent.OnUploadingPhotoStart(mGoogleID, "6257415133015328049"));
     }
 
     @Subscribe
-    public void onPicasaFeedLoaded(LoadPicasaAlbumsEvent.OnLoaded onLoaded) {
+    public void onPicasaFeedLoaded(PicasaEvent.OnLoaded onLoaded) {
         List<PicasaAlbum> test = new ArrayList();
 
         test = onLoaded.getResponse().getPicasaAlbumList();
@@ -668,7 +689,7 @@ public class DiaryFragment extends Fragment {
     }
 
     @Subscribe
-    public void onPicasaFeedLoadingFailed(LoadPicasaAlbumsEvent.OnLoadingError onLoadingError) {
+    public void onPicasaFeedLoadingFailed(PicasaEvent.OnLoadingError onLoadingError) {
         Toast.makeText(getContext(), onLoadingError.getErrorMessage(), Toast.LENGTH_LONG).show();
         picasaTest.setText(onLoadingError.getErrorMessage());
     }
