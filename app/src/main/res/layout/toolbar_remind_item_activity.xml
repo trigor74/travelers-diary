@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/white"
-        android:hint=""
+        android:hint="No Title"
         android:imeOptions="actionDone|flagNoEnterAction"
         android:inputType="textAutoCorrect|textCapSentences"
         android:maxLines="1"

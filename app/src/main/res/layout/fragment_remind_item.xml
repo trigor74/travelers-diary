@@ -37,16 +37,13 @@
                 android:background="?attr/editTextBackground"
                 android:visibility="visible" />
 
-            <View
-                android:layout_width="16dp"
-                android:layout_height="wrap_content"/>
-
             <TextView
                 android:id="@+id/remind_item_dont_remind_text_view"
                 style="@style/ListItemPrimaryText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
                 android:background="?attr/editTextBackground"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -59,10 +56,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
                 android:background="?attr/editTextBackground"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:paddingLeft="16sp"
                 android:text="01 JAN 2016"
                 android:visibility="gone" />
 
@@ -72,15 +69,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
                 android:background="?attr/editTextBackground"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:text="Location title"
                 android:visibility="gone" />
-
-            <View
-                android:layout_width="16dp"
-                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/remind_item_time_text_view"
@@ -88,6 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
                 android:background="?attr/editTextBackground"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
@@ -99,11 +94,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginLeft="16dp"
                 android:background="?attr/editTextBackground"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:entries="@array/reminder_distance_values"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
         </LinearLayout>
 

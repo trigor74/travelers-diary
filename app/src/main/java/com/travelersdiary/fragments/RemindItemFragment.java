@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -139,8 +140,6 @@ public class RemindItemFragment extends Fragment {
             }
         });
 
-        setWaypointDistanceSelections();
-
         return view;
     }
 
@@ -230,9 +229,7 @@ public class RemindItemFragment extends Fragment {
     }
 
     public void onBackPressed() {
-        if (!saveItem()) {
-            showErrorDialog(mContext.getString(R.string.reminder_error_save_text));
-        } else {
+        if (saveItem()) {
             getActivity().finish();
         }
     }
@@ -275,6 +272,12 @@ public class RemindItemFragment extends Fragment {
                     .setTitle(R.string.reminder_hide_checkboxes);
             mSupportActionBar.invalidateOptionsMenu();
         }
+
+        ArrayAdapter<CharSequence> distanceAdapter = ArrayAdapter.createFromResource(mContext,
+                R.array.reminder_distance_values, R.layout.spinner_remind_distance_item);
+        distanceAdapter.setDropDownViewResource(R.layout.spinner_remind_distance_dropdown_item);
+        waypointDistanceSpinner.setAdapter(distanceAdapter);
+        setWaypointDistanceSelections();
 
         // item type
         RemindTypesAdapter remindTypesAdapter = new RemindTypesAdapter(mContext);
@@ -432,7 +435,9 @@ public class RemindItemFragment extends Fragment {
                         break;
                     case 2: // remind at location
                         mRemindItem.setType(Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
-                        // TODO: 26.02.2016 add logic for default values if not exists
+                        if (mRemindItem.getWaypoint() == null) {
+                            waypointTitle.callOnClick();
+                        }
                         setLocationAndDistanceText();
                         break;
                 }
@@ -545,7 +550,9 @@ public class RemindItemFragment extends Fragment {
 
     public boolean saveItem() {
         mRemindItem.setTitle(mRemindItemTitleEditText.getText().toString());
-        if (!validateData()) {
+        String error = validateData();
+        if (error != null && !error.isEmpty()) {
+            showErrorDialog(error);
             return false;
         }
         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
@@ -562,17 +569,15 @@ public class RemindItemFragment extends Fragment {
         return true;
     }
 
-    private boolean validateData() {
+    private String validateData() {
         if (mRemindItem == null) {
-            showErrorDialog(mContext.getString(R.string.reminder_error_data_text));
-            return false;
+            return mContext.getString(R.string.reminder_error_data_text);
         }
 
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType())) {
             // validate time
             if (mRemindItem.getTime() <= 0) {
-                showErrorDialog(mContext.getString(R.string.reminder_error_time_text));
-                return false;
+                return mContext.getString(R.string.reminder_error_time_text);
             }
         }
 
@@ -580,29 +585,25 @@ public class RemindItemFragment extends Fragment {
             // validate waypoint
 
             if (mRemindItem.getDistance() <= 0) {
-                showErrorDialog(mContext.getString(R.string.reminder_error_distance_text));
-                return false;
+                return mContext.getString(R.string.reminder_error_distance_text);
             }
 
             Waypoint waypoint = mRemindItem.getWaypoint();
             if (waypoint == null) {
-                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
-                return false;
+                return mContext.getString(R.string.reminder_error_location_text);
             }
 
             String waypointTitle = waypoint.getTitle();
             if (waypointTitle == null || waypointTitle.isEmpty()) {
-                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
-                return false;
+                return mContext.getString(R.string.reminder_error_location_text);
             }
 
             LocationPoint locationPoint = waypoint.getLocation();
             if (locationPoint == null) {
-                showErrorDialog(mContext.getString(R.string.reminder_error_location_text));
-                return false;
+                return mContext.getString(R.string.reminder_error_location_text);
             }
         }
-        return true;
+        return null;
     }
 
     private void showErrorDialog(String errorMessage) {
