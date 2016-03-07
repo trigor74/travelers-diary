@@ -4,8 +4,12 @@
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -23,15 +27,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d8d1756cffd2e4a36efbab0dcae68cdaf8c323d6" />
+
         <activity
             android:name=".activities.LoginActivity"
-            android:theme="@style/AppTheme.FullScreen">
-            <!--<intent-filter>-->
-            <!--<action android:name="android.intent.action.MAIN" />-->
-
-            <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
+            android:theme="@style/AppTheme.FullScreen" />
 
         <activity android:name=".activities.MainActivity">
             <intent-filter>
@@ -60,6 +62,10 @@
             android:label="@string/images" />
 
         <activity android:name=".activities.FullScreenImageActivity" />
+
+        <activity
+            android:name=".activities.RemindItemActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <service android:name=".services.SyncService"
             android:exported="false"/>

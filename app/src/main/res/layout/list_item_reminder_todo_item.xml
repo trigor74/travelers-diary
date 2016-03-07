@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="20dp"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:paddingBottom="20dp"
     android:paddingTop="20dp">
 
     <TextView
@@ -26,15 +26,15 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:alpha=".5"
-            android:src="@drawable/ic_alarm_black_24dp"
-            android:paddingRight="8sp"
-             />
+            android:src="@drawable/ic_alarm_black_24dp" />
+
         <TextView
-            android:id="@+id/item_reminder_todo_item_info_text_view"
+            android:id="@+id/item_reminder_todo_item_remind_info_text_view"
             style="@style/ListItemSecondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:paddingLeft="16sp"
             android:text="A todo item place or time info" />
 
     </LinearLayout>

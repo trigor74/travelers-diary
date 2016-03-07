@@ -9,6 +9,7 @@ public class TodoItem {
     private boolean viewAsCheckboxes;
     private boolean completed;
     private boolean active;
+    private String type; // "time" - remind at time, "locatiton" - remind at location, null or empty - don't remind
     //Remind at time
     private long time;
     private long interval;
@@ -21,7 +22,8 @@ public class TodoItem {
     }
 
     public TodoItem(String travelId, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
-                    boolean completed, boolean active, long time, long interval,
+                    boolean completed, boolean active,
+                    String type, long time, long interval,
                     Waypoint waypoint, int distance, boolean repeat) {
         this.travelId = travelId;
         this.title = title;
@@ -29,6 +31,7 @@ public class TodoItem {
         this.viewAsCheckboxes = viewAsCheckboxes;
         this.completed = completed;
         this.active = active;
+        this.type = type;
         this.time = time;
         this.interval = interval;
         this.waypoint = waypoint;
@@ -82,6 +85,14 @@ public class TodoItem {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public long getTime() {

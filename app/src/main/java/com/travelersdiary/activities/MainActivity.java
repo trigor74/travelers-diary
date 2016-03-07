@@ -34,7 +34,7 @@ public class MainActivity extends BaseActivity {
     ViewPager mViewPager;
 
     @OnClick(R.id.main_activity_fab)
-    public void onClick(View v) {
+    public void onClickFAB(View v) {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();
@@ -42,11 +42,13 @@ public class MainActivity extends BaseActivity {
                 addTravelDialog.show(fragmentManager, "dialog");
                 break;
             case 1: // Diary Tab
-                Intent intent = new Intent(this, AddDiaryNoteActivity.class);
-                //intent.putExtra(key, value);
-                startActivity(intent);
+                Intent diaryIntent = new Intent(this, AddDiaryNoteActivity.class);
+                //diaryIntent.putExtra(key, value);
+                startActivity(diaryIntent);
                 break;
             case 2: // Reminder Tab
+                Intent remindItemIntent = new Intent(this, RemindItemActivity.class);
+                startActivity(remindItemIntent);
                 break;
             default:
         }

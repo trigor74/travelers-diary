@@ -7,10 +7,12 @@
     <string name="reminder_text">Reminder</string>
     <string name="map_text">Map</string>
     <string name="settings">Settings</string>
+    <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="create">Create</string>
     <string name="discard">Discard</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
     <string name="add_photo">Add photo</string>
     <string name="add_image">Add image</string>
     <string name="title">Title</string>
@@ -23,6 +25,8 @@
     <string name="share">Share</string>
     <string name="select_all">Select all</string>
     <string name="nothing_selected">Nothing selected</string>
+    <string name="error">Error</string>
+    <string name="no_images">No images</string>
 
 
     <string name="edit_travel_dialog_title_create">Create new travel</string>
@@ -40,4 +44,22 @@
     <string name="login_activity_error_message_invalid_provider">Invalid login provider: %s</string>
 
     <string name="travel_activity_title">A Travel</string>
+
+    <string name="reminder_dont_remind_text">Don\'t remind</string>
+    <string name="reminder_choose_location_text">Choose location</string>
+    <string name="reminder_new_remind_item_default_title">New remind item</string>
+    <string name="reminder_new_remind_item_default_text">Write text here to remind</string>
+    <string name="remind_item_show_checkboxes">Show Checkboxes</string>
+    <string name="remind_item_hide_checkboxes">Hide Checkboxes</string>
+    <string-array name="reminder_type_names">
+        <item>Don\'t remind</item>
+        <item>Remind at time</item>
+        <item>Remind at location</item>
+    </string-array>
+    <array name="reminder_type_icons">
+        <item>@drawable/ic_alarm_off_black_24dp</item>
+        <item>@drawable/ic_alarm_black_24dp</item>
+        <item>@drawable/ic_location_on_black_24dp</item>
+    </array>
+
 </resources>
