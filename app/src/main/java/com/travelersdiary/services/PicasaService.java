@@ -2,6 +2,7 @@ package com.travelersdiary.services;
 
 import com.travelersdiary.picasa_model.PicasaAlbum;
 import com.travelersdiary.picasa_model.PicasaFeed;
+import com.travelersdiary.picasa_model.PicasaPhoto;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -31,7 +32,7 @@ public interface PicasaService {
 
 
     @POST("feed/api/user/{username}/albumid/{albumId}")
-    Call<PicasaAlbum> uploadPhoto(@Path("username") String username,
+    Call<PicasaPhoto> uploadPhoto(@Path("username") String username,
                                   @Path("albumId") String albumId,
                                   @Body RequestBody file);
 

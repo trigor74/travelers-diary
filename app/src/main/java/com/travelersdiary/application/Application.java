@@ -20,8 +20,8 @@ public class Application extends android.app.Application {
         //pre-load fonts for rtEditor
         FontManager.preLoadFonts(this);
 
-        mApiRequestHandler = new ApiRequestHandler(mBus);
-        mBus.register(mApiRequestHandler);
+//        mApiRequestHandler = new ApiRequestHandler(mBus);
+//        mBus.register(mApiRequestHandler);
     }
 
 }

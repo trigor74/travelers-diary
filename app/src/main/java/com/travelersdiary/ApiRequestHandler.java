@@ -8,6 +8,7 @@ import com.squareup.otto.Subscribe;
 import com.travelersdiary.events.PicasaEvent;
 import com.travelersdiary.picasa_model.PicasaAlbum;
 import com.travelersdiary.picasa_model.PicasaFeed;
+import com.travelersdiary.picasa_model.PicasaPhoto;
 
 import java.io.File;
 import java.io.IOException;
@@ -107,9 +108,9 @@ public class ApiRequestHandler {
         RequestBody requestBody = RequestBody.create(IMAGE, file);
 
         mPicasaClient.getPicasaService().uploadPhoto(onLoadingStart.getUsername(),
-                onLoadingStart.getAlbumId(), requestBody).enqueue(new Callback<PicasaAlbum>() {
+                onLoadingStart.getAlbumId(), requestBody).enqueue(new Callback<PicasaPhoto>() {
             @Override
-            public void onResponse(Call<PicasaAlbum> call, Response<PicasaAlbum> response) {
+            public void onResponse(Call<PicasaPhoto> call, Response<PicasaPhoto> response) {
                 if (response.isSuccess()) {
                     Log.d("picasa", "onResponse: isSuccess");
                 } else {
@@ -126,7 +127,7 @@ public class ApiRequestHandler {
             }
 
             @Override
-            public void onFailure(Call<PicasaAlbum> call, Throwable t) {
+            public void onFailure(Call<PicasaPhoto> call, Throwable t) {
                 if (t != null && t.getMessage() != null) {
                     Log.d("picasa", "onFailure: " + t.getMessage());
                 } else {

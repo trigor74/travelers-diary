@@ -1,5 +1,7 @@
 package com.travelersdiary.activities;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -13,6 +15,7 @@ import android.view.View;
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.dialogs.EditTravelDialog;
+import com.travelersdiary.services.SyncService;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -49,6 +52,16 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +75,13 @@ public class MainActivity extends BaseActivity {
         if (supportActionBar != null) {
             supportActionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
             supportActionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        if (savedInstanceState == null) {
+            if (!isMyServiceRunning(SyncService.class)) {
+                Intent intent = new Intent(this, SyncService.class);
+                startService(intent);
+            }
         }
 
         setupViewPager();

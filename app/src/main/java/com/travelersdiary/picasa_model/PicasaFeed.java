@@ -8,7 +8,8 @@ import java.util.List;
 
 @Root(name = "feed", strict = false)
 public class PicasaFeed {
-    @ElementList(name ="entry", inline = true)
+
+    @ElementList(entry = "entry", inline = true)
     private List<PicasaAlbum> picasaAlbumList;
 
     public List<PicasaAlbum> getPicasaAlbumList() {

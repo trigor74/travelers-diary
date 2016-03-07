@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class DiaryNote {
     private String travelId;
     private String travelTitle;
+    private String picasaAlbumId;
     private long time;
     private String title;
     private String text;
@@ -20,10 +21,12 @@ public class DiaryNote {
     public DiaryNote() {
     }
 
-    public DiaryNote(String travelId, long time, String title, String text, LocationPoint location,
-                     WeatherInfo weather, ArrayList<Photo> photos, ArrayList<String> audios,
-                     ArrayList<String> videos) {
+    public DiaryNote(String travelId, String travelTitle, String picasaAlbumId, long time,
+                     String title, String text, LocationPoint location, WeatherInfo weather,
+                     ArrayList<Photo> photos, ArrayList<String> audios, ArrayList<String> videos) {
         this.travelId = travelId;
+        this.travelTitle = travelTitle;
+        this.picasaAlbumId = picasaAlbumId;
         this.time = time;
         this.title = title;
         this.text = text;
@@ -112,5 +115,13 @@ public class DiaryNote {
 
     public void setVideos(ArrayList<String> videos) {
         this.videos = videos;
+    }
+
+    public String getPicasaAlbumId() {
+        return picasaAlbumId;
+    }
+
+    public void setPicasaAlbumId(String picasaAlbumId) {
+        this.picasaAlbumId = picasaAlbumId;
     }
 }

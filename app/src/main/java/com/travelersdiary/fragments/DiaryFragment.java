@@ -51,7 +51,6 @@ import com.onegravity.rteditor.api.format.RTFormat;
 import com.squareup.otto.Subscribe;
 import com.travelersdiary.BusProvider;
 import com.travelersdiary.Constants;
-import com.travelersdiary.PicasaClient;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.AlbumImagesActivity;
@@ -162,7 +161,7 @@ public class DiaryFragment extends Fragment {
         mGoogleToken = sharedPreferences.getString(Constants.KEY_USER_GOOGLE_TOKEN, null);
         mKey = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
 
-        PicasaClient.getInstance().createService(mGoogleToken);
+//        PicasaClient.getInstance().createService(mGoogleToken);
 
         //get toolbar
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -566,10 +565,10 @@ public class DiaryFragment extends Fragment {
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
 
         //save travel
-        if (mTravelId != null) {
-            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
-            mDiaryNote.setTravelId(mTravelId);
-        }
+//        if (mTravelId != null) {
+//            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+//            mDiaryNote.setTravelId(mTravelId);
+//        }
 
         //save images
         mDiaryNote.setPhotos(mImages);
@@ -641,6 +640,11 @@ public class DiaryFragment extends Fragment {
                             Travel travel = mAdapter.getItem(which);
                             mTravelId = mAdapter.getRef(which).getKey();
                             mTxtTravel.setText(travel.getTitle());
+                            if (mTravelId != null) {
+                                mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+                                mDiaryNote.setTravelId(mTravelId);
+                                mDiaryNote.setPicasaAlbumId(travel.getPicasaAlbumId());
+                            }
                         }
                     })
                     .show();
