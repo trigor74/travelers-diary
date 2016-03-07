@@ -20,11 +20,11 @@ import butterknife.ButterKnife;
 public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, ReminderListAdapter.ViewHolder> {
 
     public ReminderListAdapter(Query ref) {
-        super(TodoItem.class, R.layout.list_item_reminder_todo_item, ReminderListAdapter.ViewHolder.class, ref);
+        super(TodoItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
     }
 
     public ReminderListAdapter(Firebase ref) {
-        super(TodoItem.class, R.layout.list_item_reminder_todo_item, ReminderListAdapter.ViewHolder.class, ref);
+        super(TodoItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
     }
 
     public interface OnItemClickListener {
@@ -47,6 +47,8 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
         TextView textViewInfo;
         @Bind(R.id.item_reminder_todo_item_type_icon)
         ImageView imageViewItemTypeIcon;
+        @Bind(R.id.item_reminder_completed_icon)
+        ImageView imageViewCompletedIcon;
 
         public ViewHolder(View view) {
             super(view);
@@ -90,6 +92,11 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
             // don't remind
             viewHolder.textViewInfo.setText(R.string.reminder_dont_remind_text);
             viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_off_black_24dp);
+        }
+        if (model.isCompleted()){
+            viewHolder.imageViewCompletedIcon.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.imageViewCompletedIcon.setVisibility(View.INVISIBLE);
         }
     }
 }

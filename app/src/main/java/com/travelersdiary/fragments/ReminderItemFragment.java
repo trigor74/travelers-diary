@@ -58,7 +58,7 @@ import java.util.Calendar;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class RemindItemFragment extends Fragment {
+public class ReminderItemFragment extends Fragment {
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
@@ -103,7 +103,7 @@ public class RemindItemFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_remind_item, container, false);
+        View view = inflater.inflate(R.layout.fragment_reminder_item, container, false);
         ButterKnife.bind(this, view);
         mContext = getContext();
 
@@ -274,8 +274,8 @@ public class RemindItemFragment extends Fragment {
         }
 
         ArrayAdapter<CharSequence> distanceAdapter = ArrayAdapter.createFromResource(mContext,
-                R.array.reminder_distance_values, R.layout.spinner_remind_distance_item);
-        distanceAdapter.setDropDownViewResource(R.layout.spinner_remind_distance_dropdown_item);
+                R.array.reminder_distance_values, R.layout.spinner_reminder_distance_item);
+        distanceAdapter.setDropDownViewResource(R.layout.spinner_reminder_distance_dropdown_item);
         waypointDistanceSpinner.setAdapter(distanceAdapter);
         setWaypointDistanceSelections();
 

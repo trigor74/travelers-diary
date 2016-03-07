@@ -39,7 +39,7 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
     private LayoutInflater mDropDownInflater;
 
     public RemindTypesAdapter(Context context) {
-        super(context, R.layout.spinner_remind_type_item);
+        super(context, R.layout.spinner_reminder_type_item);
 
         this.mContext = context;
         this.mInflater = LayoutInflater.from(mContext);
@@ -62,7 +62,7 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
                 position,
                 convertView,
                 parent,
-                R.layout.spinner_remind_type_item,
+                R.layout.spinner_reminder_type_item,
                 false);
     }
 
@@ -72,7 +72,7 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
                 position,
                 convertView,
                 parent,
-                R.layout.spinner_remind_type_dropdown_item,
+                R.layout.spinner_reminder_type_dropdown_item,
                 true);
     }
 

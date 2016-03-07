@@ -44,7 +44,7 @@ public class MainActivity extends BaseActivity {
                 startActivity(diaryIntent);
                 break;
             case 2: // Reminder Tab
-                Intent remindItemIntent = new Intent(this, RemindItemActivity.class);
+                Intent remindItemIntent = new Intent(this, ReminderItemActivity.class);
                 startActivity(remindItemIntent);
                 break;
             default:
