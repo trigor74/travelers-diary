@@ -26,27 +26,27 @@ import java.util.ArrayList;
  */
 
 public class Utils {
-    public static String getFirebaseUserUrl (String userUID){
+    public static String getFirebaseUserUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID;
     }
 
-    public static String getFirebaseUserTravelsUrl (String userUID){
+    public static String getFirebaseUserTravelsUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_TRAVELS;
     }
 
-    public static String getFirebaseUserDiaryUrl (String userUID){
+    public static String getFirebaseUserDiaryUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_DIARY;
     }
 
-    public static String getFirebaseUserTracksUrl (String userUID){
+    public static String getFirebaseUserTracksUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_TRACKS;
     }
 
-    public static String getFirebaseUserReminderUrl (String userUID){
+    public static String getFirebaseUserReminderUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_REMINDER;
     }
 
-    public static String getFirebaseUserWaypointsUrl (String userUID){
+    public static String getFirebaseUserWaypointsUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_WAYPOINTS;
     }
 
@@ -80,22 +80,30 @@ public class Utils {
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
             cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
+            if (cursor != null && cursor.getCount() != 0) {
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                cursor.moveToFirst();
+                return cursor.getString(column_index);
+            }
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
+
+        return null;
     }
 
     public static boolean checkFileExists(Context context, String uri) {
         Uri uriPath = Uri.parse(uri);
         String path = Utils.getRealPathFromURI(context, uriPath);
-        File file = new File(path);
 
-        return file.exists();
+        if (path != null) {
+            File file = new File(path);
+            return file.exists();
+        }
+
+        return false;
     }
 
     public static ArrayList<String> photoArrayToStringArray(Context context, ArrayList<Photo> images) {
