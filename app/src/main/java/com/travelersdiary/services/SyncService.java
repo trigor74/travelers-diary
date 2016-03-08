@@ -1,6 +1,7 @@
 package com.travelersdiary.services;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -13,12 +14,11 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.squareup.otto.Subscribe;
-import com.travelersdiary.BusProvider;
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.travelersdiary.Constants;
 import com.travelersdiary.PicasaClient;
 import com.travelersdiary.Utils;
-import com.travelersdiary.events.OnListOfNotSyncedImagesReadyEvent;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
@@ -46,44 +46,26 @@ public class SyncService extends Service {
 
     private static int UPDATE_INTERVAL = 2;
 
-    ArrayList<Photo> notSyncedImages = new ArrayList<>();
-    final HashMap<String, ArrayList<Photo>> imagesToSync = new HashMap<>();
-
-    private boolean isListReady = false;
-    private boolean isSyncFinished = true;
-
     private Timer timer = new Timer();
     private boolean isRunning = false;
 
+    final HashMap<String, ArrayList<Photo>> imagesToSync = new HashMap<>();
+    private int photosToUpload = 0;
+
     private PicasaClient mPicasaClient;
     private PicasaService mPicasaService;
+
+    private String mUserGoogleId;
     private String mUserUID;
 
     @Override
     public void onCreate() {
-
-        BusProvider.bus().register(this);
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String mGoogleToken = sharedPreferences.getString(Constants.KEY_USER_GOOGLE_TOKEN, null);
-        mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-
         mPicasaClient = PicasaClient.getInstance();
-
-        mPicasaClient.createService(mGoogleToken);
-        mPicasaService = mPicasaClient.getPicasaService();
-
-        Log.i(TAG, "Service onCreate\n" +
-                "1 Picasa client " + mPicasaClient + "\n" +
-                "1 Picasa service " + mPicasaService + "\n" +
-                "--- Google token " + mGoogleToken);
-
         isRunning = true;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(TAG, "Service onStartCommand\n" +
                 "2 Picasa client " + mPicasaClient + "\n" +
                 "2 Picasa service " + mPicasaService);
@@ -92,16 +74,16 @@ public class SyncService extends Service {
             @Override
             public void run() {
                 if (isRunning) {
+
+                    getToken(SyncService.this);
+
                     Log.i(TAG, "Service running\n" +
                             "3 Picasa client " + mPicasaClient + "\n" +
                             "3 Picasa service " + mPicasaService);
 
-                    if (isSyncFinished) {
+                    if (photosToUpload == 0) {
                         getListOfNotSyncedImages();
-//                        isSyncFinished = false;
                     }
-
-                    //uploadPhoto();
                 }
             }
         }, 10000, UPDATE_INTERVAL * 60000);
@@ -119,40 +101,67 @@ public class SyncService extends Service {
     @Override
     public void onDestroy() {
         isRunning = false;
-        BusProvider.bus().unregister(this);
         Log.i(TAG, "Service onDestroy");
     }
 
-    private void getListOfNotSyncedImages() {
-//        final ArrayList<Photo> notSyncedImages = new ArrayList<>();
-//        final HashMap<String, ArrayList<Photo>> imagesToSync = new HashMap<>();
+    private void getToken(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String email = sharedPreferences.getString(Constants.KEY_EMAIL, null);
+        mUserGoogleId = sharedPreferences.getString(Constants.KEY_USER_GOOGLE_ID, null);
+        mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null); //firebase userId
 
+        try {
+            String scope = String.format("oauth2:%s", "https://picasaweb.google.com/data/");
+            String token = null;
+            if (email != null) {
+                token = GoogleAuthUtil.getToken(context, email, scope);
+            }
+
+            Log.i(TAG, "Get Token\n" +
+                    "1 Picasa client " + mPicasaClient + "\n" +
+                    "1 Picasa service " + mPicasaService + "\n" +
+                    "--- Google token " + token);
+
+            mPicasaClient.createService(token);
+            mPicasaService = mPicasaClient.getPicasaService();
+        } catch (IOException | GoogleAuthException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getListOfNotSyncedImages() {
         new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             DiaryNote diaryNote = child.getValue(DiaryNote.class);
 
-                            ArrayList<Photo> photos = diaryNote.getPhotos(); //TODO photos null
+                            ArrayList<Photo> photos = diaryNote.getPhotos();
+                            ArrayList<Photo> notSyncedImages;
+
+                            if (imagesToSync.containsKey(diaryNote.getTravelId())) {
+                                notSyncedImages = imagesToSync.get(diaryNote.getTravelId());
+                            } else {
+                                notSyncedImages = new ArrayList<>();
+                            }
 
                             if (photos != null) {
                                 for (int i = 0; i < photos.size(); i++) {
                                     if (photos.get(i).getPicasaUri() == null) {
                                         notSyncedImages.add(photos.get(i));
                                         imagesToSync.put(diaryNote.getTravelId(), notSyncedImages);
+                                        photosToUpload++; //count of photos for upload to picasa
                                     }
                                 }
                             }
                         }
 
                         if (!imagesToSync.isEmpty()) {
-                            isSyncFinished = false;
-                            BusProvider.bus().post(new OnListOfNotSyncedImagesReadyEvent());
+                            Log.e(TAG, "Photos to upload: " + photosToUpload);
+                            uploadPhotosToPicasa(imagesToSync);
                         } else {
-                            isSyncFinished = true;
-                            Log.e(TAG, "Nothing to sync");
+                            Log.e(TAG, "Photos to upload: " + photosToUpload);
                         }
                     }
 
@@ -163,43 +172,27 @@ public class SyncService extends Service {
                 });
     }
 
-    @Subscribe
-    public void onListOfNotSyncedImagesReady(OnListOfNotSyncedImagesReadyEvent event) {
-        uploadPhotosToPicasa(imagesToSync);
-    }
-
-
     private void uploadPhotosToPicasa(HashMap<String, ArrayList<Photo>> imagesToUpload) {
-
         for (Map.Entry<String, ArrayList<Photo>> entry : imagesToUpload.entrySet()) {
-
-            final String key = entry.getKey(); // travelId
-            final ArrayList<Photo> value = entry.getValue();
+            final String travelId = entry.getKey(); // travelId
+            final ArrayList<Photo> photos = entry.getValue(); //array of photos
 
             new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))
-                    .child(key)
+                    .child(travelId)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Travel travel = dataSnapshot.getValue(Travel.class);
 
                             if (travel.getPicasaAlbumId() == null) {
-                                //TODO: create picasa album and upload photos to it
-                                createAlbumAndUploadPhotos(travel, key, value);
+                                createAlbumAndUploadPhotos(travel, travelId, photos);
                             } else {
-                                //TODO: upload photos
-
-                                for (Photo photo : value) {
-                                    uploadPhoto(photo, key, travel.getPicasaAlbumId());
+                                for (Photo photo : photos) {
+                                    uploadPhoto(photo, travelId, travel.getPicasaAlbumId());
                                 }
-
-                                isSyncFinished = true;
-                                notSyncedImages.clear();
                                 imagesToSync.clear();
-
-                                Log.e(TAG, "Sync finished, arrays cleared");
+                                Log.e(TAG, "imagesToSync map cleared");
                             }
-
                         }
 
                         @Override
@@ -209,79 +202,68 @@ public class SyncService extends Service {
         }
     }
 
-
     private void createAlbumAndUploadPhotos(Travel travel, final String travelId, final ArrayList<Photo> photos) {
-//        PicasaAlbum album = new PicasaAlbum();
-//        album.setTitle("My New Album2");
+        mPicasaService.createAlbum(mUserGoogleId, new PicasaAlbum(travel.getTitle())).enqueue(new Callback<PicasaAlbum>() {
+            @Override
+            public void onResponse(Call<PicasaAlbum> call, final Response<PicasaAlbum> response) {
+                if (response.isSuccess()) {
+                    final String albumId = response.body().getAlbumId();
 
-        mPicasaClient.getPicasaService()
-                .createAlbum("113984660589503350851", new PicasaAlbum(travel.getTitle()))
-                .enqueue(new Callback<PicasaAlbum>() {
-                    @Override
-                    public void onResponse(Call<PicasaAlbum> call, final Response<PicasaAlbum> response) {
-                        if (response.isSuccess()) {
-                            //TODO:write albumId to travel and travel's diaries;
+                    //update travel
+                    Firebase firebaseRef = new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID));
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(Constants.FIREBASE_PICASA_ALABUM_ID, albumId);
+                    Firebase editTravelRef = firebaseRef.child(travelId);
+                    editTravelRef.updateChildren(map);
 
-                            final String albumId = response.body().getAlbumId();
+                    //update all diaries of this travel
+                    new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
+                            .orderByChild(Constants.FIREBASE_DIARY_TRAVELID)
+                            .equalTo(travelId)
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Map<String, Object> map = new HashMap<>();
+                                    map.put(Constants.FIREBASE_PICASA_ALABUM_ID, albumId);
+                                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                        child.getRef().updateChildren(map);
+                                    }
+                                }
 
-                            //update travel
-                            Firebase firebaseRef = new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID));
-                            Map<String, Object> map = new HashMap<>();
-                            map.put(Constants.FIREBASE_PICASA_ALABUM_ID, albumId);
-                            Firebase editTravelRef = firebaseRef.child(travelId);
-                            editTravelRef.updateChildren(map);
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+                                }
+                            });
 
-                            //update all diaries of this travel
-                            new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
-                                    .orderByChild(Constants.FIREBASE_DIARY_TRAVELID)
-                                    .equalTo(travelId)
-                                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            Map<String, Object> map = new HashMap<>();
-                                            map.put(Constants.FIREBASE_PICASA_ALABUM_ID, albumId);
-                                            for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                                child.getRef().updateChildren(map);
-                                            }
-                                        }
+                    Log.d(TAG, "Picasa create album onResponse: isSuccess");
 
-                                        @Override
-                                        public void onCancelled(FirebaseError firebaseError) {
-                                        }
-                                    });
-
-                            //upload images
-                            for (Photo photo : photos) {
-                                uploadPhoto(photo, travelId, albumId);
-                            }
-
-                            Log.d(TAG, "Picasa create album onResponse: isSuccess");
-
-                            isSyncFinished = true;
-                            notSyncedImages.clear();
-                            imagesToSync.clear();
-
-                            Log.e(TAG, "Sync finished, arrays cleared");
-                        } else {
-                            int statusCode = response.code();
-                            ResponseBody errorBody = response.errorBody();
-                            try {
-                                Log.d(TAG, "Picasa create album onResponse: " + errorBody.string() + statusCode);
-                            } catch (IOException e) {
-                                Log.d(TAG, "Picasa create album onResponse: failed");
-                            }
-                        }
+                    //upload images
+                    for (Photo photo : photos) {
+                        uploadPhoto(photo, travelId, albumId);
                     }
 
-                    @Override
-                    public void onFailure(Call<PicasaAlbum> call, Throwable t) {
-                        if (t != null && t.getMessage() != null) {
-                            Log.d(TAG, "Picasa create album onFailure: " + t.getMessage());
-                        } else {
-                            Log.d(TAG, "Picasa create album onFailure: failed");
-                        }
+                    imagesToSync.clear();
+                    Log.e(TAG, "imagesToSync map cleared");
+                } else {
+                    int statusCode = response.code();
+                    ResponseBody errorBody = response.errorBody();
+                    try {
+                        Log.d(TAG, "Picasa create album onResponse: " + errorBody.string() + statusCode);
+                    } catch (IOException e) {
+                        Log.d(TAG, "Picasa create album onResponse: failed");
                     }
-                });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PicasaAlbum> call, Throwable t) {
+                if (t != null && t.getMessage() != null) {
+                    Log.d(TAG, "Picasa create album onFailure: " + t.getMessage());
+                } else {
+                    Log.d(TAG, "Picasa create album onFailure: failed");
+                }
+            }
+        });
     }
 
     private void uploadPhoto(final Photo photo, final String travelId, final String albumId) {
@@ -290,15 +272,23 @@ public class SyncService extends Service {
         Uri uri = Uri.parse(photo.getLocalUri());
         String path = Utils.getRealPathFromURI(this, uri);
         File file = new File(path);
+        
+        if (!file.exists()) {
+            photosToUpload--;
+            Log.e(TAG, "--------> File is not exists!!! Photos to upload: " + photosToUpload);
+            return;
+        }
 
         RequestBody requestBody = RequestBody.create(IMAGE, file);
 
-        mPicasaService.uploadPhoto("113984660589503350851",
-                albumId, requestBody).enqueue(new Callback<PicasaPhoto>() {
+        mPicasaService.uploadPhoto(mUserGoogleId, albumId, requestBody).enqueue(new Callback<PicasaPhoto>() {
             @Override
             public void onResponse(Call<PicasaPhoto> call, final Response<PicasaPhoto> response) {
                 if (response.isSuccess()) {
                     Log.d(TAG, "Picasa upload photo onResponse: isSuccess");
+
+                    photosToUpload--;
+                    Log.e(TAG, "Photos to upload: " + photosToUpload);
 
                     new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                             .orderByChild(Constants.FIREBASE_DIARY_TRAVELID)
@@ -307,22 +297,23 @@ public class SyncService extends Service {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     for (DataSnapshot child : dataSnapshot.getChildren()) {
-
                                         DiaryNote diaryNote = child.getValue(DiaryNote.class);
 
-                                        //TODO update firebase picasa uri
-                                        if (diaryNote.getPicasaAlbumId().equals(albumId)) { //TODO albumId
-                                            ArrayList<Photo> remotePhotoList = diaryNote.getPhotos();
-
+                                        ArrayList<Photo> remotePhotoList = diaryNote.getPhotos();
+                                        if (remotePhotoList != null) {
                                             for (int i = 0; i < remotePhotoList.size(); i++) {
                                                 if (remotePhotoList.get(i).getLocalUri()
                                                         .equals(photo.getLocalUri())) {
                                                     Map<String, Object> map = new HashMap<>();
-                                                    map.put(Constants.FIREBASE_PICASA_URI,
-                                                            response.body().getSrc()); //TODO picasaUri
 
-                                                    child.getRef().child("photos")
-                                                            .child(String.valueOf(i)).updateChildren(map); //TODO return
+                                                    map.put(Constants.FIREBASE_PICASA_URI,
+                                                            response.body().getImageUrl());
+
+                                                    //update picasa uri of photo
+                                                    child.getRef()
+                                                            .child("photos")
+                                                            .child(String.valueOf(i))
+                                                            .updateChildren(map);
                                                 }
                                             }
                                         }
@@ -354,4 +345,5 @@ public class SyncService extends Service {
             }
         });
     }
+
 }
