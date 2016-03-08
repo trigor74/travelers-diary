@@ -34,10 +34,52 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
         this.onItemClickListener = onItemClickListener;
     }
 
+    public interface OnTaskCompletedListener {
+        void onTaskCompleted(boolean completed);
+    }
+
+    private static OnTaskCompletedListener onTaskCompletedListener;
+
+    public void setOnTaskCompletedListener(OnTaskCompletedListener onTaskCompletedListener) {
+        this.onTaskCompletedListener = onTaskCompletedListener;
+    }
+
+    private boolean mCompleted;
+
+    public void setCompleted(boolean completed) {
+        this.mCompleted = completed;
+        for (int i = 0; i < mTodoTaskItemList.size(); i++) {
+            mTodoTaskItemList.get(i).setChecked(completed);
+        }
+        notifyDataSetChanged();
+    }
+
+    public boolean isCompleted() {
+        return this.mCompleted;
+    }
+
+    private void checkCompleted() {
+        if (mViewAsCheckboxes) {
+            boolean completed = true;
+            for (int i = 0; i < mTodoTaskItemList.size(); i++) {
+                if (!mTodoTaskItemList.get(i).isChecked()) {
+                    completed = false;
+                }
+            }
+            if (mCompleted != completed) {
+                if (onTaskCompletedListener != null) {
+                    onTaskCompletedListener.onTaskCompleted(completed);
+                    this.mCompleted = completed;
+                }
+            }
+        }
+    }
+
     private boolean mViewAsCheckboxes;
 
     public void setViewAsCheckboxes(boolean viewAsCheckboxes) {
         this.mViewAsCheckboxes = viewAsCheckboxes;
+        checkCompleted();
         notifyDataSetChanged();
     }
 
@@ -76,6 +118,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                     }
                     mTodoTaskItemList.get(position).setChecked(((AppCompatCheckBox) v).isChecked());
                     notifyItemChanged(position);
+                    checkCompleted();
                 }
             });
 
@@ -115,6 +158,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                                 notifyItemChanged(index - 1);
                                 setSelectedItem(index - 1);
                                 setEditTextCursorPosition(previousText.length());
+                                checkCompleted();
                                 return true;
                             } else {
                                 if (enteredText.length() == 0) {
@@ -122,6 +166,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                                     notifyItemChanged(0);
                                     setSelectedItem(0);
                                     setEditTextCursorPosition(0);
+                                    checkCompleted();
                                     return true;
                                 }
                             }
@@ -140,6 +185,7 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
                         notifyItemRangeChanged(index, 2);
                         setSelectedItem(index + 1);
                         setEditTextCursorPosition(0);
+                        checkCompleted();
                         return true;
                     }
                     return false;
@@ -201,14 +247,18 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
 
         if (mViewAsCheckboxes) {
             viewHolder.checkBox.setVisibility(View.VISIBLE);
-            if (model.isChecked()) {
+            if (model.isChecked() || mCompleted) {
                 viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             } else {
                 viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
             }
         } else {
             viewHolder.checkBox.setVisibility(View.GONE);
-            viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            if (mCompleted) {
+                viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                viewHolder.editText.setPaintFlags(viewHolder.editText.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            }
         }
 
         if (mSelectedItem == position) {

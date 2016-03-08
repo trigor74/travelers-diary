@@ -18,6 +18,7 @@
     <string name="title">Title</string>
     <string name="text">Text</string>
     <string name="discard_changes_text">Discard changes?</string>
+    <string name="save_changes_text">Save changes?</string>
     <string name="images">Images</string>
     <string name="albums">Albums</string>
     <string name="select">Select</string>

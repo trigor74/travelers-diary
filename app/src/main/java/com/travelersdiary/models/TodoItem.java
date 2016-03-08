@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class TodoItem implements Serializable {
     private String travelId;
+    private String travelTitle;
     private String title;
     private ArrayList<TodoTask> task;
     private boolean viewAsCheckboxes;
@@ -22,11 +23,12 @@ public class TodoItem implements Serializable {
     public TodoItem() {
     }
 
-    public TodoItem(String travelId, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
+    public TodoItem(String travelId, String travelTitle, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
                     boolean completed, boolean active,
                     String type, long time, long interval,
                     Waypoint waypoint, int distance, boolean repeat) {
         this.travelId = travelId;
+        this.travelTitle = travelTitle;
         this.title = title;
         this.task = task;
         this.viewAsCheckboxes = viewAsCheckboxes;
@@ -46,6 +48,14 @@ public class TodoItem implements Serializable {
 
     public void setTravelId(String travelId) {
         this.travelId = travelId;
+    }
+
+    public String getTravelTitle() {
+        return travelTitle;
+    }
+
+    public void setTravelTitle(String travelTitle) {
+        this.travelTitle = travelTitle;
     }
 
     public String getTitle() {

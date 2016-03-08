@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,6 +31,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.firebase.ui.FirebaseListAdapter;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -44,6 +46,7 @@ import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.TodoItem;
 import com.travelersdiary.models.TodoTask;
+import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
@@ -75,6 +78,10 @@ public class ReminderItemFragment extends Fragment {
 
     private boolean isNewItem = false;
 
+    @Bind(R.id.remind_item_travel_text_view)
+    TextView travelTextView;
+    @Bind(R.id.remind_item_completed_checkbox)
+    CheckBox completedCheckBox;
     @Bind(R.id.remind_item_dont_remind_text_view)
     TextView dontRemindTextView;
     @Bind(R.id.remind_item_remind_type_spinner)
@@ -122,8 +129,13 @@ public class ReminderItemFragment extends Fragment {
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setDisplayShowTitleEnabled(false);
+            if (isNewItem) {
+                mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
+            } else {
+                mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+            }
         }
-        mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+
 
         mRemindItemTitleEditText = (EditText) (getActivity()).findViewById(R.id.remind_item_title_edit_text);
         mRemindItemTitleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -160,6 +172,7 @@ public class ReminderItemFragment extends Fragment {
                 mRemindItem.setTask(task);
                 // TODO: 26.02.2016 set current active travelId
                 mRemindItem.setTravelId("default");
+                mRemindItem.setTravelTitle("Uncategorized");
                 // TODO: 26.02.2016 set active to true only if travelId is default or current
                 mRemindItem.setActive(true);
                 mRemindItem.setCompleted(false);
@@ -221,7 +234,6 @@ public class ReminderItemFragment extends Fragment {
                     item.setTitle(R.string.reminder_hide_checkboxes);
                 }
                 ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mRemindItem.isViewAsCheckboxes());
-                // TODO: 26.02.2016 add save logic for view as checkboxes state in review mode
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -229,8 +241,33 @@ public class ReminderItemFragment extends Fragment {
     }
 
     public void onBackPressed() {
-        if (saveItem()) {
-            getActivity().finish();
+        if (isNewItem) {
+            new AlertDialog.Builder(getContext())
+                    .setMessage(R.string.save_changes_text)
+                    .setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (saveItem()) {
+                                getActivity().finish();
+                            }
+                        }
+                    })
+                    .setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                        }
+                    })
+                    .setNegativeButton(R.string.discard, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            getActivity().finish();
+                        }
+                    })
+                    .show();
+
+        } else {
+            if (saveItem()) {
+                getActivity().finish();
+            }
         }
     }
 
@@ -273,6 +310,10 @@ public class ReminderItemFragment extends Fragment {
             mSupportActionBar.invalidateOptionsMenu();
         }
 
+        travelTextView.setText(mRemindItem.getTravelTitle());
+
+        completedCheckBox.setChecked(mRemindItem.isCompleted());
+
         ArrayAdapter<CharSequence> distanceAdapter = ArrayAdapter.createFromResource(mContext,
                 R.array.reminder_distance_values, R.layout.spinner_reminder_distance_item);
         distanceAdapter.setDropDownViewResource(R.layout.spinner_reminder_distance_dropdown_item);
@@ -284,7 +325,9 @@ public class ReminderItemFragment extends Fragment {
         remindTypeSpinner.setAdapter(remindTypesAdapter);
 
         // task text
-        RecyclerView.Adapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
+        TodoTaskAdapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
+        todoTaskAdapter.setOnTaskCompletedListener(mOnTaskCompletedListener);
+        todoTaskAdapter.setCompleted(mRemindItem.isCompleted());
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         mTodoItemTask.setLayoutManager(layoutManager);
         mTodoItemTask.setAdapter(todoTaskAdapter);
@@ -417,7 +460,59 @@ public class ReminderItemFragment extends Fragment {
         timePickerDialog.show(getActivity().getFragmentManager(), TIME_PICKER_DIALOG_TAG);
     }
 
+    private TodoTaskAdapter.OnTaskCompletedListener mOnTaskCompletedListener = new TodoTaskAdapter.OnTaskCompletedListener() {
+        @Override
+        public void onTaskCompleted(boolean completed) {
+            mRemindItem.setCompleted(completed);
+            completedCheckBox.setChecked(completed);
+        }
+    };
+
     private void setOnClickListeners() {
+
+        travelTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final FirebaseListAdapter<Travel> adapter = new FirebaseListAdapter<Travel>(getActivity(),
+                        Travel.class,
+                        android.R.layout.simple_dropdown_item_1line,
+                        new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))) {
+                    @Override
+                    protected void populateView(View view, Travel travel, int position) {
+                        super.populateView(view, travel, position);
+                        ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
+                    }
+                };
+
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Select travel")
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //do nothing
+                            }
+                        })
+                        .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Travel travel = adapter.getItem(which);
+                                String travelId = adapter.getRef(which).getKey();
+                                mRemindItem.setTravelId(travelId);
+                                mRemindItem.setTravelTitle(travel.getTitle());
+                                mRemindItem.setActive(travel.isActive() || Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(travelId));
+                                travelTextView.setText(mRemindItem.getTravelTitle());
+                            }
+                        })
+                        .show();
+            }
+        });
+
+        completedCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRemindItem.setCompleted(((CheckBox) v).isChecked());
+                ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setCompleted(mRemindItem.isCompleted());
+            }
+        });
 
         remindTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -513,6 +608,8 @@ public class ReminderItemFragment extends Fragment {
     }
 
     private void clearOnClickListeners() {
+        travelTextView.setOnClickListener(null);
+        completedCheckBox.setOnClickListener(null);
         remindTypeSpinner.setOnItemSelectedListener(null);
         dontRemindTextView.setOnClickListener(null);
         dateTextView.setOnClickListener(null);
