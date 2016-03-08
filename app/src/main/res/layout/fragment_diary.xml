@@ -51,24 +51,6 @@
                         android:layout_height="wrap_content"
                         android:text="View all images" />
 
-                    <Button
-                        android:id="@+id/btn_picasa_test"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Picasa test" />
-
-                    <Button
-                        android:id="@+id/btn_picasa_create_album"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Create album" />
-
-                    <Button
-                        android:id="@+id/btn_picasa_upload_photo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Upload photo" />
-
                     <include
                         android:id="@+id/diary_note_footer_layout"
                         layout="@layout/diary_note_footer" />

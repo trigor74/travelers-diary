@@ -1,4 +1,4 @@
-package com.travelersdiary.picasa_model;
+package com.travelersdiary.models.picasa;
 
 
 import org.simpleframework.xml.ElementList;

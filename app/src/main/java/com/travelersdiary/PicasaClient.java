@@ -1,6 +1,6 @@
 package com.travelersdiary;
 
-import com.travelersdiary.services.PicasaService;
+import com.travelersdiary.interfaces.PicasaService;
 
 import java.io.IOException;
 

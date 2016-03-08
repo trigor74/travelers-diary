@@ -19,11 +19,12 @@ import com.google.android.gms.auth.GoogleAuthUtil;
 import com.travelersdiary.Constants;
 import com.travelersdiary.PicasaClient;
 import com.travelersdiary.Utils;
+import com.travelersdiary.interfaces.PicasaService;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
-import com.travelersdiary.picasa_model.PicasaAlbum;
-import com.travelersdiary.picasa_model.PicasaPhoto;
+import com.travelersdiary.models.picasa.PicasaAlbum;
+import com.travelersdiary.models.picasa.PicasaPhoto;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +50,6 @@ public class SyncService extends Service {
     private Timer timer = new Timer();
     private boolean isRunning = false;
 
-    final HashMap<String, ArrayList<Photo>> imagesToSync = new HashMap<>();
     private int photosToUpload = 0;
 
     private PicasaClient mPicasaClient;
@@ -60,6 +60,7 @@ public class SyncService extends Service {
 
     @Override
     public void onCreate() {
+        Log.i(TAG, "Service onCreate");
         mPicasaClient = PicasaClient.getInstance();
         isRunning = true;
     }
@@ -67,8 +68,8 @@ public class SyncService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "Service onStartCommand\n" +
-                "2 Picasa client " + mPicasaClient + "\n" +
-                "2 Picasa service " + mPicasaService);
+                "1 Picasa client " + mPicasaClient + "\n" +
+                "1 Picasa service " + mPicasaService);
 
         timer.schedule(new TimerTask() {
             @Override
@@ -118,8 +119,8 @@ public class SyncService extends Service {
             }
 
             Log.i(TAG, "Get Token\n" +
-                    "1 Picasa client " + mPicasaClient + "\n" +
-                    "1 Picasa service " + mPicasaService + "\n" +
+                    "2 Picasa client " + mPicasaClient + "\n" +
+                    "2 Picasa service " + mPicasaService + "\n" +
                     "--- Google token " + token);
 
             mPicasaClient.createService(token);
@@ -130,6 +131,8 @@ public class SyncService extends Service {
     }
 
     private void getListOfNotSyncedImages() {
+        final HashMap<String, ArrayList<Photo>> imagesToSync = new HashMap<>();
+
         new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -190,8 +193,8 @@ public class SyncService extends Service {
                                 for (Photo photo : photos) {
                                     uploadPhoto(photo, travelId, travel.getPicasaAlbumId());
                                 }
-                                imagesToSync.clear();
-                                Log.e(TAG, "imagesToSync map cleared");
+//                                imagesToSync.clear();
+//                                Log.e(TAG, "imagesToSync map cleared");
                             }
                         }
 
@@ -242,8 +245,8 @@ public class SyncService extends Service {
                         uploadPhoto(photo, travelId, albumId);
                     }
 
-                    imagesToSync.clear();
-                    Log.e(TAG, "imagesToSync map cleared");
+//                    imagesToSync.clear();
+//                    Log.e(TAG, "imagesToSync map cleared");
                 } else {
                     int statusCode = response.code();
                     ResponseBody errorBody = response.errorBody();
@@ -272,7 +275,7 @@ public class SyncService extends Service {
         Uri uri = Uri.parse(photo.getLocalUri());
         String path = Utils.getRealPathFromURI(this, uri);
         File file = new File(path);
-        
+
         if (!file.exists()) {
             photosToUpload--;
             Log.e(TAG, "--------> File is not exists!!! Photos to upload: " + photosToUpload);

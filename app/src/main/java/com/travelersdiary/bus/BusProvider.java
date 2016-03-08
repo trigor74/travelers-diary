@@ -1,4 +1,4 @@
-package com.travelersdiary;
+package com.travelersdiary.bus;
 
 
 import com.squareup.otto.Bus;

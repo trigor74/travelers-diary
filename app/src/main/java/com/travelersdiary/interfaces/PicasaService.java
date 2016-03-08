@@ -1,8 +1,8 @@
-package com.travelersdiary.services;
+package com.travelersdiary.interfaces;
 
-import com.travelersdiary.picasa_model.PicasaAlbum;
-import com.travelersdiary.picasa_model.PicasaFeed;
-import com.travelersdiary.picasa_model.PicasaPhoto;
+import com.travelersdiary.models.picasa.PicasaAlbum;
+import com.travelersdiary.models.picasa.PicasaFeed;
+import com.travelersdiary.models.picasa.PicasaPhoto;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -20,16 +20,6 @@ public interface PicasaService {
     @Headers("Content-Type: application/atom+xml")
     @POST("feed/api/user/{username}")
     Call<PicasaAlbum> createAlbum(@Path("username") String username, @Body PicasaAlbum album);
-
-
-//    @Multipart
-//    @POST("feed/api/user/{username}/albumid/6257415133015328049")
-//    Call<PicasaAlbum> uploadPhoto(@Path("username") String username,
-//                                  @Headers("Content-Type: multipart/related"),
-////                                  @Path("albumid") String albumid,
-////                                  @Part("metadata") RequestBody metadata,
-//                                  @Part("image") RequestBody file);
-
 
     @POST("feed/api/user/{username}/albumid/{albumId}")
     Call<PicasaPhoto> uploadPhoto(@Path("username") String username,

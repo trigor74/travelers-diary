@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,8 +44,6 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
-import com.squareup.otto.Subscribe;
-import com.travelersdiary.BusProvider;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -54,18 +51,15 @@ import com.travelersdiary.activities.AlbumImagesActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
-import com.travelersdiary.events.PicasaEvent;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
-import com.travelersdiary.picasa_model.PicasaAlbum;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -103,9 +97,6 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
-    @Bind(R.id.btn_picasa_test)
-    Button picasaTest;
-
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -125,10 +116,7 @@ public class DiaryFragment extends Fragment {
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
-    private String mMessage;
     private String mUserUID;
-    private String mGoogleID;
-    private String mGoogleToken;
     private String mKey;
 
     @Override
@@ -140,12 +128,6 @@ public class DiaryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // read extras
-        if (savedInstanceState == null) {
-            Intent intent = getActivity().getIntent();
-            mMessage = getStringExtra(intent, "message");
-        }
-
         // set theme
         getActivity().setTheme(R.style.RteTheme);
 
@@ -154,11 +136,7 @@ public class DiaryFragment extends Fragment {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-        mGoogleID = sharedPreferences.getString(Constants.KEY_USER_GOOGLE_ID, null);
-        mGoogleToken = sharedPreferences.getString(Constants.KEY_USER_GOOGLE_TOKEN, null);
         mKey = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
-
-//        PicasaClient.getInstance().createService(mGoogleToken);
 
         //get toolbar
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -201,7 +179,6 @@ public class DiaryFragment extends Fragment {
                 android.R.layout.simple_dropdown_item_1line, new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))) {
             @Override
             protected void populateView(View view, Travel travel, int position) {
-//                super.populateView(view, travel, position);
                 ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
             }
         };
@@ -648,57 +625,6 @@ public class DiaryFragment extends Fragment {
         intent.putExtra("images", mImages);
         intent.putExtra("title", mDiaryNote.getTitle());
         startActivity(intent);
-    }
-
-    @OnClick(R.id.btn_picasa_test)
-    public void onPicasaButtonClicked() {
-        Toast.makeText(getContext(), "Let's start!", Toast.LENGTH_LONG).show();
-        BusProvider.bus().post(new PicasaEvent.OnLoadingStart(mGoogleID));
-    }
-
-    @OnClick(R.id.btn_picasa_create_album)
-    public void onPicasaCreateButtonClicked() {
-        Toast.makeText(getContext(), "Creating album...", Toast.LENGTH_LONG).show();
-        BusProvider.bus().post(new PicasaEvent.OnUploadingStart(mGoogleID));
-    }
-
-    @OnClick(R.id.btn_picasa_upload_photo)
-    public void onPicasaUploadPhotoButtonClicked() {
-        Toast.makeText(getContext(), "Uploading photo...", Toast.LENGTH_LONG).show();
-        BusProvider.bus().post(new PicasaEvent.OnUploadingPhotoStart(mGoogleID, "6257415133015328049"));
-    }
-
-    @Subscribe
-    public void onPicasaFeedLoaded(PicasaEvent.OnLoaded onLoaded) {
-        List<PicasaAlbum> test = new ArrayList();
-
-        test = onLoaded.getResponse().getPicasaAlbumList();
-
-        picasaTest.setText(test.get(0).getTitle());
-
-        Toast.makeText(getContext(), "Loaded " + onLoaded.getResponse().getPicasaAlbumList().size() + " items", Toast.LENGTH_LONG).show();
-//        List<UserEntity> entityList = Stream.of(onLoaded.getResponse().getResults())
-//                .map(value -> EntitiesTransformer.userResponse2userEntity(value.getUser()))
-//                .collect(Collectors.toList());
-//        mAdapter.setItems(entityList);
-    }
-
-    @Subscribe
-    public void onPicasaFeedLoadingFailed(PicasaEvent.OnLoadingError onLoadingError) {
-        Toast.makeText(getContext(), onLoadingError.getErrorMessage(), Toast.LENGTH_LONG).show();
-        picasaTest.setText(onLoadingError.getErrorMessage());
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        BusProvider.bus().register(this);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        BusProvider.bus().unregister(this);
     }
 
 }
