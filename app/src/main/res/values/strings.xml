@@ -57,6 +57,8 @@
     <string name="reminder_error_time_text">Invalid time</string>
     <string name="reminder_error_distance_text">Invalid distance</string>
     <string name="reminder_error_location_text">Invalid location</string>
+    <string name="reminder_place_picker_progress_dialog_title"></string>
+    <string name="reminder_place_picker_progress_dialog_message">Loading...</string>
     <string-array name="reminder_type_names">
         <item>Don\'t remind</item>
         <item>Remind at time</item>

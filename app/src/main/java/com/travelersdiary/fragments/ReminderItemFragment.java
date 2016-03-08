@@ -1,6 +1,7 @@
 package com.travelersdiary.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -100,6 +101,7 @@ public class ReminderItemFragment extends Fragment {
     private Context mContext;
 
     private EditText mRemindItemTitleEditText;
+    private ProgressDialog mProgressDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -390,6 +392,9 @@ public class ReminderItemFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+            }
             if (resultCode == Activity.RESULT_OK) {
                 Place place = PlacePicker.getPlace(mContext, data);
                 if (place != null) {
@@ -587,6 +592,9 @@ public class ReminderItemFragment extends Fragment {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     e.printStackTrace();
                 }
+                mProgressDialog = ProgressDialog.show(mContext,
+                        getString(R.string.reminder_place_picker_progress_dialog_title),
+                        getString(R.string.reminder_place_picker_progress_dialog_message), true, false);
                 startActivityForResult(intent, PLACE_PICKER_REQUEST);
             }
         });
