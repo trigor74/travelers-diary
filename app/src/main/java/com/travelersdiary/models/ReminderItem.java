@@ -3,7 +3,7 @@ package com.travelersdiary.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class TodoItem implements Serializable {
+public class ReminderItem implements Serializable {
     private String travelId;
     private String travelTitle;
     private String title;
@@ -20,13 +20,13 @@ public class TodoItem implements Serializable {
     private int distance;
     private boolean repeat;
 
-    public TodoItem() {
+    public ReminderItem() {
     }
 
-    public TodoItem(String travelId, String travelTitle, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
-                    boolean completed, boolean active,
-                    String type, long time, long interval,
-                    Waypoint waypoint, int distance, boolean repeat) {
+    public ReminderItem(String travelId, String travelTitle, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
+                        boolean completed, boolean active,
+                        String type, long time, long interval,
+                        Waypoint waypoint, int distance, boolean repeat) {
         this.travelId = travelId;
         this.travelTitle = travelTitle;
         this.title = title;

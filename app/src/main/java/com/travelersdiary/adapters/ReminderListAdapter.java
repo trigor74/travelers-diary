@@ -1,30 +1,46 @@
 package com.travelersdiary.adapters;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bignerdranch.android.multiselector.MultiSelector;
+import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
-import com.travelersdiary.models.TodoItem;
+import com.travelersdiary.models.ReminderItem;
 
 import java.text.SimpleDateFormat;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, ReminderListAdapter.ViewHolder> {
+public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, ReminderListAdapter.ViewHolder> {
+
+    private static MultiSelector multiSelector;
 
     public ReminderListAdapter(Query ref) {
-        super(TodoItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        this.multiSelector = null;
     }
 
     public ReminderListAdapter(Firebase ref) {
-        super(TodoItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        this.multiSelector = null;
+    }
+
+    public ReminderListAdapter(Query ref, MultiSelector multiSelector) {
+        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        this.multiSelector = multiSelector;
+    }
+
+    public ReminderListAdapter(Firebase ref, MultiSelector multiSelector) {
+        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
+        this.multiSelector = multiSelector;
     }
 
     public interface OnItemClickListener {
@@ -39,7 +55,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
         this.onItemClickListener = onItemClickListener;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends SwappingHolder {
 
         @Bind(R.id.item_reminder_todo_item_title_text_view)
         TextView textViewTitle;
@@ -51,7 +67,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
         ImageView imageViewCompletedIcon;
 
         public ViewHolder(View view) {
-            super(view);
+            super(view, multiSelector);
             ButterKnife.bind(this, view);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -75,7 +91,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
     }
 
     @Override
-    protected void populateViewHolder(ViewHolder viewHolder, TodoItem model, int position) {
+    protected void populateViewHolder(ViewHolder viewHolder, ReminderItem model, int position) {
         viewHolder.textViewTitle.setText(model.getTitle());
         String type = model.getType();
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
@@ -98,5 +114,10 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<TodoItem, Remin
         } else {
             viewHolder.imageViewCompletedIcon.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return super.onCreateViewHolder(parent, viewType);
     }
 }

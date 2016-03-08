@@ -45,7 +45,7 @@ import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.RemindTypesAdapter;
 import com.travelersdiary.adapters.TodoTaskAdapter;
 import com.travelersdiary.models.LocationPoint;
-import com.travelersdiary.models.TodoItem;
+import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.models.TodoTask;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
@@ -72,7 +72,7 @@ public class ReminderItemFragment extends Fragment {
 
     private ActionBar mSupportActionBar;
     private Menu mMenu;
-    private TodoItem mRemindItem;
+    private ReminderItem mRemindItem;
 
     private String mUserUID;
     private String mItemKey = null;
@@ -166,7 +166,7 @@ public class ReminderItemFragment extends Fragment {
                 retrieveData(mItemKey);
             } else {
                 // create new empty item
-                mRemindItem = new TodoItem();
+                mRemindItem = new ReminderItem();
                 mRemindItem.setTitle(mContext.getString(R.string.reminder_new_remind_item_default_title));
                 mRemindItem.setViewAsCheckboxes(false);
                 ArrayList<TodoTask> task = new ArrayList<>();
@@ -183,7 +183,7 @@ public class ReminderItemFragment extends Fragment {
             }
         } else {
             isNewItem = savedInstanceState.getBoolean(KEY_IS_NEW_ITEM, false);
-            mRemindItem = (TodoItem) savedInstanceState.getSerializable(KEY_REMIND_ITEM);
+            mRemindItem = (ReminderItem) savedInstanceState.getSerializable(KEY_REMIND_ITEM);
 
             setViews();
         }
@@ -293,7 +293,7 @@ public class ReminderItemFragment extends Fragment {
         itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mRemindItem = dataSnapshot.getValue(TodoItem.class);
+                mRemindItem = dataSnapshot.getValue(ReminderItem.class);
                 setViews();
             }
 
