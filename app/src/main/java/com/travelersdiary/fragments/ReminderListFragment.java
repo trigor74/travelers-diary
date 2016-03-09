@@ -1,6 +1,5 @@
 package com.travelersdiary.fragments;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,9 +11,9 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,6 @@ import com.travelersdiary.adapters.ReminderListAdapter;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,11 +60,28 @@ public class ReminderListFragment extends Fragment {
             if (item.getItemId() == R.id.menu_item_delete) {
                 mode.finish();
 
+/*
                 for (Integer position : mMultiSelector.getSelectedPositions()) {
                     Firebase itemRef = mAdapter.getRef(position);
                     itemRef.removeValue();
 //                    mAdapter.notifyItemRemoved(position);
                 }
+*/
+
+                Log.v("SELECTOR", "Selected Items Count:" + String.valueOf(((ReminderListAdapter) mAdapter).getSelectedItemCount()));
+
+                for (Integer position : ((ReminderListAdapter) mAdapter).getSelectedItems()) {
+                    Log.v("SELECTOR", "Selected pos:" + String.valueOf(position));
+//                    Firebase itemRef = mAdapter.getRef(position);
+//                    itemRef.removeValue();
+                    mReminderList.findViewHolderForLayoutPosition(position).itemView.setActivated(false);
+                }
+                for (Firebase ref :
+                        ((ReminderListAdapter) mAdapter).getSelectedItemsRef()) {
+                    Log.v("SELECTOR", "Selected ref:" + ref.toString());
+//                    ref.removeValue();
+                }
+                ((ReminderListAdapter) mAdapter).clearSelections();
 
                 return true;
             }
@@ -152,7 +167,11 @@ public class ReminderListFragment extends Fragment {
         ((ReminderListAdapter) mAdapter).setOnItemClickListener(new ReminderListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (!mMultiSelector.tapSelection(position, mAdapter.getItemId(position))) {
+                boolean test = ((ReminderListAdapter) mAdapter).tapSelection(position);
+                Log.v("SELECTOR", "onClick, Item pos:" + String.valueOf(position) + ", isSelectable:" + String.valueOf(test));
+                view.setActivated(((ReminderListAdapter) mAdapter).isSelected(position));
+                if (!test) {
+//                if (!mMultiSelector.tapSelection(position, mAdapter.getItemId(position))) {
                     String key = mAdapter.getRef(position).getKey();
 
                     Intent intent = new Intent(getActivity(), ReminderItemActivity.class);
@@ -163,11 +182,23 @@ public class ReminderListFragment extends Fragment {
 
             @Override
             public void onItemLongClick(View view, int position) {
-                if (!mMultiSelector.isSelectable()) {
+                boolean test = ((ReminderListAdapter) mAdapter).isSelectable();
+                Log.v("SELECTOR", "onLongClick, Item pos:" + String.valueOf(position) + ", isSelectable:" + String.valueOf(test));
+                if (!test) {
                     ((AppCompatActivity) getActivity()).startSupportActionMode(mDeleteMode);
-                    mMultiSelector.setSelectable(true);
-                    mMultiSelector.setSelected(position, mAdapter.getItemId(position), true);
+                    ((ReminderListAdapter) mAdapter).setSelectable(true);
+                    test = ((ReminderListAdapter) mAdapter).isSelectable();
+                    Log.v("SELECTOR", "setSelectable(true), isSelectable:" + String.valueOf(test));
+                    ((ReminderListAdapter) mAdapter).setSelected(position, true);
+                    test = ((ReminderListAdapter) mAdapter).isSelected(position);
+                    Log.v("SELECTOR", "isSelected(" + String.valueOf(position) + ") = " + String.valueOf(test));
+                    view.setActivated(((ReminderListAdapter) mAdapter).isSelected(position));
                 }
+//                if (!mMultiSelector.isSelectable()) {
+//                    ((AppCompatActivity) getActivity()).startSupportActionMode(mDeleteMode);
+//                    mMultiSelector.setSelectable(true);
+//                    mMultiSelector.setSelected(position, mAdapter.getItemId(position), true);
+//                }
             }
         });
     }

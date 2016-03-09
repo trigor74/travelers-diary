@@ -1,7 +1,9 @@
 package com.travelersdiary.adapters;
 
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,6 +17,9 @@ import com.travelersdiary.R;
 import com.travelersdiary.models.ReminderItem;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -92,6 +97,8 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
 
     @Override
     protected void populateViewHolder(ViewHolder viewHolder, ReminderItem model, int position) {
+        //viewHolder.itemView.setActivated(isSelected(position));
+
         viewHolder.textViewTitle.setText(model.getTitle());
         String type = model.getType();
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
@@ -109,15 +116,80 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
             viewHolder.textViewInfo.setText(R.string.reminder_dont_remind_text);
             viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_off_black_24dp);
         }
-        if (model.isCompleted()){
+        if (model.isCompleted()) {
             viewHolder.imageViewCompletedIcon.setVisibility(View.VISIBLE);
         } else {
             viewHolder.imageViewCompletedIcon.setVisibility(View.INVISIBLE);
         }
     }
 
-    @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return super.onCreateViewHolder(parent, viewType);
+    private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
+    private HashMap<Integer, Firebase> mSelectedItemsRef = new HashMap<>();
+    private boolean mSelectable;
+
+    public void setSelected(int position, boolean checked) {
+        if (checked) {
+            mSelectedItems.put(position, true);
+            mSelectedItemsRef.put(position, getRef(position));
+        } else {
+            mSelectedItems.delete(position);
+            mSelectedItemsRef.remove(position);
+        }
+        notifyItemChanged(position);
+    }
+
+    public boolean isSelected(int position) {
+        return mSelectedItems.get(position, false);
+    }
+
+    public void setSelectable(boolean selectable) {
+        mSelectable = selectable;
+    }
+
+    public boolean isSelectable() {
+        return mSelectable;
+    }
+
+    public boolean tapSelection(int position) {
+        if (isSelectable()) {
+            if (!mSelectedItems.get(position, false)) {
+                mSelectedItems.put(position, true);
+                mSelectedItemsRef.put(position, getRef(position));
+            } else {
+                mSelectedItems.delete(position);
+                mSelectedItemsRef.remove(position);
+            }
+            notifyItemChanged(position);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void clearSelections() {
+        mSelectedItems.clear();
+        mSelectedItemsRef.clear();
+        mSelectable = false;
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedItemCount() {
+        return mSelectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items = new ArrayList<Integer>(mSelectedItems.size());
+        for (int i = 0; i < mSelectedItems.size(); i++) {
+            if (mSelectedItems.valueAt(i)) {
+                items.add(mSelectedItems.keyAt(i));
+            }
+        }
+        return items;
+    }
+
+    public List<Firebase> getSelectedItemsRef() {
+        List<Firebase> items = new ArrayList<Firebase>(mSelectedItemsRef.size());
+        items.addAll(mSelectedItemsRef.values());
+        return items;
     }
 }
