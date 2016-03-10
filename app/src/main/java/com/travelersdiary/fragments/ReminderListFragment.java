@@ -60,28 +60,18 @@ public class ReminderListFragment extends Fragment {
             if (item.getItemId() == R.id.menu_item_delete) {
                 mode.finish();
 
-/*
-                for (Integer position : mMultiSelector.getSelectedPositions()) {
-                    Firebase itemRef = mAdapter.getRef(position);
-                    itemRef.removeValue();
-//                    mAdapter.notifyItemRemoved(position);
-                }
-*/
-
                 Log.v("SELECTOR", "Selected Items Count:" + String.valueOf(((ReminderListAdapter) mAdapter).getSelectedItemCount()));
 
                 for (Integer position : ((ReminderListAdapter) mAdapter).getSelectedItems()) {
                     Log.v("SELECTOR", "Selected pos:" + String.valueOf(position));
 //                    Firebase itemRef = mAdapter.getRef(position);
 //                    itemRef.removeValue();
-                    mReminderList.findViewHolderForLayoutPosition(position).itemView.setActivated(false);
                 }
                 for (Firebase ref :
                         ((ReminderListAdapter) mAdapter).getSelectedItemsRef()) {
                     Log.v("SELECTOR", "Selected ref:" + ref.toString());
 //                    ref.removeValue();
                 }
-                ((ReminderListAdapter) mAdapter).clearSelections();
 
                 return true;
             }
@@ -90,19 +80,8 @@ public class ReminderListFragment extends Fragment {
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
-            mMultiSelector.clearSelections();
-            try {
-                Field field = mMultiSelector.getClass().getDeclaredField("mIsSelectable");
-                if (field != null) {
-                    if (!field.isAccessible())
-                        field.setAccessible(true);
-                    field.set(mMultiSelector, false);
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-            }
+            ((ReminderListAdapter) mAdapter).setSelectable(false);
+            ((ReminderListAdapter) mAdapter).clearSelections();
         }
     };
 
@@ -161,7 +140,7 @@ public class ReminderListFragment extends Fragment {
             query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_ACTIVE).equalTo(true);
         }
 
-        mAdapter = new ReminderListAdapter(query, mMultiSelector);
+        mAdapter = new ReminderListAdapter(query);
         mReminderList.setAdapter(mAdapter);
 
         ((ReminderListAdapter) mAdapter).setOnItemClickListener(new ReminderListAdapter.OnItemClickListener() {
@@ -169,9 +148,9 @@ public class ReminderListFragment extends Fragment {
             public void onItemClick(View view, int position) {
                 boolean test = ((ReminderListAdapter) mAdapter).tapSelection(position);
                 Log.v("SELECTOR", "onClick, Item pos:" + String.valueOf(position) + ", isSelectable:" + String.valueOf(test));
-                view.setActivated(((ReminderListAdapter) mAdapter).isSelected(position));
+                boolean test2 = ((ReminderListAdapter) mAdapter).isSelected(position);
+                Log.v("SELECTOR", "isSelected(" + String.valueOf(position) + ") = " + String.valueOf(test2));
                 if (!test) {
-//                if (!mMultiSelector.tapSelection(position, mAdapter.getItemId(position))) {
                     String key = mAdapter.getRef(position).getKey();
 
                     Intent intent = new Intent(getActivity(), ReminderItemActivity.class);
@@ -192,13 +171,7 @@ public class ReminderListFragment extends Fragment {
                     ((ReminderListAdapter) mAdapter).setSelected(position, true);
                     test = ((ReminderListAdapter) mAdapter).isSelected(position);
                     Log.v("SELECTOR", "isSelected(" + String.valueOf(position) + ") = " + String.valueOf(test));
-                    view.setActivated(((ReminderListAdapter) mAdapter).isSelected(position));
                 }
-//                if (!mMultiSelector.isSelectable()) {
-//                    ((AppCompatActivity) getActivity()).startSupportActionMode(mDeleteMode);
-//                    mMultiSelector.setSelectable(true);
-//                    mMultiSelector.setSelected(position, mAdapter.getItemId(position), true);
-//                }
             }
         });
     }

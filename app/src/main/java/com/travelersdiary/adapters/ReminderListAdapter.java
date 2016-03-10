@@ -1,14 +1,11 @@
 package com.travelersdiary.adapters;
 
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bignerdranch.android.multiselector.MultiSelector;
-import com.bignerdranch.android.multiselector.SwappingHolder;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.firebase.ui.FirebaseRecyclerAdapter;
@@ -26,26 +23,12 @@ import butterknife.ButterKnife;
 
 public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, ReminderListAdapter.ViewHolder> {
 
-    private static MultiSelector multiSelector;
-
     public ReminderListAdapter(Query ref) {
         super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
-        this.multiSelector = null;
     }
 
     public ReminderListAdapter(Firebase ref) {
         super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
-        this.multiSelector = null;
-    }
-
-    public ReminderListAdapter(Query ref, MultiSelector multiSelector) {
-        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
-        this.multiSelector = multiSelector;
-    }
-
-    public ReminderListAdapter(Firebase ref, MultiSelector multiSelector) {
-        super(ReminderItem.class, R.layout.list_item_reminder, ReminderListAdapter.ViewHolder.class, ref);
-        this.multiSelector = multiSelector;
     }
 
     public interface OnItemClickListener {
@@ -60,7 +43,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
         this.onItemClickListener = onItemClickListener;
     }
 
-    static class ViewHolder extends SwappingHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.item_reminder_todo_item_title_text_view)
         TextView textViewTitle;
@@ -72,7 +55,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
         ImageView imageViewCompletedIcon;
 
         public ViewHolder(View view) {
-            super(view, multiSelector);
+            super(view);
             ButterKnife.bind(this, view);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -96,9 +79,17 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
     }
 
     @Override
-    protected void populateViewHolder(ViewHolder viewHolder, ReminderItem model, int position) {
-        //viewHolder.itemView.setActivated(isSelected(position));
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+        super.onBindViewHolder(viewHolder, position);
+        if (isSelectable()) {
+            viewHolder.itemView.setActivated(isSelected(position));
+        } else {
+            viewHolder.itemView.setActivated(false);
+        }
+    }
 
+    @Override
+    protected void populateViewHolder(ViewHolder viewHolder, ReminderItem model, int position) {
         viewHolder.textViewTitle.setText(model.getTitle());
         String type = model.getType();
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
@@ -127,6 +118,14 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
     private HashMap<Integer, Firebase> mSelectedItemsRef = new HashMap<>();
     private boolean mSelectable;
 
+    public void setSelectable(boolean selectable) {
+        mSelectable = selectable;
+    }
+
+    public boolean isSelectable() {
+        return mSelectable;
+    }
+
     public void setSelected(int position, boolean checked) {
         if (checked) {
             mSelectedItems.put(position, true);
@@ -136,18 +135,6 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
             mSelectedItemsRef.remove(position);
         }
         notifyItemChanged(position);
-    }
-
-    public boolean isSelected(int position) {
-        return mSelectedItems.get(position, false);
-    }
-
-    public void setSelectable(boolean selectable) {
-        mSelectable = selectable;
-    }
-
-    public boolean isSelectable() {
-        return mSelectable;
     }
 
     public boolean tapSelection(int position) {
@@ -166,10 +153,13 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
         }
     }
 
+    public boolean isSelected(int position) {
+        return mSelectedItems.get(position, false);
+    }
+
     public void clearSelections() {
         mSelectedItems.clear();
         mSelectedItemsRef.clear();
-        mSelectable = false;
         notifyDataSetChanged();
     }
 
@@ -178,7 +168,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
     }
 
     public List<Integer> getSelectedItems() {
-        List<Integer> items = new ArrayList<Integer>(mSelectedItems.size());
+        List<Integer> items = new ArrayList<>(mSelectedItems.size());
         for (int i = 0; i < mSelectedItems.size(); i++) {
             if (mSelectedItems.valueAt(i)) {
                 items.add(mSelectedItems.keyAt(i));
@@ -188,7 +178,7 @@ public class ReminderListAdapter extends FirebaseRecyclerAdapter<ReminderItem, R
     }
 
     public List<Firebase> getSelectedItemsRef() {
-        List<Firebase> items = new ArrayList<Firebase>(mSelectedItemsRef.size());
+        List<Firebase> items = new ArrayList<>(mSelectedItemsRef.size());
         items.addAll(mSelectedItemsRef.values());
         return items;
     }
