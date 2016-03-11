@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="sync_service_settings"
+        android:title="Google Photos settings">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="sync_service_check_box"
+            android:summary="Your pictures will be uploaded to Google Photos"
+            android:title="Sync pictures with Google Photos?" />
+
+        <ListPreference
+            android:defaultValue="30"
+            android:entries="@array/interval_names"
+            android:entryValues="@array/interval_values"
+            android:key="sync_interval"
+            android:summary="How often you want to sync pictures?"
+            android:title="Sync interval" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

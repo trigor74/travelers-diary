@@ -3,7 +3,9 @@ package com.travelersdiary.activities;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -54,16 +56,6 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,8 +71,11 @@ public class MainActivity extends BaseActivity {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean syncServiceEnabled = sharedPreferences.getBoolean("sync_service_check_box", true);
+
         if (savedInstanceState == null) {
-            if (!isMyServiceRunning(SyncService.class)) {
+            if (!isServiceRunning(SyncService.class) && syncServiceEnabled) {
                 Intent intent = new Intent(this, SyncService.class);
                 startService(intent);
             }
@@ -123,13 +118,13 @@ public class MainActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.nav_travels:
                 mTabLayout.getTabAt(0).select();
-                break;
+                return true;
             case R.id.nav_diary:
                 mTabLayout.getTabAt(1).select();
-                break;
+                return true;
             case R.id.nav_reminder:
                 mTabLayout.getTabAt(2).select();
-                break;
+                return true;
             default:
         }
         return super.onOptionsItemSelected(item);
@@ -151,4 +146,15 @@ public class MainActivity extends BaseActivity {
     private boolean isTabletLandMode() {
         return getResources().getBoolean(R.bool.isTabletLand);
     }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

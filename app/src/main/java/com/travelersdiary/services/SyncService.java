@@ -45,7 +45,7 @@ public class SyncService extends Service {
 
     private static final String TAG = "SyncService";
 
-    private static int UPDATE_INTERVAL = 2;
+    private static int SYNC_INTERVAL;
 
     private Timer timer = new Timer();
     private boolean isRunning = false;
@@ -61,6 +61,15 @@ public class SyncService extends Service {
     @Override
     public void onCreate() {
         Log.i(TAG, "Service onCreate");
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SYNC_INTERVAL = Integer.valueOf(sharedPreferences.getString("sync_interval", "30"));
+        boolean enabled = sharedPreferences.getBoolean("sync_service_check_box", true);
+
+        Log.i(TAG, "*****Shared preferences***** \n" +
+                "SYNC_INTERVAL: " + SYNC_INTERVAL + "\n" +
+                "enabled: " + enabled);
+
         mPicasaClient = PicasaClient.getInstance();
         isRunning = true;
     }
@@ -87,7 +96,7 @@ public class SyncService extends Service {
                     }
                 }
             }
-        }, 10000, UPDATE_INTERVAL * 60000);
+        }, 10000, SYNC_INTERVAL * 60000);
 
         return Service.START_STICKY;
     }
@@ -102,7 +111,10 @@ public class SyncService extends Service {
     @Override
     public void onDestroy() {
         isRunning = false;
-        Log.i(TAG, "Service onDestroy");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean enabled = sharedPreferences.getBoolean("sync_service_check_box", true);
+        Log.i(TAG, "Service onDestroy \n" +
+                "enabled: " + enabled);
     }
 
     private void getToken(Context context) {
@@ -269,8 +281,8 @@ public class SyncService extends Service {
         });
     }
 
-    private void uploadPhoto(final Photo photo, final String travelId, final String albumId) {
-        final MediaType IMAGE = MediaType.parse("image/jpeg");
+    private void uploadPhoto(final Photo photo, final String travelId, String albumId) {
+        MediaType IMAGE = MediaType.parse("image/jpeg");
 
         Uri uri = Uri.parse(photo.getLocalUri());
         String path = Utils.getRealPathFromURI(this, uri);
@@ -310,7 +322,7 @@ public class SyncService extends Service {
                                                     Map<String, Object> map = new HashMap<>();
 
                                                     map.put(Constants.FIREBASE_PICASA_URI,
-                                                            response.body().getImageUrl());
+                                                            response.body().getSrc());
 
                                                     //update picasa uri of photo
                                                     child.getRef()

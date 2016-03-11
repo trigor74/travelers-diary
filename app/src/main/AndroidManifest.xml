@@ -67,8 +67,13 @@
             android:name=".activities.RemindItemActivity"
             android:windowSoftInputMode="adjustResize" />
 
-        <service android:name=".services.SyncService"
-            android:exported="false"/>
+        <activity
+            android:name=".activities.PreferencesActivity"
+            android:label="@string/settings" />
+
+        <service
+            android:name=".services.SyncService"
+            android:exported="false" />
 
     </application>
 
