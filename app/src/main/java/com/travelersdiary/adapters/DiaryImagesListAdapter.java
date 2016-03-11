@@ -53,7 +53,7 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, FullScreenImageActivity.class);
-                intent.putStringArrayListExtra("images", Utils.photoArrayToStringArray(mContext, mImagesList));
+                intent.putExtra("images",  mImagesList);
                 intent.putExtra("position", viewHolder.getAdapterPosition());
                 mContext.startActivity(intent);
             }
