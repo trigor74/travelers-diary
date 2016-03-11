@@ -124,19 +124,22 @@ public class BaseActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.nav_travels:
                 intent.putExtra(MainActivity.KEY_TAB_POSITION, 0);
-                break;
+                startActivity(intent);
+                return true;
             case R.id.nav_diary:
                 intent.putExtra(MainActivity.KEY_TAB_POSITION, 1);
-                break;
+                startActivity(intent);
+                return true;
             case R.id.nav_reminder:
                 intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
-                break;
+                startActivity(intent);
+                return true;
             case R.id.nav_settings:
                 intent = new Intent(this, PreferencesActivity.class);
-                break;
+                startActivity(intent);
+                return true;
             default:
         }
-        startActivity(intent);
         return super.onOptionsItemSelected(item);
     }
 

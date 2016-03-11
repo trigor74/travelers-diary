@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
@@ -35,7 +34,7 @@ public class MainActivity extends BaseActivity {
     ViewPager mViewPager;
 
     @OnClick(R.id.main_activity_fab)
-    public void onClickFAB(View v) {
+    public void onFabClick() {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();

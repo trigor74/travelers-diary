@@ -288,9 +288,12 @@ public class DiaryFragment extends Fragment {
     }
 
     private void initNewDiaryNote(DiaryNote diaryNote) {
+        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, "Uncategorized");
+        String travelId = getArguments().getString(Constants.KEY_TRAVEL_KEY, "default");
+
         diaryNote.setTitle("New Diary Note");
-        diaryNote.setTravelId("default"); // change to active
-        diaryNote.setTravelTitle("Uncategorized"); // change to active
+        diaryNote.setTravelId(travelId); // change to active
+        diaryNote.setTravelTitle(travelTitle); // change to active
         diaryNote.setTime(System.currentTimeMillis());
 
         mEdtDiaryNoteTitle.setText(diaryNote.getTitle());
