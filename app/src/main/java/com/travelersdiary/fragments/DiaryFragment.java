@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -97,6 +98,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
+
+    @Bind(R.id.btn_view_all_images)
+    Button mButtonViewAllImages;
 
     private ActionBar mSupportActionBar;
 
@@ -321,8 +325,14 @@ public class DiaryFragment extends Fragment {
                 if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                     mImages = mDiaryNote.getPhotos();
 
+                    mImagesRecyclerView.setVisibility(View.VISIBLE);
+                    mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                     mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                } else {
+                    mImagesRecyclerView.setVisibility(View.GONE);
+                    mButtonViewAllImages.setVisibility(View.GONE);
                 }
             }
 
@@ -361,8 +371,14 @@ public class DiaryFragment extends Fragment {
                         if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                             mImages = mDiaryNote.getPhotos();
 
+                            mImagesRecyclerView.setVisibility(View.VISIBLE);
+                            mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                        } else {
+                            mImagesRecyclerView.setVisibility(View.GONE);
+                            mButtonViewAllImages.setVisibility(View.GONE);
                         }
                     }
 
@@ -479,8 +495,11 @@ public class DiaryFragment extends Fragment {
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 Photo photo = new Photo(mImagePath);
-
                 mImages.add(photo);
+
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+                mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
                 mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
             } else {
@@ -494,6 +513,9 @@ public class DiaryFragment extends Fragment {
             for (int i = 0; i < path.size(); i++) {
                 mImages.add(new Photo(path.get(i)));
             }
+
+            mImagesRecyclerView.setVisibility(View.VISIBLE);
+            mButtonViewAllImages.setVisibility(View.VISIBLE);
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
