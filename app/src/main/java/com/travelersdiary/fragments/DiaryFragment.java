@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -389,6 +390,11 @@ public class DiaryFragment extends Fragment {
         if (isEditingMode) {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, true);
+
+            PackageManager pm = getActivity().getPackageManager();
+            if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+                menu.findItem(R.id.action_add_photo).setVisible(false);
+            }
         } else {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, false);
