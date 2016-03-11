@@ -119,13 +119,24 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(this, MainActivity.class);
+
         switch (item.getItemId()) {
+            case R.id.nav_travels:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 0);
+                break;
+            case R.id.nav_diary:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 1);
+                break;
+            case R.id.nav_reminder:
+                intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
+                break;
             case R.id.nav_settings:
-                Intent intent = new Intent(this, PreferencesActivity.class);
-                startActivity(intent);
-                return true;
+                intent = new Intent(this, PreferencesActivity.class);
+                break;
             default:
         }
+        startActivity(intent);
         return super.onOptionsItemSelected(item);
     }
 

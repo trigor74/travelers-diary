@@ -11,7 +11,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.travelersdiary.R;
@@ -83,7 +82,7 @@ public class MainActivity extends BaseActivity {
 
         setupViewPager();
 
-        openSelectedTab();
+        openSelectedTab(getIntent());
     }
 
     public void setupViewPager() {
@@ -114,20 +113,9 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_travels:
-                mTabLayout.getTabAt(0).select();
-                return true;
-            case R.id.nav_diary:
-                mTabLayout.getTabAt(1).select();
-                return true;
-            case R.id.nav_reminder:
-                mTabLayout.getTabAt(2).select();
-                return true;
-            default:
-        }
-        return super.onOptionsItemSelected(item);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        openSelectedTab(intent);
     }
 
     @Override
@@ -135,11 +123,10 @@ public class MainActivity extends BaseActivity {
         return true;
     }
 
-    private void openSelectedTab() {
-        Intent intent = getIntent();
+    private void openSelectedTab(Intent intent) {
         int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
 
-        mViewPager.setCurrentItem(tabToOpen);
+        mTabLayout.getTabAt(tabToOpen).select();
         mNavigationView.getMenu().getItem(tabToOpen).setChecked(true);
     }
 
