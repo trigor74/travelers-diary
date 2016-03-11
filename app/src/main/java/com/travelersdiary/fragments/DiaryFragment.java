@@ -472,7 +472,7 @@ public class DiaryFragment extends Fragment {
 
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
-                Photo photo = new Photo("file:" + mImagePath);
+                Photo photo = new Photo(mImagePath);
 
                 mImages.add(photo);
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
@@ -521,7 +521,11 @@ public class DiaryFragment extends Fragment {
                 travelPicturesFolder    /* directory */
         );
 
-        mImagePath = image.getAbsolutePath();
+        Uri imageUri = Utils.getImageContentUri(getContext(), image);
+        if (imageUri != null) {
+            mImagePath = imageUri.toString();
+        }
+
         return image;
     }
 

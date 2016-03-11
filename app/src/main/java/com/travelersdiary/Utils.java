@@ -2,16 +2,17 @@ package com.travelersdiary;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
-import android.provider.MediaStore;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -92,6 +93,37 @@ public class Utils {
         }
 
         return null;
+    }
+
+    public static Uri getImageContentUri(Context context, File imageFile) {
+        Cursor cursor = null;
+        try {
+            String filePath = imageFile.getAbsolutePath();
+            cursor = context.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{MediaStore.Images.Media._ID},
+                    MediaStore.Images.Media.DATA + "=? ",
+                    new String[]{filePath}, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int id = cursor.getInt(cursor
+                        .getColumnIndex(MediaStore.MediaColumns._ID));
+                Uri baseUri = Uri.parse("content://media/external/images/media");
+                return Uri.withAppendedPath(baseUri, "" + id);
+            } else {
+                if (imageFile.exists()) {
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.Images.Media.DATA, filePath);
+                    return context.getContentResolver().insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                } else {
+                    return null;
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     public static boolean checkFileExists(Context context, String uri) {
