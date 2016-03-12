@@ -35,7 +35,7 @@ public class PreferencesActivity extends AppCompatActivity {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.settingsColorPrimaryDark));
         }
 
         getFragmentManager().beginTransaction()

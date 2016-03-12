@@ -24,6 +24,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="SettingsTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/settingsColorPrimary</item>
+        <item name="colorPrimaryDark">@color/settingsColorPrimaryDark</item>
+    </style>
+
     <style name="ListItemPrimaryText">
         <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">sans-serif</item>

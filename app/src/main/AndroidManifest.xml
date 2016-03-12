@@ -71,7 +71,8 @@
 
         <activity
             android:name=".activities.PreferencesActivity"
-            android:label="@string/settings" />
+            android:label="@string/settings"
+            android:theme="@style/SettingsTheme" />
 
         <service
             android:name=".services.SyncService"
