@@ -11,22 +11,26 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
-import com.firebase.ui.FirebaseRecyclerAdapter;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.ReminderItemActivity;
-import com.travelersdiary.adapters.ReminderListAdapter;
+import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
+import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -36,7 +40,7 @@ public class ReminderListFragment extends Fragment {
     @Bind(R.id.reminder_list)
     RecyclerView mReminderList;
 
-    private FirebaseRecyclerAdapter mAdapter;
+    private FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private ActionMode mDeleteMode = null;
@@ -56,8 +60,7 @@ public class ReminderListFragment extends Fragment {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.menu_item_delete) {
                 for (Firebase ref :
-                        ((ReminderListAdapter) mAdapter).getSelectedItemsRef()) {
-                    Log.v("SELECTOR", "Selected ref:" + ref.toString());
+                        (List<Firebase>) mAdapter.getSelectedItemsRef()) {
                     ref.removeValue();
                 }
                 mode.finish();
@@ -68,8 +71,8 @@ public class ReminderListFragment extends Fragment {
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            ((ReminderListAdapter) mAdapter).setSelectable(false);
-            ((ReminderListAdapter) mAdapter).clearSelections();
+            mAdapter.setSelectable(false);
+            mAdapter.clearSelections();
             mDeleteMode = null;
         }
     };
@@ -111,13 +114,45 @@ public class ReminderListFragment extends Fragment {
             query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_ACTIVE).equalTo(true);
         }
 
-        mAdapter = new ReminderListAdapter(query);
+        mAdapter = new FirebaseMultiSelectRecyclerAdapter<ReminderItem, ReminderListFragment.ViewHolder>(
+                ReminderItem.class,
+                R.layout.list_item_reminder,
+                ReminderListFragment.ViewHolder.class,
+                query) {
+            @Override
+            protected void populateViewHolder(ReminderListFragment.ViewHolder viewHolder, ReminderItem model, int position) {
+
+                viewHolder.textViewTitle.setText(model.getTitle());
+                String type = model.getType();
+                if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
+                    // remind at time
+                    long time = model.getTime();
+                    String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
+                    viewHolder.textViewInfo.setText(timeText);
+                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
+                } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
+                    // remind at location
+                    viewHolder.textViewInfo.setText(model.getWaypoint().getTitle());
+                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
+                } else {
+                    // don't remind
+                    viewHolder.textViewInfo.setText(R.string.reminder_dont_remind_text);
+                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_off_black_24dp);
+                }
+                if (model.isCompleted()) {
+                    viewHolder.imageViewCompletedIcon.setVisibility(View.VISIBLE);
+                } else {
+                    viewHolder.imageViewCompletedIcon.setVisibility(View.INVISIBLE);
+                }
+            }
+        };
+
         mReminderList.setAdapter(mAdapter);
 
-        ((ReminderListAdapter) mAdapter).setOnItemClickListener(new ReminderListAdapter.OnItemClickListener() {
+        mAdapter.setOnItemClickListener(new FirebaseMultiSelectRecyclerAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (!((ReminderListAdapter) mAdapter).tapSelection(position)) {
+                if (!mAdapter.tapSelection(position)) {
                     String key = mAdapter.getRef(position).getKey();
 
                     Intent intent = new Intent(getActivity(), ReminderItemActivity.class);
@@ -125,11 +160,11 @@ public class ReminderListFragment extends Fragment {
                     startActivity(intent);
                 } else {
                     if (mDeleteMode != null) {
-                        if (((ReminderListAdapter) mAdapter).getSelectedItemCount() == 0) {
+                        if (mAdapter.getSelectedItemCount() == 0) {
                             mDeleteMode.finish();
                         } else {
-                            int selectedItems = ((ReminderListAdapter) mAdapter).getSelectedItemCount();
-                            int items = ((ReminderListAdapter) mAdapter).getItemCount();
+                            int selectedItems = mAdapter.getSelectedItemCount();
+                            int items = mAdapter.getItemCount();
                             mDeleteMode.setTitle(getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
                         }
                     }
@@ -142,11 +177,11 @@ public class ReminderListFragment extends Fragment {
                     mDeleteMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mDeleteModeCallback);
                 }
                 if (mDeleteMode != null) {
-                    ((ReminderListAdapter) mAdapter).setSelectable(true);
-                    ((ReminderListAdapter) mAdapter).setSelected(position, true);
+                    mAdapter.setSelectable(true);
+                    mAdapter.setSelected(position, true);
 
-                    int selectedItems = ((ReminderListAdapter) mAdapter).getSelectedItemCount();
-                    int items = ((ReminderListAdapter) mAdapter).getItemCount();
+                    int selectedItems = mAdapter.getSelectedItemCount();
+                    int items = mAdapter.getItemCount();
                     mDeleteMode.setTitle(getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
                 }
             }
@@ -158,5 +193,22 @@ public class ReminderListFragment extends Fragment {
         ButterKnife.unbind(this);
         mAdapter.cleanup();
         super.onDestroyView();
+    }
+
+    static class ViewHolder extends FirebaseMultiSelectRecyclerAdapter.ViewHolder {
+
+        @Bind(R.id.item_reminder_todo_item_title_text_view)
+        TextView textViewTitle;
+        @Bind(R.id.item_reminder_todo_item_remind_info_text_view)
+        TextView textViewInfo;
+        @Bind(R.id.item_reminder_todo_item_type_icon)
+        ImageView imageViewItemTypeIcon;
+        @Bind(R.id.item_reminder_completed_icon)
+        ImageView imageViewCompletedIcon;
+
+        public ViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this, view);
+        }
     }
 }

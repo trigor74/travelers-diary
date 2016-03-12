@@ -1,5 +1,6 @@
 package com.travelersdiary.adapters;
 
+import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 import android.view.View;
 
@@ -11,12 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FirebaseMultiselectRecyclerAdapter<T, VH extends android.support.v7.widget.RecyclerView.ViewHolder> extends FirebaseRecyclerAdapter<T, VH> {
-    public FirebaseMultiselectRecyclerAdapter(Class<T> modelClass, int modelLayout, Class<VH> viewHolderClass, Query ref) {
+public abstract class FirebaseMultiSelectRecyclerAdapter<T, VH extends RecyclerView.ViewHolder> extends FirebaseRecyclerAdapter<T, VH> {
+    public FirebaseMultiSelectRecyclerAdapter(Class<T> modelClass, int modelLayout, Class<VH> viewHolderClass, Query ref) {
         super(modelClass, modelLayout, viewHolderClass, ref);
     }
 
-    public FirebaseMultiselectRecyclerAdapter(Class<T> modelClass, int modelLayout, Class<VH> viewHolderClass, Firebase ref) {
+    public FirebaseMultiSelectRecyclerAdapter(Class<T> modelClass, int modelLayout, Class<VH> viewHolderClass, Firebase ref) {
         super(modelClass, modelLayout, viewHolderClass, ref);
     }
 
@@ -32,7 +33,7 @@ public class FirebaseMultiselectRecyclerAdapter<T, VH extends android.support.v7
         this.onItemClickListener = onItemClickListener;
     }
 
-    public static class ViewHolder extends android.support.v7.widget.RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -59,6 +60,8 @@ public class FirebaseMultiselectRecyclerAdapter<T, VH extends android.support.v7
 
     @Override
     public void onBindViewHolder(VH viewHolder, int position) {
+//        T model = getItem(position);
+//        populateViewHolder(viewHolder, model, position);
         super.onBindViewHolder(viewHolder, position);
         if (isSelectable()) {
             viewHolder.itemView.setActivated(isSelected(position));
@@ -66,6 +69,8 @@ public class FirebaseMultiselectRecyclerAdapter<T, VH extends android.support.v7
             viewHolder.itemView.setActivated(false);
         }
     }
+
+//    protected abstract void populateViewHolder(VH viewHolder, T model, int position);
 
     private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
     private HashMap<Integer, Firebase> mSelectedItemsRef = new HashMap<>();
