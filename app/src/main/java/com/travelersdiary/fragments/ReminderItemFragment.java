@@ -484,7 +484,6 @@ public class ReminderItemFragment extends Fragment {
                         new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))) {
                     @Override
                     protected void populateView(View view, Travel travel, int position) {
-                        super.populateView(view, travel, position);
                         ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
                     }
                 };
