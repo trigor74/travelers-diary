@@ -1,5 +1,5 @@
 #Traveler's Diary
-#Дневник путешественника
+##Дневник путешественника
 #![](https://dl.dropboxusercontent.com/s/udl5tzonra0xwu7/travelers-diary-icon.png) 
 
 - GitHub: https://github.com/trigor74/travelers-diary
@@ -9,5 +9,4 @@
 - QR-Code (APK): https://dl.dropboxusercontent.com/s/nfzyrxcddmdtkbf/travelers-diary-QR-Code.png
 - APK: https://www.dropbox.com/s/39fh658hp24sdn1/travelers-diary.apk?dl=1
 
-#![](https://dl.dropboxusercontent.com/s/nfzyrxcddmdtkbf/travelers-diary-QR-Code.png) 
-
+![](https://dl.dropboxusercontent.com/s/nfzyrxcddmdtkbf/travelers-diary-QR-Code.png) 
