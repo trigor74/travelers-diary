@@ -1,6 +1,8 @@
 package com.travelersdiary.models;
 
-public class LocationPoint {
+import java.io.Serializable;
+
+public class LocationPoint implements Serializable {
     private double latitude;
     private double longitude;
     private double altitude;

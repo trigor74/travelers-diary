@@ -36,12 +36,14 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
 
     private Context mContext;
     private LayoutInflater mInflater;
+    private LayoutInflater mDropDownInflater;
 
     public RemindTypesAdapter(Context context) {
-        super(context, R.layout.spinner_remind_type_item);
+        super(context, R.layout.spinner_reminder_type_item);
 
         this.mContext = context;
         this.mInflater = LayoutInflater.from(mContext);
+        this.mDropDownInflater = LayoutInflater.from(mContext);
 
         String[] names = context.getResources().getStringArray(R.array.reminder_type_names);
         TypedArray icons = context.getResources().obtainTypedArray(R.array.reminder_type_icons);
@@ -60,17 +62,17 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
                 position,
                 convertView,
                 parent,
-                R.layout.spinner_remind_type_item,
+                R.layout.spinner_reminder_type_item,
                 false);
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(mInflater,
+        return createViewFromResource(mDropDownInflater,
                 position,
                 convertView,
                 parent,
-                R.layout.spinner_remind_type_item,
+                R.layout.spinner_reminder_type_dropdown_item,
                 true);
     }
 
@@ -79,8 +81,6 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
         RemindType item = getItem(position);
 
         View view;
-        TextView text;
-        ImageView icon;
 
         if (convertView == null) {
             view = inflater.inflate(resource, parent, false);
@@ -88,15 +88,12 @@ public class RemindTypesAdapter extends ArrayAdapter<RemindTypesAdapter.RemindTy
             view = convertView;
         }
 
-        text = (TextView) view.findViewById(R.id.spinner_remind_type_item_text);
-        text.setText(item.getTypeName());
         if (dropDown) {
-            text.setVisibility(View.VISIBLE);
-        } else {
-            text.setVisibility(View.GONE);
+            TextView text = (TextView) view.findViewById(R.id.spinner_remind_type_item_text);
+            text.setText(item.getTypeName());
         }
 
-        icon = (ImageView) view.findViewById(R.id.spinner_remind_type_item_icon);
+        ImageView icon = (ImageView) view.findViewById(R.id.spinner_remind_type_item_icon);
         icon.setImageResource(item.getTypeIconResourceId());
 
         return view;

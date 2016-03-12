@@ -1,6 +1,8 @@
 package com.travelersdiary.models;
 
-public class Waypoint {
+import java.io.Serializable;
+
+public class Waypoint implements Serializable {
     private String travelId;
     private String title;
     private LocationPoint location;

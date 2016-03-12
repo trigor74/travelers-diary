@@ -1,9 +1,8 @@
 package com.travelersdiary.models;
 
-/**
- * Created by itrifonov on 31.12.2015.
- */
-public class Travel {
+import java.io.Serializable;
+
+public class Travel implements Serializable {
     private long start; //time stamp
     private long stop; //time stamp
     private String title;

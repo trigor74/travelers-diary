@@ -1,24 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group android:id="@+id/remind_item_menu_view_mode">
-        <item
-            android:id="@+id/action_edit_remind_item"
-            android:icon="@drawable/ic_edit_white_24dp"
-            android:title="@string/edit"
-            app:showAsAction="always" />
-    </group>
-    <group android:id="@+id/remind_item_menu_edit_mode">
-        <item
-            android:id="@+id/action_save_remind_item"
-            android:icon="@drawable/ic_save_white_24dp"
-            android:title="@string/save"
-            app:showAsAction="always" />
-    </group>
     <group android:id="@+id/remind_item_menu_view_as_checkboxes">
         <item
             android:id="@+id/action_switch_checkboxes_remind_item"
-            android:title="@string/remind_item_show_checkboxes"
+            android:title="@string/reminder_show_checkboxes"
             app:showAsAction="never" />
     </group>
 </menu>

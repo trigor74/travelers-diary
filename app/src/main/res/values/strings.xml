@@ -18,6 +18,7 @@
     <string name="title">Title</string>
     <string name="text">Text</string>
     <string name="discard_changes_text">Discard changes?</string>
+    <string name="save_changes_text">Save changes?</string>
     <string name="images">Images</string>
     <string name="albums">Albums</string>
     <string name="select">Select</string>
@@ -45,12 +46,21 @@
 
     <string name="travel_activity_title">A Travel</string>
 
+    <string name="reminder_list_action_mode_title_text">%1$d/%2$d</string>
+
     <string name="reminder_dont_remind_text">Don\'t remind</string>
     <string name="reminder_choose_location_text">Choose location</string>
     <string name="reminder_new_remind_item_default_title">New remind item</string>
     <string name="reminder_new_remind_item_default_text">Write text here to remind</string>
-    <string name="remind_item_show_checkboxes">Show Checkboxes</string>
-    <string name="remind_item_hide_checkboxes">Hide Checkboxes</string>
+    <string name="reminder_show_checkboxes">Show Checkboxes</string>
+    <string name="reminder_hide_checkboxes">Hide Checkboxes</string>
+    <string name="reminder_error_save_text">Cannot save changes</string>
+    <string name="reminder_error_data_text">Invalid data</string>
+    <string name="reminder_error_time_text">Invalid time</string>
+    <string name="reminder_error_distance_text">Invalid distance</string>
+    <string name="reminder_error_location_text">Invalid location</string>
+    <string name="reminder_place_picker_progress_dialog_title"></string>
+    <string name="reminder_place_picker_progress_dialog_message">Loading...</string>
     <string-array name="reminder_type_names">
         <item>Don\'t remind</item>
         <item>Remind at time</item>
@@ -61,5 +71,15 @@
         <item>@drawable/ic_alarm_black_24dp</item>
         <item>@drawable/ic_location_on_black_24dp</item>
     </array>
+    <string name="reminder_choose_distance_text">Enter a distance, or select from the list</string>
+    <string-array name="reminder_distance_values">
+        <item>50</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
+        <item>300</item>
+        <item>500</item>
+        <item>1000</item>
+    </string-array>
 
 </resources>

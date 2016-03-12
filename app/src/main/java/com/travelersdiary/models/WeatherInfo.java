@@ -1,9 +1,8 @@
 package com.travelersdiary.models;
 
-/**
- * Created by itrifonov on 31.12.2015.
- */
-public class WeatherInfo {
+import java.io.Serializable;
+
+public class WeatherInfo implements Serializable {
     private String unit; // Default, Metric, Imperial
     private String weatherMain; // Group of weather parameters (Rain, Snow, Extreme etc.)
     private String weatherDescription; // Weather condition within the group

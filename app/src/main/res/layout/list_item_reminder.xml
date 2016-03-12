@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_item_background_selector"
+    android:clickable="true"
+    android:orientation="horizontal"
+    android:paddingBottom="20dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="20dp">
+    <!--android:background="?android:attr/activatedBackgroundIndicator"-->
+    <!--android:background="?android:attr/selectableItemBackground"-->
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/item_reminder_todo_item_title_text_view"
+            style="@style/ListItemPrimaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A TODO Item Title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:id="@+id/item_reminder_todo_item_type_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:alpha=".5"
+                android:src="@drawable/ic_alarm_black_24dp" />
+
+            <TextView
+                android:id="@+id/item_reminder_todo_item_remind_info_text_view"
+                style="@style/ListItemSecondaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="16sp"
+                android:text="A todo item place or time info" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/item_reminder_completed_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:alpha=".5"
+        android:paddingLeft="16dp"
+        android:src="@drawable/ic_done_all_black_24dp"
+        android:visibility="visible" />
+
+</LinearLayout>

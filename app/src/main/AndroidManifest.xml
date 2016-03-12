@@ -64,8 +64,8 @@
         <activity android:name=".activities.FullScreenImageActivity" />
 
         <activity
-            android:name=".activities.RemindItemActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:name=".activities.ReminderItemActivity"
+            android:windowSoftInputMode="stateHidden" />
 
     </application>
 

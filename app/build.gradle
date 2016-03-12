@@ -145,6 +145,8 @@ dependencies {
         transitive = true;
     }
 
+    compile 'com.bignerdranch.android:recyclerview-multiselect:+'
+
     /*Implementation of LinearLayoutManager which wraps its contents*/
     compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
 }

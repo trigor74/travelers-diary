@@ -11,11 +11,13 @@
         android:id="@+id/remind_item_title_edit_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="@string/title"
+        android:backgroundTint="@color/white"
+        android:hint="No Title"
         android:imeOptions="actionDone|flagNoEnterAction"
         android:inputType="textAutoCorrect|textCapSentences"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
 
 </android.support.v7.widget.Toolbar>

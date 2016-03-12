@@ -13,15 +13,23 @@ import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
     private Context mContext;
     private int mNumOfTabs;
+    private final List<Fragment> mFragments = new ArrayList<>();
 
     public ViewPagerAdapter(FragmentManager fm, Context current, int numOfTabs) {
         super(fm);
         this.mContext = current;
         this.mNumOfTabs = numOfTabs;
+    }
+
+    public void addFragment(Fragment fragment) {
+        mFragments.add(fragment);
     }
 
     // Overriding the getWidth method
@@ -40,34 +48,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        switch (position) {
-            case 0:
-                if (mContext.getClass().equals(MainActivity.class)) {
-                    return new TravelsListFragment();
-                } else if (mContext.getClass().equals(TravelActivity.class)) {
-                    return new DiaryListFragment();
-                } else {
-                    return null;
-                }
-            case 1:
-                if (mContext.getClass().equals(MainActivity.class)) {
-                    return new DiaryListFragment();
-                } else if (mContext.getClass().equals(TravelActivity.class)) {
-                    return new ReminderListFragment();
-                } else {
-                    return null;
-                }
-            case 2:
-                if (mContext.getClass().equals(MainActivity.class)) {
-                    return new ReminderListFragment();
-                } else if (mContext.getClass().equals(TravelActivity.class)) {
-                    return new MapFragment();
-                } else {
-                    return null;
-                }
-            default:
-                return null;
-        }
+        return mFragments.get(position);
     }
 
     @Override

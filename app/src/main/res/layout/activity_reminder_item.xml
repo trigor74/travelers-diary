@@ -6,7 +6,7 @@
 
     <include
         android:id="@+id/remind_item_activity_toolbar"
-        layout="@layout/toolbar_remind_item_activity" />
+        layout="@layout/toolbar_reminder_item_activity" />
 
     <FrameLayout
         android:id="@+id/fragment_container"
