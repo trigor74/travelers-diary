@@ -1,6 +1,6 @@
 #Traveler's Diary
 ##Дневник путешественника
-#![](https://dl.dropboxusercontent.com/s/udl5tzonra0xwu7/travelers-diary-icon.png) 
+#![](https://dl.dropboxusercontent.com/s/xe8iy7rsoag709g/travelers-diary-logo.png) 
 
 - GitHub: https://github.com/trigor74/travelers-diary
 - Description: https://goo.gl/eBSmvm
