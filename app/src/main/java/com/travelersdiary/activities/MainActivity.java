@@ -3,6 +3,7 @@ package com.travelersdiary.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -13,6 +14,10 @@ import android.view.View;
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.dialogs.EditTravelDialog;
+import com.travelersdiary.fragments.DiaryListFragment;
+import com.travelersdiary.fragments.MapFragment;
+import com.travelersdiary.fragments.ReminderListFragment;
+import com.travelersdiary.fragments.TravelsListFragment;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -79,6 +84,11 @@ public class MainActivity extends BaseActivity {
 
         final ViewPagerAdapter adapter = new ViewPagerAdapter
                 (getSupportFragmentManager(), MainActivity.this, mTabLayout.getTabCount());
+
+        adapter.addFragment(new TravelsListFragment());
+        adapter.addFragment(new DiaryListFragment());
+        adapter.addFragment(new ReminderListFragment());
+
         mViewPager.setAdapter(adapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
         mTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -90,6 +100,10 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+                Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
+                if (fragment instanceof ReminderListFragment) {
+                    ((ReminderListFragment) fragment).finishActionMode();
+                }
             }
 
             @Override

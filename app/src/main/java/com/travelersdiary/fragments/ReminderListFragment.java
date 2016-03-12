@@ -188,6 +188,18 @@ public class ReminderListFragment extends Fragment {
         });
     }
 
+    public void finishActionMode() {
+        if (mDeleteMode != null) {
+            mDeleteMode.finish();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        finishActionMode();
+        super.onPause();
+    }
+
     @Override
     public void onDestroyView() {
         ButterKnife.unbind(this);
