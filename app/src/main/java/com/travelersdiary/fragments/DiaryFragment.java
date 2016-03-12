@@ -208,7 +208,7 @@ public class DiaryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.HORIZONTAL, true);
+                LinearLayoutManager.HORIZONTAL, false);
         mImagesRecyclerView.setLayoutManager(layoutManager);
 
         mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -332,7 +332,7 @@ public class DiaryFragment extends Fragment {
                     mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
-                    mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                    mImagesRecyclerView.scrollToPosition(0);
                 } else {
                     mImagesRecyclerView.setVisibility(View.GONE);
                     mButtonViewAllImages.setVisibility(View.GONE);
@@ -378,7 +378,7 @@ public class DiaryFragment extends Fragment {
                             mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
-                            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                            mImagesRecyclerView.scrollToPosition(0);
                         } else {
                             mImagesRecyclerView.setVisibility(View.GONE);
                             mButtonViewAllImages.setVisibility(View.GONE);
@@ -498,13 +498,13 @@ public class DiaryFragment extends Fragment {
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 Photo photo = new Photo(mImagePath);
-                mImages.add(photo);
+                mImages.add(0, photo);
 
                 mImagesRecyclerView.setVisibility(View.VISIBLE);
                 mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-                mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                mImagesRecyclerView.scrollToPosition(0);
             } else {
                 new File(mImagePath).delete();
             }
@@ -514,14 +514,14 @@ public class DiaryFragment extends Fragment {
             ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
 
             for (int i = 0; i < path.size(); i++) {
-                mImages.add(new Photo(path.get(i)));
+                mImages.add(0, new Photo(path.get(i)));
             }
 
             mImagesRecyclerView.setVisibility(View.VISIBLE);
             mButtonViewAllImages.setVisibility(View.VISIBLE);
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-            mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+            mImagesRecyclerView.scrollToPosition(0);
         }
     }
 
