@@ -8,16 +8,18 @@ public class Travel implements Serializable {
     private String title;
     private String description;
     private boolean active;
+    private String picasaAlbumId;
 
     public Travel() {
     }
 
-    public Travel(long start, long stop, String title, String description, boolean active) {
+    public Travel(long start, long stop, String title, String description, boolean active, String picasaAlbumId) {
         this.start = start;
         this.stop = stop;
         this.title = title;
         this.description = description;
         this.active = active;
+        this.picasaAlbumId = picasaAlbumId;
     }
 
     public long getStart() {
@@ -58,5 +60,13 @@ public class Travel implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getPicasaAlbumId() {
+        return picasaAlbumId;
+    }
+
+    public void setPicasaAlbumId(String picasaAlbumId) {
+        this.picasaAlbumId = picasaAlbumId;
     }
 }

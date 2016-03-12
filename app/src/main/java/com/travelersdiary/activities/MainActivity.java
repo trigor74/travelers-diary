@@ -1,15 +1,17 @@
 package com.travelersdiary.activities;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
 
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
@@ -18,6 +20,7 @@ import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
+import com.travelersdiary.services.SyncService;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -36,7 +39,7 @@ public class MainActivity extends BaseActivity {
     ViewPager mViewPager;
 
     @OnClick(R.id.main_activity_fab)
-    public void onClickFAB(View v) {
+    public void onFabClick() {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
                 FragmentManager fragmentManager = getSupportFragmentManager();
@@ -71,9 +74,19 @@ public class MainActivity extends BaseActivity {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean syncServiceEnabled = sharedPreferences.getBoolean("sync_service_check_box", true);
+
+        if (savedInstanceState == null) {
+            if (!isServiceRunning(SyncService.class) && syncServiceEnabled) {
+                Intent intent = new Intent(this, SyncService.class);
+                startService(intent);
+            }
+        }
+
         setupViewPager();
 
-        openSelectedTab();
+        openSelectedTab(getIntent());
     }
 
     public void setupViewPager() {
@@ -113,20 +126,9 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_travels:
-                mTabLayout.getTabAt(0).select();
-                break;
-            case R.id.nav_diary:
-                mTabLayout.getTabAt(1).select();
-                break;
-            case R.id.nav_reminder:
-                mTabLayout.getTabAt(2).select();
-                break;
-            default:
-        }
-        return super.onOptionsItemSelected(item);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        openSelectedTab(intent);
     }
 
     @Override
@@ -134,15 +136,25 @@ public class MainActivity extends BaseActivity {
         return true;
     }
 
-    private void openSelectedTab() {
-        Intent intent = getIntent();
+    private void openSelectedTab(Intent intent) {
         int tabToOpen = intent.getIntExtra(KEY_TAB_POSITION, 0);
 
-        mViewPager.setCurrentItem(tabToOpen);
+        mTabLayout.getTabAt(tabToOpen).select();
         mNavigationView.getMenu().getItem(tabToOpen).setChecked(true);
     }
 
     private boolean isTabletLandMode() {
         return getResources().getBoolean(R.bool.isTabletLand);
     }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

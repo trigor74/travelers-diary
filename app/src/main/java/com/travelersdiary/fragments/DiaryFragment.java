@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +54,7 @@ import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
 
 import java.io.File;
@@ -96,6 +99,9 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
 
+    @Bind(R.id.btn_view_all_images)
+    Button mButtonViewAllImages;
+
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -106,7 +112,7 @@ public class DiaryFragment extends Fragment {
     private RTManager mRtManager;
     private InputMethodManager mInputMethodManager;
 
-    private ArrayList<String> mImages = new ArrayList<>();
+    private ArrayList<Photo> mImages = new ArrayList<>();
     private String mImagePath;
 
     private Firebase mItemRef;
@@ -115,7 +121,6 @@ public class DiaryFragment extends Fragment {
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
-    private String mMessage;
     private String mUserUID;
     private String mKey;
 
@@ -128,12 +133,6 @@ public class DiaryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // read extras
-        if (savedInstanceState == null) {
-            Intent intent = getActivity().getIntent();
-            mMessage = getStringExtra(intent, "message");
-        }
-
         // set theme
         getActivity().setTheme(R.style.RteTheme);
 
@@ -185,7 +184,6 @@ public class DiaryFragment extends Fragment {
                 android.R.layout.simple_dropdown_item_1line, new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID))) {
             @Override
             protected void populateView(View view, Travel travel, int position) {
-                super.populateView(view, travel, position);
                 ((TextView) view.findViewById(android.R.id.text1)).setText(travel.getTitle());
             }
         };
@@ -290,9 +288,12 @@ public class DiaryFragment extends Fragment {
     }
 
     private void initNewDiaryNote(DiaryNote diaryNote) {
+        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, "Uncategorized");
+        String travelId = getArguments().getString(Constants.KEY_TRAVEL_KEY, "default");
+
         diaryNote.setTitle("New Diary Note");
-        diaryNote.setTravelId("default"); // change to active
-        diaryNote.setTravelTitle("Uncategorized"); // change to active
+        diaryNote.setTravelId(travelId); // change to active
+        diaryNote.setTravelTitle(travelTitle); // change to active
         diaryNote.setTime(System.currentTimeMillis());
 
         mEdtDiaryNoteTitle.setText(diaryNote.getTitle());
@@ -326,8 +327,15 @@ public class DiaryFragment extends Fragment {
 
                 if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                     mImages = mDiaryNote.getPhotos();
+
+                    mImagesRecyclerView.setVisibility(View.VISIBLE);
+                    mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                     mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                } else {
+                    mImagesRecyclerView.setVisibility(View.GONE);
+                    mButtonViewAllImages.setVisibility(View.GONE);
                 }
             }
 
@@ -365,8 +373,15 @@ public class DiaryFragment extends Fragment {
 
                         if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                             mImages = mDiaryNote.getPhotos();
+
+                            mImagesRecyclerView.setVisibility(View.VISIBLE);
+                            mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
+                        } else {
+                            mImagesRecyclerView.setVisibility(View.GONE);
+                            mButtonViewAllImages.setVisibility(View.GONE);
                         }
                     }
 
@@ -394,6 +409,11 @@ public class DiaryFragment extends Fragment {
         if (isEditingMode) {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, true);
+
+            PackageManager pm = getActivity().getPackageManager();
+            if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+                menu.findItem(R.id.action_add_photo).setVisible(false);
+            }
         } else {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, false);
@@ -474,9 +494,15 @@ public class DiaryFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
-                mImages.add("file:" + mImagePath);
+                Photo photo = new Photo(mImagePath);
+                mImages.add(photo);
+
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+                mButtonViewAllImages.setVisibility(View.VISIBLE);
+
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
                 mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
             } else {
@@ -486,7 +512,13 @@ public class DiaryFragment extends Fragment {
 
         if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
-            mImages.addAll(path);
+
+            for (int i = 0; i < path.size(); i++) {
+                mImages.add(new Photo(path.get(i)));
+            }
+
+            mImagesRecyclerView.setVisibility(View.VISIBLE);
+            mButtonViewAllImages.setVisibility(View.VISIBLE);
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(mImages.size() - 1);
@@ -520,7 +552,11 @@ public class DiaryFragment extends Fragment {
                 travelPicturesFolder    /* directory */
         );
 
-        mImagePath = image.getAbsolutePath();
+        Uri imageUri = Utils.getImageContentUri(getContext(), image);
+        if (imageUri != null) {
+            mImagePath = imageUri.toString();
+        }
+
         return image;
     }
 
@@ -538,10 +574,10 @@ public class DiaryFragment extends Fragment {
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
 
         //save travel
-        if (mTravelId != null) {
-            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
-            mDiaryNote.setTravelId(mTravelId);
-        }
+//        if (mTravelId != null) {
+//            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+//            mDiaryNote.setTravelId(mTravelId);
+//        }
 
         //save images
         mDiaryNote.setPhotos(mImages);
@@ -607,6 +643,11 @@ public class DiaryFragment extends Fragment {
                             Travel travel = mAdapter.getItem(which);
                             mTravelId = mAdapter.getRef(which).getKey();
                             mTxtTravel.setText(travel.getTitle());
+                            if (mTravelId != null) {
+                                mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+                                mDiaryNote.setTravelId(mTravelId);
+                                mDiaryNote.setPicasaAlbumId(travel.getPicasaAlbumId());
+                            }
                         }
                     })
                     .show();
@@ -616,7 +657,7 @@ public class DiaryFragment extends Fragment {
     @OnClick(R.id.btn_view_all_images)
     public void viewAllImages() {
         Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
-        intent.putStringArrayListExtra("images", mImages);
+        intent.putExtra("images", mImages);
         intent.putExtra("title", mDiaryNote.getTitle());
         startActivity(intent);
     }

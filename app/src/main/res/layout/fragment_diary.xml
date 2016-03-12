@@ -43,11 +43,13 @@
                         android:layout_height="150dp"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:visibility="gone"
                         android:scrollbars="horizontal" />
 
                     <Button
                         android:id="@+id/btn_view_all_images"
                         android:layout_width="wrap_content"
+                        android:visibility="gone"
                         android:layout_height="wrap_content"
                         android:text="View all images" />
 

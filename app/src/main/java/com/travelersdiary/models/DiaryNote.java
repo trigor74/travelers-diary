@@ -6,22 +6,25 @@ import java.util.ArrayList;
 public class DiaryNote implements Serializable {
     private String travelId;
     private String travelTitle;
+    private String picasaAlbumId;
     private long time;
     private String title;
     private String text;
     private LocationPoint location;
     private WeatherInfo weather;
-    private ArrayList<String> photos;
+    private ArrayList<Photo> photos;
     private ArrayList<String> audios;
     private ArrayList<String> videos;
 
     public DiaryNote() {
     }
 
-    public DiaryNote(String travelId, long time, String title, String text, LocationPoint location,
-                     WeatherInfo weather, ArrayList<String> photos, ArrayList<String> audios,
-                     ArrayList<String> videos) {
+    public DiaryNote(String travelId, String travelTitle, String picasaAlbumId, long time,
+                     String title, String text, LocationPoint location, WeatherInfo weather,
+                     ArrayList<Photo> photos, ArrayList<String> audios, ArrayList<String> videos) {
         this.travelId = travelId;
+        this.travelTitle = travelTitle;
+        this.picasaAlbumId = picasaAlbumId;
         this.time = time;
         this.title = title;
         this.text = text;
@@ -88,11 +91,11 @@ public class DiaryNote implements Serializable {
         this.weather = weather;
     }
 
-    public ArrayList<String> getPhotos() {
+    public ArrayList<Photo> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(ArrayList<String> photos) {
+    public void setPhotos(ArrayList<Photo> photos) {
         this.photos = photos;
     }
 
@@ -110,5 +113,13 @@ public class DiaryNote implements Serializable {
 
     public void setVideos(ArrayList<String> videos) {
         this.videos = videos;
+    }
+
+    public String getPicasaAlbumId() {
+        return picasaAlbumId;
+    }
+
+    public void setPicasaAlbumId(String picasaAlbumId) {
+        this.picasaAlbumId = picasaAlbumId;
     }
 }

@@ -180,7 +180,7 @@ public class LoginActivity extends AppCompatActivity implements
                 HashMap<String, String> result = new HashMap<>();
 
                 try {
-                    String scope = String.format("oauth2:email %s", Scopes.PLUS_LOGIN);
+                    String scope = String.format("oauth2:email %s %s", Scopes.PLUS_LOGIN, "https://picasaweb.google.com/data/");
                     id = GoogleAuthUtil.getAccountId(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient));
                     token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
                 } catch (IOException transientEx) {
@@ -223,6 +223,7 @@ public class LoginActivity extends AppCompatActivity implements
 
                 if (token != null) {
                     /* Successfully got OAuth token, now login with Google */
+                    mSharedPreferences.edit().putString(Constants.KEY_USER_GOOGLE_TOKEN, token).apply();
                     mFirebaseRef.authWithOAuthToken(Constants.GOOGLE_PROVIDER, token, new AuthResultHandler());
                 } else if (errorMessage != null) {
                     mAuthProgressDialog.hide();
@@ -301,6 +302,9 @@ public class LoginActivity extends AppCompatActivity implements
             if (authData.getProvider().equals(Constants.GOOGLE_PROVIDER)) {
                 mSharedPreferences.edit().putString(Constants.KEY_PROVIDER, authData.getProvider()).apply();
                 mSharedPreferences.edit().putString(Constants.KEY_USER_UID, authData.getUid()).apply();
+
+                String googleId = (String) authData.getProviderData().get(Constants.GOOGLE_ID);
+                mSharedPreferences.edit().putString(Constants.KEY_USER_GOOGLE_ID, googleId).apply();
 
                 String name = (String) authData.getProviderData().get(Constants.GOOGLE_DISPLAY_NAME);
                 mSharedPreferences.edit().putString(Constants.KEY_DISPLAY_NAME, name).apply();

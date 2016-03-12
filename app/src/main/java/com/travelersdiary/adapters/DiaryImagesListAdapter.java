@@ -10,7 +10,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.activities.FullScreenImageActivity;
+import com.travelersdiary.models.Photo;
 
 import java.util.ArrayList;
 
@@ -20,9 +22,9 @@ import butterknife.ButterKnife;
 public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesListAdapter.ViewHolder> {
 
     private Context mContext;
-    private ArrayList<String> mImagesList;
+    private ArrayList<Photo> mImagesList;
 
-    public DiaryImagesListAdapter(Context context, ArrayList<String> list) {
+    public DiaryImagesListAdapter(Context context, ArrayList<Photo> list) {
         this.mContext = context;
         this.mImagesList = list;
     }
@@ -37,7 +39,7 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
         }
     }
 
-    public void changeList(ArrayList<String> list) {
+    public void changeList(ArrayList<Photo> list) {
         this.mImagesList = list;
         notifyDataSetChanged();
     }
@@ -51,7 +53,7 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, FullScreenImageActivity.class);
-                intent.putStringArrayListExtra("images", mImagesList);
+                intent.putExtra("images",  mImagesList);
                 intent.putExtra("position", viewHolder.getAdapterPosition());
                 mContext.startActivity(intent);
             }
@@ -62,10 +64,17 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Glide.with(mContext)
-                .load(mImagesList.get(position))
-                .centerCrop()
-                .into(holder.image);
+        if (Utils.checkFileExists(mContext, mImagesList.get(position).getLocalUri())) {
+            Glide.with(mContext)
+                    .load(mImagesList.get(position).getLocalUri())
+                    .centerCrop()
+                    .into(holder.image);
+        } else {
+            Glide.with(mContext)
+                    .load(mImagesList.get(position).getPicasaUri())
+                    .centerCrop()
+                    .into(holder.image);
+        }
     }
 
     @Override

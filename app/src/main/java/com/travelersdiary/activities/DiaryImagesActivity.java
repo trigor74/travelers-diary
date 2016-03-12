@@ -19,6 +19,7 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.AlbumImagesAdapter;
+import com.travelersdiary.models.Photo;
 
 import java.util.ArrayList;
 
@@ -34,7 +35,7 @@ public class DiaryImagesActivity extends AppCompatActivity
     @Bind(R.id.album_images_list)
     RecyclerView mRecyclerView;
 
-    private ArrayList<String> mImages;
+    private ArrayList<Photo> mImages;
     private String mDiaryTitle;
     private ActionBar mSupportActionBar;
 
@@ -50,7 +51,7 @@ public class DiaryImagesActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         Intent intent = getIntent();
-        mImages = intent.getStringArrayListExtra("images");
+        mImages = (ArrayList<Photo>) intent.getExtras().get("images");
         mDiaryTitle = intent.getStringExtra("title");
 
         setSupportActionBar(mToolbar);
@@ -67,7 +68,7 @@ public class DiaryImagesActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));
 
-        mAdapter = new AlbumImagesAdapter(this, mImages, this);
+        mAdapter = new AlbumImagesAdapter(this, Utils.photoArrayToStringArray(this, mImages), this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -78,7 +79,7 @@ public class DiaryImagesActivity extends AppCompatActivity
             setToolbarTitle();
         } else {
             Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
-            intent.putStringArrayListExtra("images", mImages);
+            intent.putExtra("images", mImages);
             intent.putExtra("position", position);
 
             startActivity(intent);
@@ -118,7 +119,7 @@ public class DiaryImagesActivity extends AppCompatActivity
 
         Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
 
-        String uri = mImages.get(position);
+        String uri = mImages.get(position).getLocalUri();
 
         if (mAdapter.isSelected(position)) {
             mSelectedImages.add(uri);

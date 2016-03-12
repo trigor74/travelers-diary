@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.fragments.DiaryFragment;
 
@@ -17,6 +18,10 @@ public class AddDiaryNoteActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_diary_note);
+
+        String travelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
+        String travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -32,6 +37,8 @@ public class AddDiaryNoteActivity extends BaseActivity {
             DiaryFragment diaryFragment = new DiaryFragment();
             Bundle bundle = new Bundle();
             bundle.putBoolean("editing mode", true);
+            bundle.putString(Constants.KEY_TRAVEL_TITLE, travelTitle);
+            bundle.putString(Constants.KEY_TRAVEL_KEY, travelId);
             diaryFragment.setArguments(bundle);
 
             getSupportFragmentManager().beginTransaction()

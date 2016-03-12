@@ -2,12 +2,14 @@ package com.travelersdiary.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
@@ -17,6 +19,7 @@ import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 public class TravelActivity extends BaseActivity {
 
@@ -29,24 +32,27 @@ public class TravelActivity extends BaseActivity {
     @Bind(R.id.travel_view_pager)
     ViewPager mViewPager;
 
+    @Bind(R.id.travel_activity_fab)
+    FloatingActionButton mTravelActivityFab;
+
+    private String mTravelTitle;
+    private String mTravelId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_travel);
 
-        setSupportActionBar(mToolbar);
+        mTravelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
+        mTravelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
 
+        setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-//            supportActionBar.setTitle(R.string.travel_activity_title);
-            String travelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
-            if (travelTitle == null || travelTitle.isEmpty()) {
-                travelTitle = getString(R.string.travel_activity_title);
-            }
-            supportActionBar.setTitle(travelTitle);
+            supportActionBar.setTitle(mTravelTitle);
         }
 
         setupViewPager();
@@ -71,6 +77,10 @@ public class TravelActivity extends BaseActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
+
+                if (tab.getPosition() == 2) {
+                    mTravelActivityFab.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -78,6 +88,10 @@ public class TravelActivity extends BaseActivity {
                 Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
                 if (fragment instanceof ReminderListFragment) {
                     ((ReminderListFragment) fragment).finishActionMode();
+                }
+
+                if (tab.getPosition() == 2) {
+                    mTravelActivityFab.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -89,29 +103,32 @@ public class TravelActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 return true;
-            case R.id.nav_travels:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 0);
-                startActivity(intent);
+            default:
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @OnClick(R.id.travel_activity_fab)
+    public void onFabClick() {
+        switch (mViewPager.getCurrentItem()) {
+            case 0: // Diary Tab
+                Intent diaryIntent = new Intent(this, AddDiaryNoteActivity.class);
+                diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
+                diaryIntent.putExtra(Constants.KEY_TRAVEL_KEY, mTravelId);
+                startActivity(diaryIntent);
                 break;
-            case R.id.nav_diary:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 1);
-                startActivity(intent);
+            case 1: // Reminder Tab
+                Intent remindItemIntent = new Intent(this, RemindItemActivity.class);
+                startActivity(remindItemIntent);
                 break;
-            case R.id.nav_reminder:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
-                startActivity(intent);
+            case 2: // Map Tab
                 break;
             default:
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
 }
