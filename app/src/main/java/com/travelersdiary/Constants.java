@@ -69,4 +69,6 @@ public final class Constants {
     public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final int GALLERY_REQUEST_CODE = 21;
     public static final int ENTER_ALBUM_REQUEST_CODE = 22;
+    public static final int IMAGES_DELETE_REQUEST_CODE = 31;
+
 }

@@ -14,7 +14,6 @@ import android.view.WindowManager;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.FullScreenImageViewPagerAdapter;
-import com.travelersdiary.models.Photo;
 
 import java.util.ArrayList;
 
@@ -31,7 +30,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     private ActionBar mSupportActionBar;
 
-    private ArrayList<Photo> mImages;
+    private ArrayList<String> mImages;
     private int mPosition;
 
     private final ViewPager.OnPageChangeListener mOnPageChangeListener = new ViewPager.OnPageChangeListener() {
@@ -59,7 +58,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         Bundle extras = getIntent().getExtras();
-        mImages = (ArrayList<Photo>) extras.get("images");
+        mImages = extras.getStringArrayList("images");
         mPosition = extras.getInt("position");
 
         setSupportActionBar(mToolbar);
@@ -81,7 +80,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
     }
 
     private void setupViewPager() {
-        mViewPager.setAdapter(new FullScreenImageViewPagerAdapter(this, Utils.photoArrayToStringArray(this, mImages)));
+        mViewPager.setAdapter(new FullScreenImageViewPagerAdapter(this, mImages));
         mViewPager.setPageMargin(40);
         mViewPager.addOnPageChangeListener(mOnPageChangeListener);
         mViewPager.setCurrentItem(mPosition);
