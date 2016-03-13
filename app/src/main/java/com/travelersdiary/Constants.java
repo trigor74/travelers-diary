@@ -35,7 +35,6 @@ public final class Constants {
     public static final String GOOGLE_API_KEY = BuildConfig.GOOGLE_API_KEY;
     public static final String GOOGLE_API_SERVER_KEY = BuildConfig.GOOGLE_API_SERVER_KEY;
     public static final String GOOGLE_ANDROID_CLIENT_ID = BuildConfig.GOOGLE_ANDROID_CLIENT_ID;
-    public static final String GOOGLE_WEB_CLIENT_ID = BuildConfig.GOOGLE_WEB_CLIENT_ID;
     public static final String GOOGLE_PROVIDER = "google";
     public static final String GOOGLE_ID = "id";
     public static final String GOOGLE_EMAIL = "email";

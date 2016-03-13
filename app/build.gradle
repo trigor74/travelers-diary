@@ -60,7 +60,6 @@ android {
         it.buildConfigField 'String', 'GOOGLE_API_KEY', GoogleApiKey
         it.buildConfigField 'String', 'GOOGLE_API_SERVER_KEY', GoogleApiServerKey
         it.buildConfigField 'String', 'GOOGLE_ANDROID_CLIENT_ID', GoogleAndroidClientId
-        it.buildConfigField 'String', 'GOOGLE_WEB_CLIENT_ID', GoogleWebClientId
         it.buildConfigField 'String', 'FIREBASE_ROOT_URL', FirebaseRootUrl
     }
 
