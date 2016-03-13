@@ -21,47 +21,8 @@ public abstract class FirebaseMultiSelectRecyclerAdapter<T, VH extends RecyclerV
         super(modelClass, modelLayout, viewHolderClass, ref);
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
-
-        void onItemLongClick(View view, int position);
-    }
-
-    private static OnItemClickListener onItemClickListener;
-
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onItemClickListener != null)
-                        onItemClickListener.onItemClick(v, getLayoutPosition());
-                }
-            });
-            itemView.setLongClickable(true);
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (onItemClickListener != null) {
-                        onItemClickListener.onItemLongClick(v, getLayoutPosition());
-                        return true;
-                    }
-                    return false;
-                }
-            });
-        }
-    }
-
     @Override
     public void onBindViewHolder(VH viewHolder, int position) {
-//        T model = getItem(position);
-//        populateViewHolder(viewHolder, model, position);
         super.onBindViewHolder(viewHolder, position);
         if (isSelectable()) {
             viewHolder.itemView.setActivated(isSelected(position));
@@ -69,8 +30,6 @@ public abstract class FirebaseMultiSelectRecyclerAdapter<T, VH extends RecyclerV
             viewHolder.itemView.setActivated(false);
         }
     }
-
-//    protected abstract void populateViewHolder(VH viewHolder, T model, int position);
 
     private SparseBooleanArray mSelectedItems = new SparseBooleanArray();
     private HashMap<Integer, Firebase> mSelectedItemsRef = new HashMap<>();

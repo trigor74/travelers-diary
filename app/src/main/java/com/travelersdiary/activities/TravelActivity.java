@@ -17,6 +17,7 @@ import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
+import com.travelersdiary.interfaces.IActionModeFinishCallback;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -85,9 +86,15 @@ public class TravelActivity extends BaseActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
-                if (fragment instanceof ReminderListFragment) {
-                    ((ReminderListFragment) fragment).finishActionMode();
+                if (tab.getPosition() < 2) {
+                    Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
+                    try {
+                        IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
+                        actionModeFinishCallback.finishActionMode();
+                    } catch (ClassCastException e) {
+                        throw new ClassCastException(fragment.toString()
+                                + " must implement IActionModeFinishCallback");
+                    }
                 }
 
                 if (tab.getPosition() == 2) {

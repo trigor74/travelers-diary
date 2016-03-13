@@ -20,6 +20,7 @@ import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
+import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.services.SyncService;
 
 import butterknife.Bind;
@@ -113,9 +114,15 @@ public class MainActivity extends BaseActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
-                if (fragment instanceof ReminderListFragment) {
-                    ((ReminderListFragment) fragment).finishActionMode();
+                if (tab.getPosition() > 0) {
+                    Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
+                    try {
+                        IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
+                        actionModeFinishCallback.finishActionMode();
+                    } catch (ClassCastException e) {
+                        throw new ClassCastException(fragment.toString()
+                                + " must implement IActionModeFinishCallback");
+                    }
                 }
             }
 

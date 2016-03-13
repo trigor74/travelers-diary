@@ -26,6 +26,8 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
+import com.travelersdiary.interfaces.IActionModeFinishCallback;
+import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.recyclerview.DividerItemDecoration;
 
@@ -35,16 +37,16 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class ReminderListFragment extends Fragment {
+public class ReminderListFragment extends Fragment implements IActionModeFinishCallback {
 
     @Bind(R.id.reminder_list)
     RecyclerView mReminderList;
 
-    private FirebaseMultiSelectRecyclerAdapter mAdapter;
+    private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private ActionMode mDeleteMode = null;
-    private ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
+    private static ActionMode mDeleteMode = null;
+    private static ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.reminder_list_item_context, menu);
@@ -148,46 +150,9 @@ public class ReminderListFragment extends Fragment {
         };
 
         mReminderList.setAdapter(mAdapter);
-
-        mAdapter.setOnItemClickListener(new FirebaseMultiSelectRecyclerAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (!mAdapter.tapSelection(position)) {
-                    String key = mAdapter.getRef(position).getKey();
-
-                    Intent intent = new Intent(getActivity(), ReminderItemActivity.class);
-                    intent.putExtra(Constants.KEY_REMINDER_ITEM_REF, key);
-                    startActivity(intent);
-                } else {
-                    if (mDeleteMode != null) {
-                        if (mAdapter.getSelectedItemCount() == 0) {
-                            mDeleteMode.finish();
-                        } else {
-                            int selectedItems = mAdapter.getSelectedItemCount();
-                            int items = mAdapter.getItemCount();
-                            mDeleteMode.setTitle(getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-                if (mDeleteMode == null) {
-                    mDeleteMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mDeleteModeCallback);
-                }
-                if (mDeleteMode != null) {
-                    mAdapter.setSelectable(true);
-                    mAdapter.setSelected(position, true);
-
-                    int selectedItems = mAdapter.getSelectedItemCount();
-                    int items = mAdapter.getItemCount();
-                    mDeleteMode.setTitle(getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
-                }
-            }
-        });
     }
 
+    @Override
     public void finishActionMode() {
         if (mDeleteMode != null) {
             mDeleteMode.finish();
@@ -207,7 +172,46 @@ public class ReminderListFragment extends Fragment {
         super.onDestroyView();
     }
 
-    static class ViewHolder extends FirebaseMultiSelectRecyclerAdapter.ViewHolder {
+
+    private static IOnItemClickListener onItemClickListener = new IOnItemClickListener() {
+        @Override
+        public void onItemClick(View view, int position) {
+            if (!mAdapter.tapSelection(position)) {
+                String key = mAdapter.getRef(position).getKey();
+
+                Intent intent = new Intent(view.getContext(), ReminderItemActivity.class);
+                intent.putExtra(Constants.KEY_REMINDER_ITEM_REF, key);
+                view.getContext().startActivity(intent);
+            } else {
+                if (mDeleteMode != null) {
+                    if (mAdapter.getSelectedItemCount() == 0) {
+                        mDeleteMode.finish();
+                    } else {
+                        int selectedItems = mAdapter.getSelectedItemCount();
+                        int items = mAdapter.getItemCount();
+                        mDeleteMode.setTitle(view.getContext().getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onItemLongClick(View view, int position) {
+            if (mDeleteMode == null) {
+                mDeleteMode = ((AppCompatActivity) view.getContext()).startSupportActionMode(mDeleteModeCallback);
+            }
+            if (mDeleteMode != null) {
+                mAdapter.setSelectable(true);
+                mAdapter.setSelected(position, true);
+
+                int selectedItems = mAdapter.getSelectedItemCount();
+                int items = mAdapter.getItemCount();
+                mDeleteMode.setTitle(view.getContext().getString(R.string.reminder_list_action_mode_title_text, selectedItems, items));
+            }
+        }
+    };
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.item_reminder_todo_item_title_text_view)
         TextView textViewTitle;
@@ -221,6 +225,28 @@ public class ReminderListFragment extends Fragment {
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemClick(v, getAdapterPosition());
+                    }
+                }
+            });
+
+            view.setLongClickable(true);
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    if (onItemClickListener != null) {
+                        onItemClickListener.onItemLongClick(v, getAdapterPosition());
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
     }
 }
