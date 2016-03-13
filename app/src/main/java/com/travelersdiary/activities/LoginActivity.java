@@ -2,25 +2,30 @@ package com.travelersdiary.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 
@@ -37,7 +42,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     @Bind(R.id.sign_in_button)
@@ -48,10 +52,6 @@ public class LoginActivity extends AppCompatActivity implements
     private final OkHttpClient mClient = new OkHttpClient();
 
     private GoogleApiClient mGoogleApiClient;
-    private ConnectionResult mGoogleConnectionResult;
-
-    private boolean mGoogleIntentInProgress;
-    private boolean mGoogleLoginClicked;
 
     private Firebase mFirebaseRef;
     private Firebase.AuthStateListener mAuthStateListener;
@@ -67,11 +67,16 @@ public class LoginActivity extends AppCompatActivity implements
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                .requestScopes(new Scope(Scopes.PLUS_ME))
+                .requestScopes(new Scope("https://picasaweb.google.com/data/"))
+                .requestEmail()
+                .build();
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(Plus.SCOPE_PLUS_LOGIN)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         mGoogleLoginButton.setSize(SignInButton.SIZE_WIDE);
@@ -104,28 +109,72 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+
+        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        if (opr.isDone()) {
+            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+            // and the GoogleSignInResult will be available instantly.
+            GoogleSignInResult result = opr.get();
+            handleGoogleSignInResult(result);
+        } else {
+            // If the user has not previously signed in on this device or the sign-in has expired,
+            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+            // single sign-on will occur in this branch.
+            mAuthProgressDialog.show();
+            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(GoogleSignInResult googleSignInResult) {
+                    handleGoogleSignInResult(googleSignInResult);
+                }
+            });
+        }
+
         mFirebaseRef.addAuthStateListener(mAuthStateListener);
     }
 
+    private void handleGoogleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            // Signed in successfully
+
+            GoogleSignInAccount googleSignInAccount = result.getSignInAccount();
+            String googleId = googleSignInAccount.getId();
+            String name = googleSignInAccount.getDisplayName();
+            String email = googleSignInAccount.getEmail();
+            String profileImageURL = googleSignInAccount.getPhotoUrl() != null
+                    ? googleSignInAccount.getPhotoUrl().toString() : null;
+
+            mSharedPreferences.edit().putString(Constants.KEY_USER_GOOGLE_ID, googleId).apply();
+            mSharedPreferences.edit().putString(Constants.KEY_DISPLAY_NAME, name).apply();
+            mSharedPreferences.edit().putString(Constants.KEY_EMAIL, email).apply();
+            mSharedPreferences.edit().putString(Constants.KEY_PROFILE_IMAGE, profileImageURL).apply();
+
+            getGoogleOAuthTokenAndLogin(email, googleId);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_GOOGLE_LOGIN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleGoogleSignInResult(result);
+        }
+    }
+
+
     @OnClick(R.id.sign_in_button)
     public void googleSignIn() {
-        mGoogleLoginClicked = true;
-        if (!mGoogleApiClient.isConnecting()) {
-            if (mGoogleConnectionResult != null) {
-                resolveSignInError();
-            } else if (mGoogleApiClient.isConnected()) {
-                getGoogleOAuthTokenAndLogin();
-            } else {
-                mGoogleApiClient.connect();
-            }
-        }
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_GOOGLE_LOGIN);
     }
 
     /**
      * Show errors to users
      */
+
     private void showErrorDialog(String message) {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.login_activity_error_dialog_title))
@@ -150,49 +199,27 @@ public class LoginActivity extends AppCompatActivity implements
         }
     }
 
-    /* A helper method to resolve the current ConnectionResult error. */
-    private void resolveSignInError() {
-        if (mGoogleConnectionResult.hasResolution()) {
-            try {
-                mGoogleIntentInProgress = true;
-                mGoogleConnectionResult.startResolutionForResult(this, RC_GOOGLE_LOGIN);
-            } catch (IntentSender.SendIntentException e) {
-                // The intent was canceled before it was sent.  Return to the default
-                // state and attempt to connect to get an updated ConnectionResult.
-                mGoogleIntentInProgress = false;
-                mGoogleApiClient.connect();
-            }
-        }
-    }
-
-    private void getGoogleOAuthTokenAndLogin() {
+    private void getGoogleOAuthTokenAndLogin(final String email, final String googleId) {
         mAuthProgressDialog.show();
-        /* Get OAuth token in Background */
+        /* Request the token with the minimal scopes */
+        /* Get User`s G+ Cover Image Url */
+
         AsyncTask<Void, Void, HashMap<String, String>> task = new AsyncTask<Void, Void, HashMap<String, String>>() {
             String errorMessage = null;
 
             @Override
             protected HashMap<String, String> doInBackground(Void... params) {
                 String token = null;
-                String id = null;
                 String coverUrl = null;
 
                 HashMap<String, String> result = new HashMap<>();
 
                 try {
-                    String scope = String.format("oauth2:email %s %s", Scopes.PLUS_LOGIN, "https://picasaweb.google.com/data/");
-                    id = GoogleAuthUtil.getAccountId(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient));
-                    token = GoogleAuthUtil.getToken(LoginActivity.this, Plus.AccountApi.getAccountName(mGoogleApiClient), scope);
+                    String scopes = "oauth2:profile email";
+                    token = GoogleAuthUtil.getToken(getApplicationContext(), email, scopes);
                 } catch (IOException transientEx) {
                     /* Network or server error */
                     errorMessage = getString(R.string.login_activity_error_message_network, transientEx.getMessage());
-                } catch (UserRecoverableAuthException e) {
-                    /* We probably need to ask for permissions, so start the intent if there is none pending */
-                    if (!mGoogleIntentInProgress) {
-                        mGoogleIntentInProgress = true;
-                        Intent recover = e.getIntent();
-                        startActivityForResult(recover, RC_GOOGLE_LOGIN);
-                    }
                 } catch (GoogleAuthException authEx) {
                     /* The call is not ever expected to succeed assuming you have already verified that
                      * Google Play services is installed. */
@@ -200,7 +227,7 @@ public class LoginActivity extends AppCompatActivity implements
                 }
 
                 try {
-                    coverUrl = getCoverImageUrl(id);
+                    coverUrl = getCoverImageUrl(googleId);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -213,7 +240,6 @@ public class LoginActivity extends AppCompatActivity implements
 
             @Override
             protected void onPostExecute(HashMap<String, String> result) {
-                mGoogleLoginClicked = false;
                 String token = result.get("token");
                 String coverUrl = result.get("coverUrl");
 
@@ -235,8 +261,8 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     public String getCoverImageUrl(String id) throws Exception {
-        String coverJsonUrl = "https://www.googleapis.com/plus/v1/people/" + id +
-                "?fields=cover%2FcoverPhoto%2Furl&key=" + Constants.GOOGLE_API_SERVER_KEY;
+        String coverJsonUrl = "https://www.googleapis.com/plus/v1/people/"
+                + id + "?fields=cover%2FcoverPhoto%2Furl&key=" + Constants.GOOGLE_API_SERVER_KEY;
         Request request = new Request.Builder()
                 .url(coverJsonUrl)
                 .build();
@@ -251,44 +277,16 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onConnected(final Bundle bundle) {
-        getGoogleOAuthTokenAndLogin();
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
+        // be available.
+        Log.d("LoginActivity", "onConnectionFailed:" + connectionResult);
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        if (!mGoogleIntentInProgress) {
-            /* Store the ConnectionResult so that we can use it later when the user clicks on the Google+ login button */
-            mGoogleConnectionResult = result;
-
-            if (mGoogleLoginClicked) {
-                /* The user has already clicked login so we attempt to resolve all errors until the user is signed in,
-                 * or they cancel. */
-                resolveSignInError();
-            }
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        // ignore
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
-            mGoogleLoginClicked = false;
-        }
-        mGoogleIntentInProgress = false;
-        if (!mGoogleApiClient.isConnecting()) {
-            mGoogleApiClient.connect();
-        }
-    }
-
-    @Override
-    protected void onPause() {
+    protected void onStop() {
         mFirebaseRef.removeAuthStateListener(mAuthStateListener);
-        super.onPause();
+        super.onStop();
     }
 
     /**
@@ -296,36 +294,17 @@ public class LoginActivity extends AppCompatActivity implements
      */
     private void setAuthenticatedUser(AuthData authData) {
         if (authData != null) {
-            /* Hide all the login buttons */
-            //mGoogleLoginButton.setVisibility(View.GONE);
-            /* If user has logged in with Google provider */
             if (authData.getProvider().equals(Constants.GOOGLE_PROVIDER)) {
                 mSharedPreferences.edit().putString(Constants.KEY_PROVIDER, authData.getProvider()).apply();
                 mSharedPreferences.edit().putString(Constants.KEY_USER_UID, authData.getUid()).apply();
-
-                String googleId = (String) authData.getProviderData().get(Constants.GOOGLE_ID);
-                mSharedPreferences.edit().putString(Constants.KEY_USER_GOOGLE_ID, googleId).apply();
-
-                String name = (String) authData.getProviderData().get(Constants.GOOGLE_DISPLAY_NAME);
-                mSharedPreferences.edit().putString(Constants.KEY_DISPLAY_NAME, name).apply();
-
-                String email = (String) authData.getProviderData().get(Constants.GOOGLE_EMAIL);
-                mSharedPreferences.edit().putString(Constants.KEY_EMAIL, email).apply();
-
-                String profileImageURL = (String) authData.getProviderData().get(Constants.GOOGLE_PROFILE_IMAGE);
-                mSharedPreferences.edit().putString(Constants.KEY_PROFILE_IMAGE, profileImageURL).apply();
             } else {
                 showErrorDialog(getString(R.string.login_activity_error_message_invalid_provider, authData.getProvider()));
             }
-        } else {
-            /* No authenticated user show all the login buttons */
-            //mGoogleLoginButton.setVisibility(View.VISIBLE);
+            /* Go to main activity */
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         }
-        /* Go to main activity */
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
-
 }

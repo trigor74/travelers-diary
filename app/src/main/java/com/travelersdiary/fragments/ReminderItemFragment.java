@@ -212,6 +212,12 @@ public class ReminderItemFragment extends Fragment {
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
+        if (isNewItem) {
+            menu.setGroupVisible(R.id.remind_item_menu_group_save, true);
+        } else {
+            menu.setGroupVisible(R.id.remind_item_menu_group_save, false);
+        }
+
         if (mRemindItem != null && mRemindItem.isViewAsCheckboxes()) {
             menu.findItem(R.id.action_switch_checkboxes_remind_item)
                     .setTitle(R.string.reminder_hide_checkboxes);
@@ -226,6 +232,11 @@ public class ReminderItemFragment extends Fragment {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.action_save_remind_item:
+                if (saveItem()) {
+                    getActivity().finish();
+                }
                 return true;
             case R.id.action_switch_checkboxes_remind_item:
                 if (mRemindItem.isViewAsCheckboxes()) {
