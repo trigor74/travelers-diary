@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.travelersdiary.Constants;
@@ -35,14 +37,19 @@ public class DiaryImagesActivity extends AppCompatActivity
     @Bind(R.id.album_images_list)
     RecyclerView mRecyclerView;
 
+    public static final String IMAGES_AFTER_DELETE = "images after delete";
+
     private ArrayList<Photo> mImages;
+    private ArrayList<String> mImagesPathList;
+    private ArrayList<String> mImagesPathListPrev = new ArrayList<>();
     private String mDiaryTitle;
     private ActionBar mSupportActionBar;
 
     private boolean isSelectMode;
 
     private AlbumImagesAdapter mAdapter;
-    private ArrayList<String> mSelectedImages = new ArrayList<>();
+    private ArrayList<Photo> mSelectedImages = new ArrayList<>();
+    private ArrayList<Photo> mImagesToDelete = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +75,8 @@ public class DiaryImagesActivity extends AppCompatActivity
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));
 
-        mAdapter = new AlbumImagesAdapter(this, Utils.photoArrayToStringArray(this, mImages), this);
+        mImagesPathList = Utils.photoArrayToStringArray(this, mImages);
+        mAdapter = new AlbumImagesAdapter(this, mImagesPathList, this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -79,9 +87,8 @@ public class DiaryImagesActivity extends AppCompatActivity
             setToolbarTitle();
         } else {
             Intent intent = new Intent(DiaryImagesActivity.this, FullScreenImageActivity.class);
-            intent.putExtra("images", mImages);
+            intent.putStringArrayListExtra("images", mImagesPathList);
             intent.putExtra("position", position);
-
             startActivity(intent);
         }
     }
@@ -98,7 +105,7 @@ public class DiaryImagesActivity extends AppCompatActivity
     }
 
     private void setToolbarTitle() {
-        mSupportActionBar.setTitle(mSelectedImages.size() + "/" + mImages.size());
+        mSupportActionBar.setTitle(mSelectedImages.size() + "/" + mImagesPathList.size());
     }
 
     private void enableReviewMode() {
@@ -119,12 +126,12 @@ public class DiaryImagesActivity extends AppCompatActivity
 
         Log.i("string path", "" + mAdapter.getAlbumImagesList().get(position));
 
-        String uri = mImages.get(position).getLocalUri();
+        Photo photo = mImages.get(position);
 
         if (mAdapter.isSelected(position)) {
-            mSelectedImages.add(uri);
+            mSelectedImages.add(photo);
         } else {
-            mSelectedImages.remove(uri);
+            mSelectedImages.remove(photo);
         }
         Log.i("uri path", "" + mSelectedImages);
     }
@@ -141,9 +148,11 @@ public class DiaryImagesActivity extends AppCompatActivity
     private void share() {
         ArrayList<Uri> shareImages = new ArrayList<>();
 
+        //TODO sharing for images that on picasa and not on phone
+
         if (mSelectedImages.size() > 0) {
             for (int i = 0; i < mSelectedImages.size(); i++) {
-                Uri uri = Uri.parse(mSelectedImages.get(i));
+                Uri uri = Uri.parse(mSelectedImages.get(i).getLocalUri());
                 shareImages.add(uri);
             }
 
@@ -156,6 +165,67 @@ public class DiaryImagesActivity extends AppCompatActivity
         } else {
             Toast.makeText(this, R.string.nothing_selected, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /*very awful code, needs to be rewritten*/
+    private void delete() {
+        mImagesToDelete.clear();
+        mImagesToDelete.addAll(mSelectedImages);
+
+        ArrayList<Integer> positions = new ArrayList<>();
+
+        for (int i = 0; i < mImagesPathList.size(); i++) {
+            for (int j = 0; j < mImagesToDelete.size(); j++) {
+                if (mImages.get(i) == mImagesToDelete.get(j)) {
+                    positions.add(i);
+                }
+            }
+        }
+
+        ArrayList<Integer> positionsOld = new ArrayList<>();
+        positionsOld.addAll(positions);
+
+        mImagesPathListPrev.clear();
+        mImagesPathListPrev.addAll(mImagesPathList);
+
+        for (int i = 0; i < positions.size(); i++) {
+            int pos = positions.get(i);
+            mAdapter.notifyItemRemoved(pos);
+            mImagesPathList.remove(pos);
+            for (int j = 0; j < positions.size(); j++) {
+                int a = positions.get(j);
+                a--;
+                positions.set(j, a);
+            }
+        }
+
+        showSnackbar(positionsOld, mImagesToDelete);
+        enableReviewMode();
+    }
+
+    private void showSnackbar(final ArrayList<Integer> positionsOld, final ArrayList<Photo> imagesToDelete) {
+        int count = imagesToDelete.size();
+        final ArrayList<Photo> tmp = new ArrayList<>();
+        tmp.addAll(mImages);
+
+        mImages.removeAll(imagesToDelete);
+
+        Snackbar snackbar = Snackbar
+                .make(mRecyclerView, count == 1 ? count + " PHOTO DELETED" :
+                        count + " PHOTOS DELETED", Snackbar.LENGTH_LONG)
+                .setAction("UNDO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        for (int i = 0; i < positionsOld.size(); i++) {
+                            int pos = positionsOld.get(i);
+                            mImagesPathList.add(pos, mImagesPathListPrev.get(pos));
+                            mAdapter.notifyItemInserted(pos);
+                        }
+                        mImages.clear();
+                        mImages.addAll(tmp);
+                    }
+                });
+        snackbar.show();
     }
 
     @Override
@@ -187,6 +257,9 @@ public class DiaryImagesActivity extends AppCompatActivity
                 if (isSelectMode) {
                     enableReviewMode();
                 } else {
+                    Intent intent = new Intent();
+                    intent.putExtra(IMAGES_AFTER_DELETE, mImages);
+                    setResult(RESULT_OK, intent);
                     finish();
                 }
                 return true;
@@ -195,6 +268,9 @@ public class DiaryImagesActivity extends AppCompatActivity
                 return true;
             case R.id.action_share:
                 share();
+                return true;
+            case R.id.action_delete:
+                delete();
                 return true;
             case R.id.action_select_all:
                 selectAll();

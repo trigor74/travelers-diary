@@ -438,6 +438,7 @@ public class DiaryFragment extends Fragment {
                 return true;
             case R.id.action_save:
                 saveChanges();
+                Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_add_photo:
                 takePhoto();
@@ -523,6 +524,15 @@ public class DiaryFragment extends Fragment {
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(0);
         }
+
+        if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<Photo> newImagesList = (ArrayList<Photo>) data.getSerializableExtra(DiaryImagesActivity.IMAGES_AFTER_DELETE);
+
+            mImages.clear();
+            mImages.addAll(newImagesList);
+
+            saveChanges();
+        }
     }
 
     private File createImageFile() throws IOException {
@@ -593,7 +603,6 @@ public class DiaryFragment extends Fragment {
         }
 
         mRtEditText.resetHasChanged();
-        Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
 
         enableReviewingMode();
     }
@@ -659,7 +668,10 @@ public class DiaryFragment extends Fragment {
         Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
         intent.putExtra("images", mImages);
         intent.putExtra("title", mDiaryNote.getTitle());
-        startActivity(intent);
+//        startActivity(intent);
+
+        startActivityForResult(intent, Constants.IMAGES_DELETE_REQUEST_CODE);
+
     }
 
 }

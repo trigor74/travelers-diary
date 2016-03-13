@@ -102,6 +102,11 @@ public class AlbumImagesAdapter extends SelectableAdapter<AlbumImagesAdapter.Vie
         }
     }
 
+    public void changeList(ArrayList<String> list) {
+        this.mAlbumImages = list;
+        notifyDataSetChanged();
+    }
+
     public ArrayList<String> getAlbumImagesList() {
         return mAlbumImages;
     }
