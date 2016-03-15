@@ -99,4 +99,10 @@
         <item>600</item>
     </string-array>
 
+    <string name="geocoder_no_location_data_provided">No location data provided</string>
+    <string name="geocoder_service_not_available">Sorry, the service is not available</string>
+    <string name="geocoder_invalid_lat_long_used">Invalid latitude or longitude used</string>
+    <string name="geocoder_no_address_found">Sorry, no address found</string>
+    <string name="geocoder_address_found">Address found</string>
+    <string name="geocoder_no_geocoder_available">No geocoder available</string>
 </resources>

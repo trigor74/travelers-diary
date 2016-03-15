@@ -54,8 +54,10 @@ import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.services.GeocoderIntentService;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,6 +197,7 @@ public class DiaryFragment extends Fragment {
             mDiaryNote = new DiaryNote();
             initNewDiaryNote(mDiaryNote);
             enableEditingMode();
+            retrieveLocation();
         } else {
             addDataChangeListener();
             enableReviewingMode();
@@ -674,4 +677,29 @@ public class DiaryFragment extends Fragment {
 
     }
 
+    private void retrieveLocation() {
+        // start retrieve GPS location
+        // TODO: 15.03.16 add logic
+
+        //test>
+        // 49.415781, 32.066044
+        // 48.957014,32.146055
+        // 49.8327787,23.942196
+        startGeocoderAndRetrieveWeather(new LocationPoint(49.8327787, 23.942196, 0));
+        //<test
+    }
+
+    // TODO: 15.03.16 add location result receiver
+
+    private void startGeocoderAndRetrieveWeather(LocationPoint location) {
+        // start geocoder service
+        Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+        intent.putExtra(GeocoderIntentService.LOCATION_DATA_EXTRA, location);
+        getActivity().startService(intent);
+
+        // start retrieve weather data service
+        // TODO: 15.03.16 add logic
+    }
+
+    // TODO: 15.03.16 add geocoder and weather result receivers
 }
