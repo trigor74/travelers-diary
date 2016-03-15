@@ -184,6 +184,11 @@ public class DiaryImagesActivity extends AppCompatActivity
 
     /*very awful code, needs to be rewritten*/
     private void delete() {
+        if (mSelectedImages.isEmpty()) {
+            Toast.makeText(this, R.string.nothing_selected, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         mImagesToDelete.clear();
         mImagesToDelete.addAll(mSelectedImages);
 
