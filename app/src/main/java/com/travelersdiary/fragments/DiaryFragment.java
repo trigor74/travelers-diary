@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -40,6 +41,16 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
 import com.onegravity.rteditor.RTToolbar;
@@ -73,7 +84,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.ThreadMode;
 
-public class DiaryFragment extends Fragment {
+public class DiaryFragment extends Fragment implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
@@ -133,10 +146,20 @@ public class DiaryFragment extends Fragment {
     private String mUserUID;
     private String mKey;
 
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private GoogleApiClient mGoogleApiClient;
+    protected Location mCurrentLocation;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     @Nullable
@@ -402,6 +425,27 @@ public class DiaryFragment extends Fragment {
                 });
     }
 
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(getContext());
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(getActivity(), resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (checkPlayServices()) {
+            mGoogleApiClient.connect();
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -412,6 +456,12 @@ public class DiaryFragment extends Fragment {
     public void onPause() {
         BusProvider.bus().unregister(this);
         super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     @Override
@@ -698,13 +748,18 @@ public class DiaryFragment extends Fragment {
 
     private void retrieveLocation() {
         // start retrieve GPS location
-        // TODO: 15.03.16 add logic
+        mCurrentLocation = LocationServices.FusedLocationApi
+                .getLastLocation(mGoogleApiClient);
 
+        if (mCurrentLocation != null) {
+            mDiaryNote.setLocation(new LocationPoint(mCurrentLocation.getLatitude(),
+                    mCurrentLocation.getLongitude(), mCurrentLocation.getAltitude()));
+        }
         //test>
         // 49.415781, 32.066044
         // 48.957014,32.146055
         // 49.8327787,23.942196
-        mDiaryNote.setLocation(new LocationPoint(49.8327787, 23.942196, 0));
+        //mDiaryNote.setLocation(new LocationPoint(49.8327787, 23.942196, 0));
         refreshAddress();
         //<test
     }
@@ -755,4 +810,23 @@ public class DiaryFragment extends Fragment {
             }
         }
     }
+
+    /**
+     * Google api callback methods
+     */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
 }
