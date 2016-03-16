@@ -816,7 +816,7 @@ public class DiaryFragment extends Fragment implements
      */
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        retrieveLocation();
     }
 
     @Override
