@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.squareup.otto.Bus;
 import com.travelersdiary.R;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.LocationPoint;
 
 import java.io.IOException;
@@ -20,15 +24,19 @@ import java.util.Locale;
 public class GeocoderIntentService extends IntentService {
     private static final String TAG = "GeocoderIntentService";
 
-//    protected ResultReceiver mReceiver;
+    public class GeocoderResult {
+        public int resultCode;
+        public String message;
+
+        public GeocoderResult(int resultCode, String message) {
+            this.resultCode = resultCode;
+            this.message = message;
+        }
+    }
 
     public static final int SUCCESS_RESULT = 0;
     public static final int FAILURE_RESULT = 1;
-
-    public static final String PACKAGE_NAME = "com.travelersdiary.services";
-    public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-    public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
-    public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
+    public static final String LOCATION_DATA_EXTRA = "LOCATION_DATA_EXTRA";
 
     public GeocoderIntentService() {
         super(TAG);
@@ -37,12 +45,6 @@ public class GeocoderIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String errorMessage = "";
-
-//        mReceiver = intent.getParcelableExtra(GeocoderIntentService.RECEIVER);
-//        if (mReceiver == null) {
-//            Log.wtf(TAG, "No receiver received. There is nowhere to send the results.");
-//            return;
-//        }
 
         LocationPoint location = (LocationPoint) intent.getSerializableExtra(GeocoderIntentService.LOCATION_DATA_EXTRA);
         if (location == null) {
@@ -102,8 +104,6 @@ public class GeocoderIntentService extends IntentService {
     }
 
     private void deliverResultToReceiver(int resultCode, String message) {
-        Bundle bundle = new Bundle();
-        bundle.putString(GeocoderIntentService.RESULT_DATA_KEY, message);
-//        mReceiver.send(resultCode, bundle);
+        BusProvider.bus().post(new GeocoderResult(resultCode, message));
     }
 }

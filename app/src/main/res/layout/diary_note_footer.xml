@@ -45,7 +45,9 @@
             style="@style/DiaryFooterText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cromwell Rd, London SW7 5BD, Great Britain" />
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:text="undefined" />
 
     </LinearLayout>
 

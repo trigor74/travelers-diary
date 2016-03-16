@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -46,6 +47,7 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -53,6 +55,7 @@ import com.travelersdiary.activities.AlbumImagesActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
@@ -68,6 +71,7 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.ThreadMode;
 
 public class DiaryFragment extends Fragment {
 
@@ -103,6 +107,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.btn_view_all_images)
     Button mButtonViewAllImages;
+
+    @Bind(R.id.txt_location_info)
+    TextView mTxtLocation;
 
     private ActionBar mSupportActionBar;
 
@@ -396,6 +403,18 @@ public class DiaryFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        BusProvider.bus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        BusProvider.bus().unregister(this);
+        super.onPause();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mRtManager.onSaveInstanceState(outState);
@@ -685,21 +704,55 @@ public class DiaryFragment extends Fragment {
         // 49.415781, 32.066044
         // 48.957014,32.146055
         // 49.8327787,23.942196
-        startGeocoderAndRetrieveWeather(new LocationPoint(49.8327787, 23.942196, 0));
+        mDiaryNote.setLocation(new LocationPoint(49.8327787, 23.942196, 0));
+        refreshAddress();
         //<test
     }
 
     // TODO: 15.03.16 add location result receiver
 
-    private void startGeocoderAndRetrieveWeather(LocationPoint location) {
-        // start geocoder service
-        Intent intent = new Intent(getContext(), GeocoderIntentService.class);
-        intent.putExtra(GeocoderIntentService.LOCATION_DATA_EXTRA, location);
-        getActivity().startService(intent);
+    private boolean isAddressRetrievalInProgress = false;
 
-        // start retrieve weather data service
-        // TODO: 15.03.16 add logic
+    private void startAddressRetrieval(LocationPoint location) {
+        if (!isAddressRetrievalInProgress) {
+            isAddressRetrievalInProgress = true;
+            Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+            intent.putExtra(GeocoderIntentService.LOCATION_DATA_EXTRA, location);
+            getActivity().startService(intent);
+        }
+    }
+
+    private boolean isWeatherRetrievalInProgress = false;
+
+    private void startWeatherRetrieval(LocationPoint location) {
+        if (!isWeatherRetrievalInProgress) {
+            isWeatherRetrievalInProgress = true;
+/*
+            Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+            intent.putExtra(WeatherIntentService.LOCATION_DATA_EXTRA, location);
+            getActivity().startService(intent);
+*/
+        }
+    }
+
+    @OnClick(R.id.txt_location_info)
+    public void refreshAddress() {
+        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+            startAddressRetrieval(mDiaryNote.getLocation());
+        }
     }
 
     // TODO: 15.03.16 add geocoder and weather result receivers
+    @Subscribe
+    public void getAddress(GeocoderIntentService.GeocoderResult result) {
+        isAddressRetrievalInProgress = false;
+        if (result != null) {
+            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
+                mTxtLocation.setText(result.message);
+                //test>
+                mDiaryNote.setLocation(new LocationPoint(48.957014, 32.146055, 0));
+                //<test
+            }
+        }
+    }
 }
