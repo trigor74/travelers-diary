@@ -6,14 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
@@ -41,16 +39,6 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
 import com.onegravity.rteditor.RTToolbar;
@@ -71,7 +59,9 @@ import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.models.WeatherInfo;
 import com.travelersdiary.services.GeocoderIntentService;
+import com.travelersdiary.services.LocationTrackingService;
 
 import java.io.File;
 import java.io.IOException;
@@ -82,11 +72,8 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.greenrobot.event.ThreadMode;
 
-public class DiaryFragment extends Fragment implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class DiaryFragment extends Fragment {
 
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
@@ -146,20 +133,10 @@ public class DiaryFragment extends Fragment implements
     private String mUserUID;
     private String mKey;
 
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private GoogleApiClient mGoogleApiClient;
-    protected Location mCurrentLocation;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
-        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
     }
 
     @Nullable
@@ -227,7 +204,7 @@ public class DiaryFragment extends Fragment implements
             mDiaryNote = new DiaryNote();
             initNewDiaryNote(mDiaryNote);
             enableEditingMode();
-            retrieveLocation();
+            startLocationRetrieval();
         } else {
             addDataChangeListener();
             enableReviewingMode();
@@ -425,27 +402,6 @@ public class DiaryFragment extends Fragment implements
                 });
     }
 
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(getContext());
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(getActivity(), resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            }
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (checkPlayServices()) {
-            mGoogleApiClient.connect();
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -456,12 +412,6 @@ public class DiaryFragment extends Fragment implements
     public void onPause() {
         BusProvider.bus().unregister(this);
         super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
     }
 
     @Override
@@ -746,26 +696,23 @@ public class DiaryFragment extends Fragment implements
 
     }
 
-    private void retrieveLocation() {
-        // start retrieve GPS location
-        mCurrentLocation = LocationServices.FusedLocationApi
-                .getLastLocation(mGoogleApiClient);
-
-        if (mCurrentLocation != null) {
-            mDiaryNote.setLocation(new LocationPoint(mCurrentLocation.getLatitude(),
-                    mCurrentLocation.getLongitude(), mCurrentLocation.getAltitude()));
-        }
-        //test>
-        // 49.415781, 32.066044
-        // 48.957014,32.146055
-        // 49.8327787,23.942196
-        //mDiaryNote.setLocation(new LocationPoint(49.8327787, 23.942196, 0));
-        refreshAddress();
-        //<test
+    // location
+    private void startLocationRetrieval() {
+        Intent intent = new Intent(getContext(), LocationTrackingService.class);
+        intent.setAction(LocationTrackingService.ACTION_GET_CURRENT_LOCATION);
+        getActivity().startService(intent);
     }
 
-    // TODO: 15.03.16 add location result receiver
+    @Subscribe
+    public void getLocation(LocationPoint location) {
+        if (isNewDiaryNote) {
+            mDiaryNote.setLocation(location);
+            updateAddress();
+            updateWeather();
+        }
+    }
 
+    // address
     private boolean isAddressRetrievalInProgress = false;
 
     private void startAddressRetrieval(LocationPoint location) {
@@ -777,11 +724,30 @@ public class DiaryFragment extends Fragment implements
         }
     }
 
+    @OnClick(R.id.txt_location_info)
+    public void updateAddress() {
+        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+            startAddressRetrieval(mDiaryNote.getLocation());
+        }
+    }
+
+    @Subscribe
+    public void getAddress(GeocoderIntentService.GeocoderResult result) {
+        isAddressRetrievalInProgress = false;
+        if (result != null) {
+            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
+                mTxtLocation.setText(result.message);
+            }
+        }
+    }
+
+    //weather
     private boolean isWeatherRetrievalInProgress = false;
 
     private void startWeatherRetrieval(LocationPoint location) {
         if (!isWeatherRetrievalInProgress) {
             isWeatherRetrievalInProgress = true;
+            // TODO: 17.03.2016 create service WeatherIntentService like GeocoderIntentService
 /*
             Intent intent = new Intent(getContext(), GeocoderIntentService.class);
             intent.putExtra(WeatherIntentService.LOCATION_DATA_EXTRA, location);
@@ -790,43 +756,15 @@ public class DiaryFragment extends Fragment implements
         }
     }
 
-    @OnClick(R.id.txt_location_info)
-    public void refreshAddress() {
+    @OnClick(R.id.txt_weather_info)
+    public void updateWeather() {
         if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
-            startAddressRetrieval(mDiaryNote.getLocation());
+            startWeatherRetrieval(mDiaryNote.getLocation());
         }
     }
 
-    // TODO: 15.03.16 add geocoder and weather result receivers
     @Subscribe
-    public void getAddress(GeocoderIntentService.GeocoderResult result) {
-        isAddressRetrievalInProgress = false;
-        if (result != null) {
-            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
-                mTxtLocation.setText(result.message);
-                //test>
-                mDiaryNote.setLocation(new LocationPoint(48.957014, 32.146055, 0));
-                //<test
-            }
-        }
+    public void getWeather(WeatherInfo weather) {
+        // TODO: 17.03.2016 add logic
     }
-
-    /**
-     * Google api callback methods
-     */
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        retrieveLocation();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-
 }
