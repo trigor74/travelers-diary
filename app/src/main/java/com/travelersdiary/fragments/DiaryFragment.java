@@ -347,6 +347,10 @@ public class DiaryFragment extends Fragment {
                     mImagesRecyclerView.setVisibility(View.GONE);
                     mButtonViewAllImages.setVisibility(View.GONE);
                 }
+
+                if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                    mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                }
             }
 
             @Override
@@ -392,6 +396,10 @@ public class DiaryFragment extends Fragment {
                         } else {
                             mImagesRecyclerView.setVisibility(View.GONE);
                             mButtonViewAllImages.setVisibility(View.GONE);
+                        }
+
+                        if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
                         }
                     }
 
@@ -707,7 +715,13 @@ public class DiaryFragment extends Fragment {
     public void getLocation(LocationPoint location) {
         if (isNewDiaryNote) {
             mDiaryNote.setLocation(location);
-            updateAddress();
+            mDiaryNote.setLocationAddressLine(getResources()
+                    .getString(R.string.location_format_address_line_with_gps,
+                            location.getLatitude(),
+                            location.getLongitude()));
+            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+
+            startAddressRetrieval(mDiaryNote.getLocation());
             updateWeather();
         }
     }
@@ -726,8 +740,11 @@ public class DiaryFragment extends Fragment {
 
     @OnClick(R.id.txt_location_info)
     public void updateAddress() {
-        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
-            startAddressRetrieval(mDiaryNote.getLocation());
+//        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+//            startAddressRetrieval(mDiaryNote.getLocation());
+//        }
+        if (isNewDiaryNote) {
+            startLocationRetrieval();
         }
     }
 
@@ -736,6 +753,7 @@ public class DiaryFragment extends Fragment {
         isAddressRetrievalInProgress = false;
         if (result != null) {
             if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
+                mDiaryNote.setLocationAddressLine(result.message);
                 mTxtLocation.setText(result.message);
             }
         }
@@ -765,6 +783,6 @@ public class DiaryFragment extends Fragment {
 
     @Subscribe
     public void getWeather(WeatherInfo weather) {
-        // TODO: 17.03.2016 add logic
+        // TODO: 17.03.2016 store data and update views
     }
 }

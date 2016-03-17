@@ -105,4 +105,5 @@
     <string name="geocoder_no_address_found">Sorry, no address found</string>
     <string name="geocoder_address_found">Address found</string>
     <string name="geocoder_no_geocoder_available">No geocoder available</string>
+    <string name="location_format_address_line_with_gps">(%1$.6f, %2$.6f)</string>
 </resources>
