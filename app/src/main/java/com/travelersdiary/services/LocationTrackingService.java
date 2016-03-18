@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -16,8 +17,13 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.travelersdiary.Constants;
+import com.travelersdiary.Utils;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.LocationPoint;
+import com.travelersdiary.models.TrackPoint;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LocationTrackingService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
@@ -35,6 +41,7 @@ public class LocationTrackingService extends Service implements
     private String mUserUID;
     private String mTravelId;
     private String mTrackId;
+    private Firebase mTrackRef;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
@@ -82,8 +89,6 @@ public class LocationTrackingService extends Service implements
     /**
      * tracks:    users/USER_UID/travels/TRAVEL_UID/tracks/[TRACK_UID]
      * trackpoints: users/USER_UID/tracks/[TRACK_UID]/[timestamp:[location]]
-     * Extras:
-     * Constants.KEY_TRAVEL_KEY - TRAVEL_UID
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -97,6 +102,9 @@ public class LocationTrackingService extends Service implements
         }
 
         String action = intent.getAction();
+        if (action == null) {
+            action = "";
+        }
 
         Log.i(TAG, "onStartCommand, action: " + action);
         Log.i(TAG, "onStartCommand, travel id: " + mTravelId);
@@ -126,8 +134,25 @@ public class LocationTrackingService extends Service implements
                 }
                 break;
             case ACTION_START_TRACK:
-                mTravelId = intent.getStringExtra(Constants.KEY_TRAVEL_KEY);
-                // mTrackId = get firebase uid and save to travels tracks section
+                // TODO: 18.03.2016 put travel id to SharedPreferences on change
+                //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_KEY, null);
+                mTravelId = "default"; // TODO: 18.03.2016 remove after testing
+
+                Firebase userTravelsRef = new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID));
+                Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
+                userTracksRef.push();
+                mTrackId = userTracksRef.getKey();
+
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put(Constants.FIREBASE_TRACKS, mTrackId);
+
+                userTravelsRef.child(mTravelId)
+                        .child(Constants.FIREBASE_TRACKS)
+                        .updateChildren(map);
+
+                mTrackRef = userTracksRef.child(mTrackId);
+
                 isTrackingEnabled = true;
                 startLocationUpdates();
                 break;
@@ -234,7 +259,13 @@ public class LocationTrackingService extends Service implements
 
     private void saveCurrentTrackPoint() {
         if (mCurrentLocation != null) {
-            // TODO: 17.03.16 add save point to firebase
+            LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getAltitude());
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put(String.valueOf(mLastUpdateTimestamp), point);
+
+            Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
+            userTracksRef.child(mTrackId)
+                    .updateChildren(map);
         }
     }
 
