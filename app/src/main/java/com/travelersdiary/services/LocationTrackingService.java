@@ -29,6 +29,7 @@ public class LocationTrackingService extends Service implements
     public static final String ACTION_STOP_TRACK = "ACTION_STOP_TRACK";
     public static final String ACTION_GET_CURRENT_LOCATION = "ACTION_GET_CURRENT_LOCATION";
 
+    private boolean isRequestingLocationUpdates = false;
     private boolean isTrackingEnabled = false;
     private boolean isSingleRequestLocation = false;
     private String mUserUID;
@@ -88,6 +89,13 @@ public class LocationTrackingService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand, flag: " + flags + "startId: " + startId);
 
+        if (intent == null) {
+            if (!mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
+                mGoogleApiClient.connect();
+            }
+            return Service.START_STICKY;
+        }
+
         String action = intent.getAction();
 
         Log.i(TAG, "onStartCommand, action: " + action);
@@ -95,19 +103,23 @@ public class LocationTrackingService extends Service implements
 
         switch (action) {
             case ACTION_GET_CURRENT_LOCATION:
+                isSingleRequestLocation = true;
                 if (mGoogleApiClient.isConnected()) {
-                    isSingleRequestLocation = false;
                     mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                     mLastUpdateTimestamp = System.currentTimeMillis();
 
                     Log.i(TAG, "onStartCommand, timestamp: " + mLastUpdateTimestamp);
-                    Log.i(TAG, "onStartCommand, location: (" + mCurrentLocation.getLatitude() + ","
-                            + mCurrentLocation.getLongitude() + ","
-                            + mCurrentLocation.getAltitude() + ")");
+                    Log.i(TAG, "onStartCommand, location: " + mCurrentLocation);
 
-                    sendCurrentLocation();
+                    if (mCurrentLocation != null) {
+                        isSingleRequestLocation = false;
+                        sendCurrentLocation();
+                    } else {
+                        if (!isRequestingLocationUpdates) {
+                            startLocationUpdates();
+                        }
+                    }
                 } else {
-                    isSingleRequestLocation = true;
                     if (!mGoogleApiClient.isConnecting()) {
                         mGoogleApiClient.connect();
                     }
@@ -135,17 +147,21 @@ public class LocationTrackingService extends Service implements
         mLastUpdateTimestamp = System.currentTimeMillis();
 
         Log.i(TAG, "onConnected, timestamp: " + mLastUpdateTimestamp);
-        Log.i(TAG, "onConnected, location: (" + mCurrentLocation.getLatitude() + ","
-                + mCurrentLocation.getLongitude() + ","
-                + mCurrentLocation.getAltitude() + ")");
+        Log.i(TAG, "onConnected, location: " + mCurrentLocation);
 
-        if (isSingleRequestLocation) {
-            sendCurrentLocation();
-            isSingleRequestLocation = false;
-        }
+        if (mCurrentLocation != null) {
+            if (isSingleRequestLocation) {
+                sendCurrentLocation();
+                isSingleRequestLocation = false;
+            }
 
-        if (isTrackingEnabled) {
-            saveCurrentTrackPoint();
+            if (isTrackingEnabled) {
+                saveCurrentTrackPoint();
+                startLocationUpdates();
+            } else {
+                stopLocationUpdates();
+            }
+        } else {
             startLocationUpdates();
         }
     }
@@ -177,10 +193,12 @@ public class LocationTrackingService extends Service implements
 
     protected void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        isRequestingLocationUpdates = true;
     }
 
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        isRequestingLocationUpdates = false;
     }
 
     @Override
@@ -189,17 +207,19 @@ public class LocationTrackingService extends Service implements
         mLastUpdateTimestamp = System.currentTimeMillis();
 
         Log.i(TAG, "onLocationChanged, timestamp: " + mLastUpdateTimestamp);
-        Log.i(TAG, "onLocationChanged, location: (" + mCurrentLocation.getLatitude() + ","
-                + mCurrentLocation.getLongitude() + ","
-                + mCurrentLocation.getAltitude() + ")");
+        Log.i(TAG, "onLocationChanged, location: " + mCurrentLocation);
 
-        if (isSingleRequestLocation) {
-            sendCurrentLocation();
-            isSingleRequestLocation = false;
-        }
+        if (mCurrentLocation != null) {
+            if (isSingleRequestLocation) {
+                sendCurrentLocation();
+                isSingleRequestLocation = false;
+            }
 
-        if (isTrackingEnabled) {
-            saveCurrentTrackPoint();
+            if (isTrackingEnabled) {
+                saveCurrentTrackPoint();
+            } else {
+                stopLocationUpdates();
+            }
         }
     }
 
@@ -213,11 +233,16 @@ public class LocationTrackingService extends Service implements
     }
 
     private void saveCurrentTrackPoint() {
-        // TODO: 17.03.16 add save point to firebase
+        if (mCurrentLocation != null) {
+            // TODO: 17.03.16 add save point to firebase
+        }
     }
 
     @Override
     public void onDestroy() {
+        if (isRequestingLocationUpdates) {
+            stopLocationUpdates();
+        }
         mGoogleApiClient.disconnect();
         super.onDestroy();
     }

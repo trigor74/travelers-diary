@@ -730,7 +730,7 @@ public class DiaryFragment extends Fragment {
     private boolean isAddressRetrievalInProgress = false;
 
     private void startAddressRetrieval(LocationPoint location) {
-        if (!isAddressRetrievalInProgress) {
+        if (!isAddressRetrievalInProgress && Utils.isInternetAvailable(getContext())) {
             isAddressRetrievalInProgress = true;
             Intent intent = new Intent(getContext(), GeocoderIntentService.class);
             intent.putExtra(GeocoderIntentService.LOCATION_DATA_EXTRA, location);
