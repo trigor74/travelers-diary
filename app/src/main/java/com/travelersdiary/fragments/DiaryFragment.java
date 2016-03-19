@@ -409,6 +409,7 @@ public class DiaryFragment extends Fragment {
         if (isEditingMode) {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, true);
+            menu.setGroupVisible(R.id.diary_menu, false);
 
             PackageManager pm = getActivity().getPackageManager();
             if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -417,6 +418,7 @@ public class DiaryFragment extends Fragment {
         } else {
             mSupportActionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
             menu.setGroupVisible(R.id.editor_menu, false);
+            menu.setGroupVisible(R.id.diary_menu, true);
         }
 
         super.onPrepareOptionsMenu(menu);
@@ -439,6 +441,9 @@ public class DiaryFragment extends Fragment {
             case R.id.action_save:
                 saveChanges();
                 Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_diary_share:
+                share();
                 return true;
             case R.id.action_add_photo:
                 takePhoto();
@@ -605,6 +610,41 @@ public class DiaryFragment extends Fragment {
         mRtEditText.resetHasChanged();
 
         enableReviewingMode();
+    }
+
+    private void share() {
+        String subject = mEdtDiaryNoteTitle.getText().toString();
+        String text = mRtEditText.getText().toString();
+
+        ArrayList<Uri> shareImages = new ArrayList<>();
+        ArrayList<String> shareLinks = new ArrayList<>();
+        String shareText = text + "\n\n";
+
+        for (int i = 0; i < mImages.size(); i++) {
+            if (Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri())) {
+                shareImages.add(Uri.parse(mImages.get(i).getLocalUri()));
+            } else if (mImages.get(i).getPicasaUri() != null) {
+                shareLinks.add(mImages.get(i).getPicasaUri());
+            }
+        }
+
+        for (String link : shareLinks) {
+            shareText += link + "\n";
+        }
+
+        Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        share.setType("image/jpeg");
+        share.putExtra(Intent.EXTRA_SUBJECT, subject);
+
+        if (!shareImages.isEmpty()) {
+            share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, shareImages);
+        }
+
+        if (shareText.trim().length() != 0) {
+            share.putExtra(Intent.EXTRA_TEXT, shareText);
+        }
+
+        startActivity(share);
     }
 
     @Override
