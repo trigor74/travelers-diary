@@ -39,4 +39,14 @@ public class LocationPoint implements Serializable {
     public void setAltitude(double altitude) {
         this.altitude = altitude;
     }
+
+    public void setLocation(double latitude, double longitude, double altitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.altitude = altitude;
+    }
+
+    public void setLocation(double latitude, double longitude) {
+        this.setLocation(latitude, longitude, 0);
+    }
 }

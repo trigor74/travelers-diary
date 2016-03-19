@@ -22,6 +22,7 @@ import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.services.LocationTrackingService;
 
 import butterknife.ButterKnife;
 
@@ -133,6 +134,16 @@ public class BaseActivity extends AppCompatActivity implements
             case R.id.nav_reminder:
                 intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
                 startActivity(intent);
+                return true;
+            case R.id.nav_start_tracking:
+                Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
+                intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
+                startService(intentStartTracking);
+                return true;
+            case R.id.nav_stop_tracking:
+                Intent intentStopTracking = new Intent(this, LocationTrackingService.class);
+                intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
+                startService(intentStopTracking);
                 return true;
             case R.id.nav_settings:
                 intent = new Intent(this, PreferencesActivity.class);

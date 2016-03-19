@@ -17,6 +17,18 @@
             android:title="@string/reminder_text" />
     </group>
     <group
+        android:id="@+id/menu_tracking"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_start_tracking"
+            android:icon="@drawable/ic_location_on_black_24dp"
+            android:title="@string/start_tracking_text" />
+        <item
+            android:id="@+id/nav_stop_tracking"
+            android:icon="@drawable/ic_location_on_black_24dp"
+            android:title="@string/stop_tracking_text" />
+    </group>
+    <group
         android:id="@+id/menu_bottom"
         android:checkableBehavior="none">
         <item

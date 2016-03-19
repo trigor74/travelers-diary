@@ -2,10 +2,13 @@ package com.travelersdiary;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -17,6 +20,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.bumptech.glide.Glide;
+import com.travelersdiary.application.Application;
 import com.travelersdiary.models.Photo;
 
 import java.io.File;
@@ -153,4 +157,23 @@ public class Utils {
         return albumImages;
     }
 
+    public static boolean isInternetAvailable(Context context) {
+        NetworkInfo networkInfo = (NetworkInfo) ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return false;
+        } else if (!networkInfo.isConnected() || networkInfo.isRoaming()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isServiceRunning(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
