@@ -27,12 +27,12 @@
             android:id="@+id/action_diary_share"
             android:icon="@drawable/ic_share_white_24dp"
             android:title="@string/share"
-            app:showAsAction="always" />
+            app:showAsAction="never" />
         <item
             android:id="@+id/action_diary_delete"
             android:icon="@drawable/ic_delete_white_24dp"
             android:title="@string/delete"
-            app:showAsAction="always" />
+            app:showAsAction="never" />
     </group>
 
 </menu>
