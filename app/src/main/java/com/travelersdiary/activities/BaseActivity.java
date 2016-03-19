@@ -137,12 +137,12 @@ public class BaseActivity extends AppCompatActivity implements
                 return true;
             case R.id.nav_start_tracking:
                 Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
-                intent.setAction(LocationTrackingService.ACTION_START_TRACK);
+                intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
                 startService(intentStartTracking);
                 return true;
             case R.id.nav_stop_tracking:
                 Intent intentStopTracking = new Intent(this, LocationTrackingService.class);
-                intent.setAction(LocationTrackingService.ACTION_STOP_TRACK);
+                intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
                 startService(intentStopTracking);
                 return true;
             case R.id.nav_settings:

@@ -20,7 +20,6 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.Utils;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.LocationPoint;
-import com.travelersdiary.models.TrackPoint;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +39,7 @@ public class LocationTrackingService extends Service implements
     private boolean isSingleRequestLocation = false;
     private String mUserUID;
     private String mTravelId;
-    private String mTrackId;
-    private Firebase mTrackRef;
+    private Firebase mTrackRef = null;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
@@ -59,7 +57,6 @@ public class LocationTrackingService extends Service implements
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onCreate");
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
@@ -87,13 +84,11 @@ public class LocationTrackingService extends Service implements
     }
 
     /**
-     * tracks:    users/USER_UID/travels/TRAVEL_UID/tracks/[TRACK_UID]
-     * trackpoints: users/USER_UID/tracks/[TRACK_UID]/[timestamp:[location]]
+     * travel:      users/USER_UID/tracks/TRACK_UID/travelId:TRAVEL_UID
+     * trackpoints: users/USER_UID/tracks/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand, flag: " + flags + "startId: " + startId);
-
         if (intent == null) {
             if (!mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
                 mGoogleApiClient.connect();
@@ -106,18 +101,12 @@ public class LocationTrackingService extends Service implements
             action = "";
         }
 
-        Log.i(TAG, "onStartCommand, action: " + action);
-        Log.i(TAG, "onStartCommand, travel id: " + mTravelId);
-
         switch (action) {
             case ACTION_GET_CURRENT_LOCATION:
                 isSingleRequestLocation = true;
                 if (mGoogleApiClient.isConnected()) {
                     mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                     mLastUpdateTimestamp = System.currentTimeMillis();
-
-                    Log.i(TAG, "onStartCommand, timestamp: " + mLastUpdateTimestamp);
-                    Log.i(TAG, "onStartCommand, location: " + mCurrentLocation);
 
                     if (mCurrentLocation != null) {
                         isSingleRequestLocation = false;
@@ -138,27 +127,29 @@ public class LocationTrackingService extends Service implements
                 //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_KEY, null);
                 mTravelId = "default"; // TODO: 18.03.2016 remove after testing
-
-                Firebase userTravelsRef = new Firebase(Utils.getFirebaseUserTravelsUrl(mUserUID));
-                Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
-                userTracksRef.push();
-                mTrackId = userTracksRef.getKey();
-
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put(Constants.FIREBASE_TRACKS, mTrackId);
-
-                userTravelsRef.child(mTravelId)
-                        .child(Constants.FIREBASE_TRACKS)
-                        .updateChildren(map);
-
-                mTrackRef = userTracksRef.child(mTrackId);
-
                 isTrackingEnabled = true;
-                startLocationUpdates();
+
+                Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
+                Firebase newTrackRef = userTracksRef.push();
+                Map<String, Object> map = new HashMap<>();
+                map.put(Constants.FIREBASE_TRACKS_TRAVELID, mTravelId);
+                newTrackRef.setValue(map);
+                mTrackRef = newTrackRef.child(Constants.FIREBASE_TRACKS_TRACK);
+
+                if (mGoogleApiClient.isConnected() && !isRequestingLocationUpdates) {
+                    startLocationUpdates();
+                } else {
+                    if (!mGoogleApiClient.isConnecting()) {
+                        mGoogleApiClient.connect();
+                    }
+                }
                 break;
             case ACTION_STOP_TRACK:
                 isTrackingEnabled = false;
-                stopLocationUpdates();
+                mTrackRef = null;
+                if (mGoogleApiClient.isConnected() && !isSingleRequestLocation && isRequestingLocationUpdates) {
+                    stopLocationUpdates();
+                }
                 break;
             default:
         }
@@ -170,9 +161,6 @@ public class LocationTrackingService extends Service implements
     public void onConnected(Bundle bundle) {
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         mLastUpdateTimestamp = System.currentTimeMillis();
-
-        Log.i(TAG, "onConnected, timestamp: " + mLastUpdateTimestamp);
-        Log.i(TAG, "onConnected, location: " + mCurrentLocation);
 
         if (mCurrentLocation != null) {
             if (isSingleRequestLocation) {
@@ -193,7 +181,6 @@ public class LocationTrackingService extends Service implements
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(TAG, "Connection suspended");
         if (isTrackingEnabled || isSingleRequestLocation) {
             mGoogleApiClient.connect();
         }
@@ -231,9 +218,6 @@ public class LocationTrackingService extends Service implements
         mCurrentLocation = location;
         mLastUpdateTimestamp = System.currentTimeMillis();
 
-        Log.i(TAG, "onLocationChanged, timestamp: " + mLastUpdateTimestamp);
-        Log.i(TAG, "onLocationChanged, location: " + mCurrentLocation);
-
         if (mCurrentLocation != null) {
             if (isSingleRequestLocation) {
                 sendCurrentLocation();
@@ -260,12 +244,9 @@ public class LocationTrackingService extends Service implements
     private void saveCurrentTrackPoint() {
         if (mCurrentLocation != null) {
             LocationPoint point = new LocationPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), mCurrentLocation.getAltitude());
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put(String.valueOf(mLastUpdateTimestamp), point);
-
-            Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
-            userTracksRef.child(mTrackId)
-                    .updateChildren(map);
+            if (mTrackRef != null) {
+                mTrackRef.child(String.valueOf(mLastUpdateTimestamp)).setValue(point);
+            }
         }
     }
 
