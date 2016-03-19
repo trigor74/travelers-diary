@@ -440,10 +440,13 @@ public class DiaryFragment extends Fragment {
                 return true;
             case R.id.action_save:
                 saveChanges();
-                Toast.makeText(getContext(), "saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.saved, Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_diary_share:
                 share();
+                return true;
+            case R.id.action_diary_delete:
+                delete();
                 return true;
             case R.id.action_add_photo:
                 takePhoto();
@@ -645,6 +648,13 @@ public class DiaryFragment extends Fragment {
         }
 
         startActivity(share);
+    }
+
+    private void delete() {
+        mItemRef.removeEventListener(mValueEventListener);
+        mItemRef.removeValue();
+        getActivity().finish();
+        Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
 
     @Override
