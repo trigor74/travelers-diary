@@ -107,14 +107,14 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-        Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
+        Firebase userDiaryRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
         Query query;
 
-        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
         if (travelId != null && !travelId.isEmpty()) {
-            query = mFirebaseRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(travelId);
+            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(travelId);
         } else {
-            query = mFirebaseRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
+            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
         }
 
         mAdapter = new FirebaseMultiSelectRecyclerAdapter<DiaryNote, DiaryListFragment.ViewHolder>(

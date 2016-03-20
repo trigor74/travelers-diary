@@ -24,6 +24,7 @@ import com.travelersdiary.application.Application;
 import com.travelersdiary.models.Photo;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -175,5 +176,10 @@ public class Utils {
             }
         }
         return false;
+    }
+
+    public static String getMediumDate(long timestamp) {
+        // String time = DateFormat.getMediumDateFormat(this).format(timestamp)
+        return SimpleDateFormat.getDateTimeInstance().format(timestamp);
     }
 }
