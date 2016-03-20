@@ -45,6 +45,7 @@ import com.onegravity.rteditor.api.RTApi;
 import com.onegravity.rteditor.api.RTMediaFactoryImpl;
 import com.onegravity.rteditor.api.RTProxyImpl;
 import com.onegravity.rteditor.api.format.RTFormat;
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -52,9 +53,14 @@ import com.travelersdiary.activities.AlbumImagesActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.DiaryNote;
+import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.models.WeatherInfo;
+import com.travelersdiary.services.GeocoderIntentService;
+import com.travelersdiary.services.LocationTrackingService;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,6 +103,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
+
+    @Bind(R.id.txt_location_info)
+    TextView mTxtLocation;
 
     private ActionBar mSupportActionBar;
 
@@ -191,6 +200,7 @@ public class DiaryFragment extends Fragment {
             mDiaryNote = new DiaryNote();
             initNewDiaryNote(mDiaryNote);
             enableEditingMode();
+            startLocationRetrieval();
         } else {
             addDataChangeListener();
             enableReviewingMode();
@@ -331,6 +341,10 @@ public class DiaryFragment extends Fragment {
                 } else {
                     mImagesRecyclerView.setVisibility(View.GONE);
                 }
+
+                if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                    mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                }
             }
 
             @Override
@@ -375,6 +389,10 @@ public class DiaryFragment extends Fragment {
                         } else {
                             mImagesRecyclerView.setVisibility(View.GONE);
                         }
+
+                        if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                        }
                     }
 
                     @Override
@@ -382,6 +400,18 @@ public class DiaryFragment extends Fragment {
                         Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        BusProvider.bus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        BusProvider.bus().unregister(this);
+        super.onPause();
     }
 
     @Override
@@ -703,4 +733,85 @@ public class DiaryFragment extends Fragment {
         }
     }
 
+    // location
+    private void startLocationRetrieval() {
+        Intent intent = new Intent(getContext(), LocationTrackingService.class);
+        intent.setAction(LocationTrackingService.ACTION_GET_CURRENT_LOCATION);
+        getActivity().startService(intent);
+    }
+
+    @Subscribe
+    public void getLocation(LocationPoint location) {
+        if (isNewDiaryNote) {
+            mDiaryNote.setLocation(location);
+            mDiaryNote.setLocationAddressLine(getResources()
+                    .getString(R.string.location_format_address_line_with_gps,
+                            location.getLatitude(),
+                            location.getLongitude()));
+            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+
+            startAddressRetrieval(mDiaryNote.getLocation());
+            updateWeather();
+        }
+    }
+
+    // address
+    private boolean isAddressRetrievalInProgress = false;
+
+    private void startAddressRetrieval(LocationPoint location) {
+        if (!isAddressRetrievalInProgress && Utils.isInternetAvailable(getContext())) {
+            isAddressRetrievalInProgress = true;
+            Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+            intent.putExtra(GeocoderIntentService.LOCATION_DATA_EXTRA, location);
+            getActivity().startService(intent);
+        }
+    }
+
+    @OnClick(R.id.txt_location_info)
+    public void updateAddress() {
+//        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+//            startAddressRetrieval(mDiaryNote.getLocation());
+//        }
+        if (isNewDiaryNote) {
+            startLocationRetrieval();
+        }
+    }
+
+    @Subscribe
+    public void getAddress(GeocoderIntentService.GeocoderResult result) {
+        isAddressRetrievalInProgress = false;
+        if (result != null) {
+            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
+                mDiaryNote.setLocationAddressLine(result.message);
+                mTxtLocation.setText(result.message);
+            }
+        }
+    }
+
+    //weather
+    private boolean isWeatherRetrievalInProgress = false;
+
+    private void startWeatherRetrieval(LocationPoint location) {
+        if (!isWeatherRetrievalInProgress) {
+            isWeatherRetrievalInProgress = true;
+            // TODO: 17.03.2016 create service WeatherIntentService like GeocoderIntentService
+/*
+            Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+            intent.putExtra(WeatherIntentService.LOCATION_DATA_EXTRA, location);
+            getActivity().startService(intent);
+*/
+        }
+    }
+
+    @OnClick(R.id.txt_weather_info)
+    public void updateWeather() {
+        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+            startWeatherRetrieval(mDiaryNote.getLocation());
+        }
+    }
+
+    @Subscribe
+    public void getWeather(WeatherInfo weather) {
+        // TODO: 17.03.2016 store data and update views
+    }
 }

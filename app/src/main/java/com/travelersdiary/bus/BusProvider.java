@@ -14,10 +14,10 @@ public class BusProvider {
     public static Bus bus() {
         Bus localInstance = instance;
         if (localInstance == null) {
-            synchronized (Bus.class) {
+            synchronized (AndroidBus.class) {
                 localInstance = instance;
                 if (localInstance == null) {
-                    instance = localInstance = new Bus(ThreadEnforcer.ANY);
+                    instance = localInstance = new AndroidBus(ThreadEnforcer.ANY);
                 }
             }
         }

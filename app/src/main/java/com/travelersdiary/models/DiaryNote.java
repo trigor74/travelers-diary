@@ -11,6 +11,7 @@ public class DiaryNote implements Serializable {
     private String title;
     private String text;
     private LocationPoint location;
+    private String locationAddressLine;
     private WeatherInfo weather;
     private ArrayList<Photo> photos;
     private ArrayList<String> audios;
@@ -20,7 +21,7 @@ public class DiaryNote implements Serializable {
     }
 
     public DiaryNote(String travelId, String travelTitle, String picasaAlbumId, long time,
-                     String title, String text, LocationPoint location, WeatherInfo weather,
+                     String title, String text, LocationPoint location, String addressLine, WeatherInfo weather,
                      ArrayList<Photo> photos, ArrayList<String> audios, ArrayList<String> videos) {
         this.travelId = travelId;
         this.travelTitle = travelTitle;
@@ -29,6 +30,7 @@ public class DiaryNote implements Serializable {
         this.title = title;
         this.text = text;
         this.location = location;
+        this.locationAddressLine = addressLine;
         this.weather = weather;
         this.photos = photos;
         this.audios = audios;
@@ -81,6 +83,14 @@ public class DiaryNote implements Serializable {
 
     public void setLocation(LocationPoint location) {
         this.location = location;
+    }
+
+    public String getLocationAddressLine() {
+        return locationAddressLine;
+    }
+
+    public void setLocationAddressLine(String locationAddressLine) {
+        this.locationAddressLine = locationAddressLine;
     }
 
     public WeatherInfo getWeather() {
