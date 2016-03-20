@@ -125,7 +125,7 @@ public class LocationTrackingService extends Service implements
             case ACTION_START_TRACK:
                 // TODO: 18.03.2016 put travel id to SharedPreferences on change
                 //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_KEY, null);
+                //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_REF, null);
                 mTravelId = "default"; // TODO: 18.03.2016 remove after testing
                 isTrackingEnabled = true;
 

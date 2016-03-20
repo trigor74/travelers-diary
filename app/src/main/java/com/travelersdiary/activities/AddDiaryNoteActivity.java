@@ -20,7 +20,7 @@ public class AddDiaryNoteActivity extends BaseActivity {
         setContentView(R.layout.activity_add_diary_note);
 
         String travelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
-        String travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        String travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
 
         setSupportActionBar(mToolbar);
@@ -38,7 +38,7 @@ public class AddDiaryNoteActivity extends BaseActivity {
             Bundle bundle = new Bundle();
             bundle.putBoolean("editing mode", true);
             bundle.putString(Constants.KEY_TRAVEL_TITLE, travelTitle);
-            bundle.putString(Constants.KEY_TRAVEL_KEY, travelId);
+            bundle.putString(Constants.KEY_TRAVEL_REF, travelId);
             diaryFragment.setArguments(bundle);
 
             getSupportFragmentManager().beginTransaction()

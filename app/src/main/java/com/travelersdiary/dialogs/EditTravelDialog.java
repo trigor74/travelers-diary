@@ -52,7 +52,7 @@ public class EditTravelDialog extends DialogFragment {
         if (arguments != null) {
             mTravelTitle.setText(arguments.getString(Constants.KEY_TRAVEL_TITLE));
             mTravelDescription.setText(arguments.getString(Constants.KEY_TRAVEL_DESCRIPTION));
-            mTravelKey = arguments.getString(Constants.KEY_TRAVEL_KEY);
+            mTravelKey = arguments.getString(Constants.KEY_TRAVEL_REF);
             if (mTravelKey != null && !mTravelKey.isEmpty()) {
                 dialogTitle = getString(R.string.edit_travel_dialog_title_edit);
                 positiveButtonText = getString(R.string.save);
