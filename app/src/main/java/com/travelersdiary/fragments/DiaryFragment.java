@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -98,9 +97,6 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
-
-    @Bind(R.id.btn_view_all_images)
-    Button mButtonViewAllImages;
 
     private ActionBar mSupportActionBar;
 
@@ -213,7 +209,7 @@ public class DiaryFragment extends Fragment {
 
         mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(getContext(), mImages);
+        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(getActivity(), mImages);
         mImagesRecyclerView.setAdapter(imagesAdapter);
     }
 
@@ -329,13 +325,11 @@ public class DiaryFragment extends Fragment {
                     mImages = mDiaryNote.getPhotos();
 
                     mImagesRecyclerView.setVisibility(View.VISIBLE);
-                    mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                     mImagesRecyclerView.scrollToPosition(0);
                 } else {
                     mImagesRecyclerView.setVisibility(View.GONE);
-                    mButtonViewAllImages.setVisibility(View.GONE);
                 }
             }
 
@@ -375,13 +369,11 @@ public class DiaryFragment extends Fragment {
                             mImages = mDiaryNote.getPhotos();
 
                             mImagesRecyclerView.setVisibility(View.VISIBLE);
-                            mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                             mImagesRecyclerView.scrollToPosition(0);
                         } else {
                             mImagesRecyclerView.setVisibility(View.GONE);
-                            mButtonViewAllImages.setVisibility(View.GONE);
                         }
                     }
 
@@ -510,7 +502,6 @@ public class DiaryFragment extends Fragment {
                 mImages.add(0, photo);
 
                 mImagesRecyclerView.setVisibility(View.VISIBLE);
-                mButtonViewAllImages.setVisibility(View.VISIBLE);
 
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
                 mImagesRecyclerView.scrollToPosition(0);
@@ -527,7 +518,6 @@ public class DiaryFragment extends Fragment {
             }
 
             mImagesRecyclerView.setVisibility(View.VISIBLE);
-            mButtonViewAllImages.setVisibility(View.VISIBLE);
 
             mImagesRecyclerView.getAdapter().notifyDataSetChanged();
             mImagesRecyclerView.scrollToPosition(0);
@@ -711,17 +701,6 @@ public class DiaryFragment extends Fragment {
                     })
                     .show();
         }
-    }
-
-    @OnClick(R.id.btn_view_all_images)
-    public void viewAllImages() {
-        Intent intent = new Intent(getActivity(), DiaryImagesActivity.class);
-        intent.putExtra("images", mImages);
-        intent.putExtra("title", mDiaryNote.getTitle());
-//        startActivity(intent);
-
-        startActivityForResult(intent, Constants.IMAGES_DELETE_REQUEST_CODE);
-
     }
 
 }
