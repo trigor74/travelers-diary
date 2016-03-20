@@ -1,7 +1,8 @@
 package com.travelersdiary.adapters;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,11 +28,11 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
     private final static int SHOW_ALL = 1;
     private final static int ITEM_COUNT = 12;
 
-    private Activity mActivity;
+    private Fragment mFragment;
     private ArrayList<Photo> mImagesList;
 
-    public DiaryImagesListAdapter(Activity activity, ArrayList<Photo> list) {
-        this.mActivity = activity;
+    public DiaryImagesListAdapter(Fragment fragment, ArrayList<Photo> list) {
+        this.mFragment = fragment;
         this.mImagesList = list;
     }
 
@@ -52,26 +53,26 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mActivity).inflate(R.layout.list_item_diary_note_image, parent, false);
+        View view = LayoutInflater.from(mFragment.getContext()).inflate(R.layout.list_item_diary_note_image, parent, false);
         final ViewHolder viewHolder = new ViewHolder(view);
 
         if (viewType == IMAGES) {
             viewHolder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mActivity, FullScreenImageActivity.class);
-                    intent.putStringArrayListExtra("images", Utils.photoArrayToStringArray(mActivity, mImagesList));
+                    Intent intent = new Intent(mFragment.getContext(), FullScreenImageActivity.class);
+                    intent.putStringArrayListExtra("images", Utils.photoArrayToStringArray(mFragment.getContext(), mImagesList));
                     intent.putExtra("position", viewHolder.getAdapterPosition());
-                    mActivity.startActivity(intent);
+                    mFragment.startActivity(intent);
                 }
             });
         } else if (viewType == SHOW_ALL) {
             viewHolder.image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mActivity, DiaryImagesActivity.class);
+                    Intent intent = new Intent(mFragment.getContext(), DiaryImagesActivity.class);
                     intent.putExtra("images", mImagesList);
-                    mActivity.startActivityForResult(intent, Constants.IMAGES_DELETE_REQUEST_CODE);
+                    mFragment.startActivityForResult(intent, Constants.IMAGES_DELETE_REQUEST_CODE);
                 }
             });
         }
@@ -82,20 +83,20 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         if (holder.getItemViewType() == IMAGES) {
-            if (Utils.checkFileExists(mActivity, mImagesList.get(position).getLocalUri())) {
-                Glide.with(mActivity)
+            if (Utils.checkFileExists(mFragment.getContext(), mImagesList.get(position).getLocalUri())) {
+                Glide.with(mFragment.getContext())
                         .load(mImagesList.get(position).getLocalUri())
                         .centerCrop()
                         .into(holder.image);
             } else {
-                Glide.with(mActivity)
+                Glide.with(mFragment.getContext())
                         .load(mImagesList.get(position).getPicasaUri())
                         .centerCrop()
                         .into(holder.image);
             }
         } else if (holder.getItemViewType() == SHOW_ALL) {
-            holder.image.setBackgroundColor(mActivity.getResources().getColor(R.color.gray));
-            Glide.with(mActivity)
+            holder.image.setBackgroundColor(ContextCompat.getColor(mFragment.getContext(), R.color.gray));
+            Glide.with(mFragment.getContext())
                     .load(R.drawable.ic_navigate_next_white_48dp)
                     .into(holder.image);
         }

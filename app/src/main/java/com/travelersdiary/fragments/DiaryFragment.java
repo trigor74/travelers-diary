@@ -219,7 +219,7 @@ public class DiaryFragment extends Fragment {
 
         mImagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(getActivity(), mImages);
+        DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(this, mImages);
         mImagesRecyclerView.setAdapter(imagesAdapter);
     }
 
