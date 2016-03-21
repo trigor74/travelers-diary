@@ -43,9 +43,6 @@ public class BaseActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        // for example
-        String provider = mSharedPreferences.getString(Constants.KEY_PROVIDER, null);
-        String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
