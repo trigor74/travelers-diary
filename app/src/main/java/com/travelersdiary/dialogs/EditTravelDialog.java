@@ -117,6 +117,26 @@ public class EditTravelDialog extends DialogFragment {
                                 public void onCancelled(FirebaseError firebaseError) {
                                 }
                             });
+
+                            // update all reminder items with new travel title
+
+                            Firebase reminderRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
+                            Query reminderQueryRef = reminderRef.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(mTravelKey);
+
+                            reminderQueryRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    Map<String, Object> map = new HashMap<String, Object>();
+                                    map.put(Constants.FIREBASE_REMINDER_TRAVEL_TITLE, newTravelTitle);
+                                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                        child.getRef().updateChildren(map);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+                                }
+                            });
                         }
                     }
                 })
