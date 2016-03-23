@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -14,6 +16,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,8 +31,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +44,11 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
 import com.onegravity.rteditor.RTToolbar;
@@ -107,6 +118,12 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_location_info)
     TextView mTxtLocation;
 
+    @Bind(R.id.diary_location)
+    LinearLayout mLocationLayout;
+
+    @Bind(R.id.location_drop_down)
+    ImageView mLocationDropDown;
+
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -128,6 +145,9 @@ public class DiaryFragment extends Fragment {
 
     private String mUserUID;
     private String mKey;
+
+    private GoogleMap mMap;
+    private SupportMapFragment mMapFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -205,6 +225,8 @@ public class DiaryFragment extends Fragment {
             addDataChangeListener();
             enableReviewingMode();
         }
+
+        setupMap();
 
         return view;
     }
@@ -342,8 +364,14 @@ public class DiaryFragment extends Fragment {
                     mImagesRecyclerView.setVisibility(View.GONE);
                 }
 
-                if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
-                    mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                if (mDiaryNote.getLocation() != null) {
+                    mLocationLayout.setVisibility(View.VISIBLE);
+
+                    if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                        mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                    }
+                } else {
+                    mLocationLayout.setVisibility(View.GONE);
                 }
             }
 
@@ -390,8 +418,15 @@ public class DiaryFragment extends Fragment {
                             mImagesRecyclerView.setVisibility(View.GONE);
                         }
 
-                        if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
-                            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                        if (mDiaryNote.getLocation() != null) {
+                            mLocationLayout.setVisibility(View.VISIBLE);
+
+                            if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
+                                mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+                            }
+
+                            putMarker(new LatLng(mDiaryNote.getLocation().getLatitude(),
+                                    mDiaryNote.getLocation().getLongitude()));
                         }
                     }
 
@@ -525,7 +560,6 @@ public class DiaryFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
             if (resultCode == Activity.RESULT_OK) {
                 Photo photo = new Photo(mImagePath);
@@ -743,12 +777,16 @@ public class DiaryFragment extends Fragment {
     @Subscribe
     public void getLocation(LocationPoint location) {
         if (isNewDiaryNote) {
+            mLocationLayout.setVisibility(View.VISIBLE);
+
             mDiaryNote.setLocation(location);
             mDiaryNote.setLocationAddressLine(getResources()
                     .getString(R.string.location_format_address_line_with_gps,
                             location.getLatitude(),
                             location.getLongitude()));
             mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+
+            putMarker(new LatLng(location.getLatitude(), location.getLongitude()));
 
             startAddressRetrieval(mDiaryNote.getLocation());
             updateWeather();
@@ -810,8 +848,61 @@ public class DiaryFragment extends Fragment {
         }
     }
 
+    @OnClick(R.id.diary_location)
+    public void showMap() {
+        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+
+        ObjectAnimator anim = ObjectAnimator.ofFloat(mLocationDropDown, "rotation", 0, 180);
+        anim.setDuration(300);
+
+        if (mMapFragment.isHidden()) {
+            anim.start();
+            fragmentTransaction.show(mMapFragment);
+        } else {
+            anim.setFloatValues(180, 360);
+            anim.start();
+            fragmentTransaction.hide(mMapFragment);
+        }
+
+        fragmentTransaction.commit();
+    }
+
+    private void putMarker(LatLng coordinates) {
+        mMap.addMarker(new MarkerOptions().position(coordinates));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 17f));
+    }
+
     @Subscribe
     public void getWeather(WeatherInfo weather) {
         // TODO: 17.03.2016 store data and update views
     }
+
+    private void setupMap() {
+        if (mMap == null) {
+            mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            mMap = mMapFragment.getMap();
+            mMap.getUiSettings().setScrollGesturesEnabled(false);
+            mMap.getUiSettings().setZoomGesturesEnabled(false);
+
+            final View mapView = mMapFragment.getView();
+            mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                        mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    } else {
+                        mapView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+
+                    ViewGroup.LayoutParams params = mapView.getLayoutParams();
+                    params.height = mapView.getWidth();
+                    mapView.setLayoutParams(params);
+
+                    getChildFragmentManager().beginTransaction().hide(mMapFragment).commit();
+                }
+            });
+        }
+    }
+
 }
