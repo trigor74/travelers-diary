@@ -56,6 +56,7 @@
     <string name="reminder_dont_remind_text">Don\'t remind</string>
     <string name="reminder_choose_location_text">Choose location</string>
     <string name="reminder_new_remind_item_default_title">New remind item</string>
+    <string name="reminder_no_title_text">No title</string>
     <string name="reminder_new_remind_item_default_text">Write text here to remind</string>
     <string name="reminder_show_checkboxes">Show Checkboxes</string>
     <string name="reminder_hide_checkboxes">Hide Checkboxes</string>

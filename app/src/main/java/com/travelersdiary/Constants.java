@@ -55,7 +55,6 @@ public final class Constants {
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";
-    public static final String KEY_TRAVEL_KEY = "TRAVEL_KEY";
     public static final String KEY_TRAVEL_TITLE = "TRAVEL_TITLE";
     public static final String KEY_TRAVEL_DESCRIPTION = "TRAVEL_DESCRIPTION";
 

@@ -45,7 +45,7 @@ public class TravelActivity extends BaseActivity {
         setContentView(R.layout.activity_travel);
 
         mTravelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
-        mTravelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        mTravelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -125,7 +125,7 @@ public class TravelActivity extends BaseActivity {
             case 0: // Diary Tab
                 Intent diaryIntent = new Intent(this, AddDiaryNoteActivity.class);
                 diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
-                diaryIntent.putExtra(Constants.KEY_TRAVEL_KEY, mTravelId);
+                diaryIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
                 startActivity(diaryIntent);
                 break;
             case 1: // Reminder Tab

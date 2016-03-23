@@ -109,7 +109,7 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
         Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
         Query query;
 
-        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_KEY);
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
         if (travelId != null && !travelId.isEmpty()) {
             query = mFirebaseRef.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(travelId);
         } else {

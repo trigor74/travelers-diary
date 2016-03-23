@@ -316,8 +316,9 @@ public class DiaryFragment extends Fragment {
     }
 
     private void initNewDiaryNote(DiaryNote diaryNote) {
+        // TODO: 20.03.16 change "default" to current active travel
         String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, "Uncategorized");
-        String travelId = getArguments().getString(Constants.KEY_TRAVEL_KEY, "default");
+        String travelId = getArguments().getString(Constants.KEY_TRAVEL_REF, "default");
 
         diaryNote.setTitle("New Diary Note");
         diaryNote.setTravelId(travelId); // change to active
