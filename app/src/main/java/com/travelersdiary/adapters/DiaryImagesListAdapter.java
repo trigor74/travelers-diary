@@ -1,7 +1,8 @@
 package com.travelersdiary.adapters;
 
-import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.FullScreenImageActivity;
 import com.travelersdiary.models.Photo;
 
@@ -21,11 +24,15 @@ import butterknife.ButterKnife;
 
 public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesListAdapter.ViewHolder> {
 
-    private Context mContext;
+    private final static int IMAGES = 0;
+    private final static int SHOW_ALL = 1;
+    private final static int ITEM_COUNT = 12;
+
+    private Fragment mFragment;
     private ArrayList<Photo> mImagesList;
 
-    public DiaryImagesListAdapter(Context context, ArrayList<Photo> list) {
-        this.mContext = context;
+    public DiaryImagesListAdapter(Fragment fragment, ArrayList<Photo> list) {
+        this.mFragment = fragment;
         this.mImagesList = list;
     }
 
@@ -46,40 +53,71 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_diary_note_image, parent, false);
-
+        View view = LayoutInflater.from(mFragment.getContext()).inflate(R.layout.list_item_diary_note_image, parent, false);
         final ViewHolder viewHolder = new ViewHolder(view);
-        viewHolder.image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, FullScreenImageActivity.class);
-                intent.putStringArrayListExtra("images",  Utils.photoArrayToStringArray(mContext, mImagesList));
-                intent.putExtra("position", viewHolder.getAdapterPosition());
-                mContext.startActivity(intent);
-            }
-        });
+
+        if (viewType == IMAGES) {
+            viewHolder.image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mFragment.getContext(), FullScreenImageActivity.class);
+                    intent.putStringArrayListExtra("images", Utils.photoArrayToStringArray(mFragment.getContext(), mImagesList));
+                    intent.putExtra("position", viewHolder.getAdapterPosition());
+                    mFragment.startActivity(intent);
+                }
+            });
+        } else if (viewType == SHOW_ALL) {
+            viewHolder.image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(mFragment.getContext(), DiaryImagesActivity.class);
+                    intent.putExtra("images", mImagesList);
+                    mFragment.startActivityForResult(intent, Constants.IMAGES_DELETE_REQUEST_CODE);
+                }
+            });
+        }
 
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        if (Utils.checkFileExists(mContext, mImagesList.get(position).getLocalUri())) {
-            Glide.with(mContext)
-                    .load(mImagesList.get(position).getLocalUri())
-                    .centerCrop()
-                    .into(holder.image);
-        } else {
-            Glide.with(mContext)
-                    .load(mImagesList.get(position).getPicasaUri())
-                    .centerCrop()
+        if (holder.getItemViewType() == IMAGES) {
+            if (Utils.checkFileExists(mFragment.getContext(), mImagesList.get(position).getLocalUri())) {
+                Glide.with(mFragment.getContext())
+                        .load(mImagesList.get(position).getLocalUri())
+                        .centerCrop()
+                        .into(holder.image);
+            } else {
+                Glide.with(mFragment.getContext())
+                        .load(mImagesList.get(position).getPicasaUri())
+                        .centerCrop()
+                        .into(holder.image);
+            }
+        } else if (holder.getItemViewType() == SHOW_ALL) {
+            holder.image.setBackgroundColor(ContextCompat.getColor(mFragment.getContext(), R.color.gray));
+            Glide.with(mFragment.getContext())
+                    .load(R.drawable.ic_navigate_next_white_48dp)
                     .into(holder.image);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mImagesList.size();
+        if (mImagesList.size() < ITEM_COUNT) {
+            return mImagesList.size() + 1;
+        } else {
+            return ITEM_COUNT;
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position < getItemCount() - 1) {
+            return IMAGES;
+        } else {
+            return SHOW_ALL;
+        }
     }
 
 }

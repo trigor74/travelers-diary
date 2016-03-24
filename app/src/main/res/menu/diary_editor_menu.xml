@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group android:id="@+id/editor_menu">
+
+    <group
+        android:id="@+id/editor_menu"
+        android:visible="false">
         <item
             android:id="@+id/action_save"
             android:icon="@drawable/ic_save_white_24dp"
@@ -18,4 +21,18 @@
             android:title="@string/add_image"
             app:showAsAction="never" />
     </group>
+
+    <group android:id="@+id/diary_menu">
+        <item
+            android:id="@+id/action_diary_share"
+            android:icon="@drawable/ic_share_white_24dp"
+            android:title="@string/share"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_diary_delete"
+            android:icon="@drawable/ic_delete_white_24dp"
+            android:title="@string/delete"
+            app:showAsAction="never" />
+    </group>
+
 </menu>

@@ -146,29 +146,49 @@ public class DiaryImagesActivity extends AppCompatActivity
     }
 
     private void share() {
-        ArrayList<Uri> shareImages = new ArrayList<>();
-
-        //TODO sharing for images that on picasa and not on phone
-
-        if (mSelectedImages.size() > 0) {
-            for (int i = 0; i < mSelectedImages.size(); i++) {
-                Uri uri = Uri.parse(mSelectedImages.get(i).getLocalUri());
-                shareImages.add(uri);
-            }
-
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-            intent.putExtra(Intent.EXTRA_SUBJECT, mDiaryTitle);
-            intent.setType("image/jpeg");
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, shareImages);
-            startActivity(intent);
-        } else {
+        if (mSelectedImages.isEmpty()) {
             Toast.makeText(this, R.string.nothing_selected, Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        ArrayList<Uri> shareImages = new ArrayList<>();
+        ArrayList<String> shareLinks = new ArrayList<>();
+        String links = "";
+
+        for (int i = 0; i < mSelectedImages.size(); i++) {
+            if (Utils.checkFileExists(this, mSelectedImages.get(i).getLocalUri())) {
+                shareImages.add(Uri.parse(mSelectedImages.get(i).getLocalUri()));
+            } else if (mSelectedImages.get(i).getPicasaUri() != null) {
+                shareLinks.add(mSelectedImages.get(i).getPicasaUri());
+            }
+        }
+
+        for (String link : shareLinks) {
+            links += link + "\n";
+        }
+
+        Intent share = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        share.setType("image/jpeg");
+        share.putExtra(Intent.EXTRA_SUBJECT, mDiaryTitle);
+
+        if (!shareImages.isEmpty()) {
+            share.putParcelableArrayListExtra(Intent.EXTRA_STREAM, shareImages);
+        }
+
+        if (!shareLinks.isEmpty()) {
+            share.putExtra(Intent.EXTRA_TEXT, links);
+        }
+
+        startActivity(share);
     }
 
     /*very awful code, needs to be rewritten*/
     private void delete() {
+        if (mSelectedImages.isEmpty()) {
+            Toast.makeText(this, R.string.nothing_selected, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         mImagesToDelete.clear();
         mImagesToDelete.addAll(mSelectedImages);
 
