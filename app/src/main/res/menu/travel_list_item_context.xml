@@ -3,22 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_item_set_active"
-        android:icon="@drawable/ic_explore_black_24dp"
         android:title="Make Active"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_item_open"
-        android:icon="@drawable/ic_explore_black_24dp"
         android:title="Open"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_item_edit"
-        android:icon="@drawable/ic_explore_black_24dp"
         android:title="Edit"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_item_delete"
-        android:icon="@drawable/ic_delete_white_24dp"
         android:title="@string/delete"
         app:showAsAction="always" />
 </menu>
