@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -36,6 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -123,6 +123,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.location_drop_down)
     ImageView mLocationDropDown;
+
+    @Bind(R.id.rte_content)
+    ScrollView mScrollView;
 
     private ActionBar mSupportActionBar;
 
@@ -858,14 +861,19 @@ public class DiaryFragment extends Fragment {
 
         if (mMapFragment.isHidden()) {
             anim.start();
-            fragmentTransaction.show(mMapFragment);
+            fragmentTransaction.show(mMapFragment).commit();
+            mScrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    mScrollView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+                }
+            });
         } else {
             anim.setFloatValues(180, 360);
             anim.start();
-            fragmentTransaction.hide(mMapFragment);
+            fragmentTransaction.hide(mMapFragment).commit();
         }
-
-        fragmentTransaction.commit();
     }
 
     private void putMarker(LatLng coordinates) {
@@ -889,11 +897,7 @@ public class DiaryFragment extends Fragment {
             mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                        mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    } else {
-                        mapView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    }
+                    mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 
                     ViewGroup.LayoutParams params = mapView.getLayoutParams();
                     params.height = mapView.getWidth();

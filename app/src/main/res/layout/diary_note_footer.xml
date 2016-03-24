@@ -4,16 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#bbbbbb"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp">
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,7 +74,7 @@
         </LinearLayout>
 
     </LinearLayout>
-    
+
     <!-- MapFragment with lite mode enabled -->
     <fragment
         android:id="@+id/map"
