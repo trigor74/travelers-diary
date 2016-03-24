@@ -10,6 +10,8 @@
     <string name="stop_tracking_text">Stop tracking</string>
     <string name="settings">Settings</string>
     <string name="edit">Edit</string>
+    <string name="open">Open</string>
+    <string name="make_active">Make Active</string>
     <string name="save">Save</string>
     <string name="saved">Saved</string>
     <string name="create">Create</string>
@@ -111,4 +113,6 @@
     <string name="geocoder_address_found">Address found</string>
     <string name="geocoder_no_geocoder_available">No geocoder available</string>
     <string name="location_format_address_line_with_gps">(%1$.6f, %2$.6f)</string>
+
+    <string name="travels_select_action_text">Select The Action</string>
 </resources>
