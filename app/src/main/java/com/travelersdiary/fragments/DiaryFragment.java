@@ -787,7 +787,7 @@ public class DiaryFragment extends Fragment {
                             location.getLongitude()));
             mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
 
-            putMarker(new LatLng(location.getLatitude(), location.getLongitude()));
+            putMarker(location.getLatLng());
 
             startAddressRetrieval(mDiaryNote.getLocation());
             updateWeather();
@@ -808,11 +808,10 @@ public class DiaryFragment extends Fragment {
 
     @OnClick(R.id.txt_location_info)
     public void updateAddress() {
-//        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
-//            startAddressRetrieval(mDiaryNote.getLocation());
-//        }
         if (isNewDiaryNote) {
             startLocationRetrieval();
+        } else if (isEditingMode && mDiaryNote != null && mDiaryNote.getLocation() != null) {
+            startAddressRetrieval(mDiaryNote.getLocation());
         }
     }
 
