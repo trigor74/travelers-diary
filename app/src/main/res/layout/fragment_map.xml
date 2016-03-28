@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <FrameLayout
+    <com.google.android.gms.maps.MapView
         android:id="@+id/map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

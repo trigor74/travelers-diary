@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,8 +21,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -55,8 +54,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
 
     private String mTravelId = null;
 
-    private SupportMapFragment mFragment;
     private GoogleMap mMap;
+    private MapView mMapView;
 
     private LatLngBounds.Builder mLatLngBoundsBuilder = new LatLngBounds.Builder();
     private boolean mHasLatLngBoundsBuilderPoints = false;
@@ -75,24 +74,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         ButterKnife.bind(this, view);
 
+        mTravelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
+
+        mMapView = (MapView) view.findViewById(R.id.map_container);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.getMapAsync(this);
+
         return view;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
 
-        mTravelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
-
-        FragmentManager fm = getChildFragmentManager();
-        mFragment = (SupportMapFragment) fm.findFragmentById(R.id.map_container);
-        if (mFragment == null) {
-            mFragment = SupportMapFragment.newInstance();
-            fm.beginTransaction().replace(R.id.map_container, mFragment).commit();
-        }
-        if (mFragment != null) {
-            mFragment.getMapAsync(this);
-        }
+    @Override
+    public void onPause() {
+        mMapView.onPause();
+        super.onPause();
     }
 
     @Override
@@ -197,9 +197,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        mMapView.onDestroy();
         ButterKnife.unbind(this);
-        mFragment = null;
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapView.onSaveInstanceState(outState);
     }
 
     private void retrieveDataAndShowOnMap() {
@@ -217,8 +229,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
                     TrackListItem track = child.getValue(TrackListItem.class);
                     //child.getKey();
 
-                    List<LatLng> trackPoints = track.getSortedLatLngTrack();
-                    if (trackPoints.size() > 0) {
+                    TreeMap<Long, LocationPoint> sortedTrack = new TreeMap<>(track.getTrack());
+                    if (!sortedTrack.isEmpty()) {
+                        Long firstTime = sortedTrack.firstEntry().getKey();
+                        LatLng firstPoint = sortedTrack.firstEntry().getValue().getLatLng();
+                        Long lastTime = sortedTrack.lastEntry().getKey();
+                        LatLng lastPoint = sortedTrack.lastEntry().getValue().getLatLng();
+
+                        List<LatLng> trackPoints = new ArrayList<>(sortedTrack.size());
+                        for (Map.Entry<Long, LocationPoint> entry : sortedTrack.entrySet()) {
+                            LatLng latLng = entry.getValue().getLatLng();
+                            trackPoints.add(latLng);
+                            mLatLngBoundsBuilder.include(latLng);
+                            mHasLatLngBoundsBuilderPoints = true;
+                        }
 
                         Polyline route = mMap.addPolyline(new PolylineOptions()
                                 .width(5f)
@@ -226,18 +250,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
                                 .geodesic(true)
                                 .zIndex(2f));
                         route.setPoints(trackPoints);
-
-                        for (LatLng latLng : trackPoints) {
-                            mLatLngBoundsBuilder.include(latLng);
-                            mHasLatLngBoundsBuilderPoints = true;
-                        }
-
-                        //Start and End points
-                        TreeMap<Long, LocationPoint> treeMap = new TreeMap<>(track.getTrack());
-                        Long firstTime = treeMap.firstEntry().getKey();
-                        LatLng firstPoint = treeMap.firstEntry().getValue().getLatLng();
-                        Long lastTime = treeMap.lastEntry().getKey();
-                        LatLng lastPoint = treeMap.lastEntry().getValue().getLatLng();
 
                         Marker startMarker = mMap.addMarker(new MarkerOptions()
                                 .title("Start")
