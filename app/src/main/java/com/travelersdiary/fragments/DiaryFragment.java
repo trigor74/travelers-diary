@@ -585,10 +585,11 @@ public class DiaryFragment extends Fragment {
                 mImages.add(0, new Photo(path.get(i)));
             }
 
-            mImagesRecyclerView.setVisibility(View.VISIBLE);
-
-            mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-            mImagesRecyclerView.scrollToPosition(0);
+            if (!mImages.isEmpty()) {
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(0);
+            }
         }
 
         if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
