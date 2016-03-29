@@ -17,7 +17,6 @@ import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.dialogs.EditTravelDialog;
 import com.travelersdiary.fragments.DiaryListFragment;
-import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
@@ -48,8 +47,8 @@ public class MainActivity extends BaseActivity {
                 addTravelDialog.show(fragmentManager, "dialog");
                 break;
             case 1: // Diary Tab
-                Intent diaryIntent = new Intent(this, AddDiaryNoteActivity.class);
-                //diaryIntent.putExtra(key, value);
+                Intent diaryIntent = new Intent(this, DiaryActivity.class);
+                diaryIntent.putExtra(DiaryActivity.NEW_DIARY_NOTE, true);
                 startActivity(diaryIntent);
                 break;
             case 2: // Reminder Tab

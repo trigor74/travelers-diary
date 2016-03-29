@@ -10,6 +10,10 @@
         android:orientation="vertical">
 
         <include
+            android:id="@+id/diary_fragment_toolbar"
+            layout="@layout/toolbar_diary_activity" />
+
+        <include
             android:id="@+id/diary_note_header_layout"
             layout="@layout/diary_note_header" />
 
@@ -40,12 +44,12 @@
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/images_list"
                         android:layout_width="match_parent"
-                        android:clickable="true"
                         android:layout_height="87dp"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
                         android:layout_marginBottom="16dp"
                         android:layout_marginTop="16dp"
+                        android:clickable="true"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
                         android:scrollbars="horizontal"
                         android:visibility="gone" />
 

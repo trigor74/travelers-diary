@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,6 +62,8 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.AlbumImagesActivity;
+import com.travelersdiary.activities.BaseActivity;
+import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
@@ -96,6 +99,9 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.rte_toolbar_container)
     ViewGroup mToolbarContainer;
+
+    @Bind(R.id.diary_fragment_toolbar)
+    Toolbar mToolbar;
 
     @Bind(R.id.rte_toolbar)
     RTToolbar mRtToolbar;
@@ -171,14 +177,17 @@ public class DiaryFragment extends Fragment {
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
         mKey = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
 
-        //get toolbar
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        ((BaseActivity) getActivity()).setupNavigationView(mToolbar);
+
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setDisplayShowTitleEnabled(false);
         }
 
-        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+//        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+        mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_diary_note_title);
         mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
@@ -216,7 +225,7 @@ public class DiaryFragment extends Fragment {
             }
         };
 
-        isNewDiaryNote = getArguments().getBoolean("editing mode", false);
+        isNewDiaryNote = getArguments().getBoolean(DiaryActivity.NEW_DIARY_NOTE, false);
 
         if (isNewDiaryNote) {
             mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID));

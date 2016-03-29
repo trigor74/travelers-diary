@@ -46,7 +46,6 @@
         <activity
             android:name=".activities.DiaryActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".activities.AddDiaryNoteActivity" />
         <activity
             android:name=".activities.GalleryAlbumActivity"
             android:label="@string/albums" />

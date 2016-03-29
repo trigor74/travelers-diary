@@ -123,7 +123,8 @@ public class TravelActivity extends BaseActivity {
     public void onFabClick() {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Diary Tab
-                Intent diaryIntent = new Intent(this, AddDiaryNoteActivity.class);
+                Intent diaryIntent = new Intent(this, DiaryActivity.class);
+                diaryIntent.putExtra(DiaryActivity.NEW_DIARY_NOTE, true);
                 diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
                 diaryIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
                 startActivity(diaryIntent);

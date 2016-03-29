@@ -76,7 +76,7 @@ public class BaseActivity extends AppCompatActivity implements
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
     }
 
-    protected void setupNavigationView(Toolbar toolbar) {
+    public void setupNavigationView(Toolbar toolbar) {
         mNavigationView.setNavigationItemSelectedListener(this);
 
         if (useDrawerToggle()) {
