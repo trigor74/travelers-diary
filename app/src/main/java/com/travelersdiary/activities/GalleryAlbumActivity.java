@@ -143,6 +143,8 @@ public class GalleryAlbumActivity extends AppCompatActivity {
             }
             cursor.moveToNext();
         }
+        cursor.close();
+
         return albumsModels;
     }
 
