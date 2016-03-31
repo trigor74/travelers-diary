@@ -46,4 +46,5 @@
             app:layout_behavior="com.travelersdiary.ui.ScrollingFABBehavior" />
 
     </android.support.design.widget.CoordinatorLayout>
+
 </RelativeLayout>

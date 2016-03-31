@@ -50,8 +50,20 @@
                         android:clickable="true"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
-                        android:scrollbars="horizontal"
-                        android:visibility="gone" />
+                        android:scrollbars="horizontal" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="16dp"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <include
+                            android:id="@+id/warning"
+                            layout="@layout/warning" />
+
+                    </LinearLayout>
 
                     <include
                         android:id="@+id/diary_note_footer_layout"

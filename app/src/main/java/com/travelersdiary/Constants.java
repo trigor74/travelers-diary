@@ -53,6 +53,7 @@ public final class Constants {
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
+    public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";

@@ -8,6 +8,8 @@
     <color name="white">#ffffff</color>
     <color name="black">#000000</color>
     <color name="gray">#77000000</color>
+    <color name="bloodRed">#CC9B0000</color>
+    <color name="darkRed">#999B0000</color>
     <color name="mapRouteColor">#8F00796B</color>
     <color name="mapCircleFillColor">#100000FF</color>
     <color name="mapCircleStrokeColor">#200000FF</color>

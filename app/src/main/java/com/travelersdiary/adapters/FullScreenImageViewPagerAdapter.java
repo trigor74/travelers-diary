@@ -37,6 +37,7 @@ public class FullScreenImageViewPagerAdapter extends PagerAdapter {
 
         Glide.with(mContext)
                 .load(mImages.get(position))
+                .error(R.drawable.image_loading)
                 .into(mImageFullScreen);
 
         container.addView(view);

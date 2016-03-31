@@ -115,4 +115,8 @@
     <string name="location_format_address_line_with_gps">(%1$.6f, %2$.6f)</string>
 
     <string name="travels_select_action_text">Select The Action</string>
+    <string name="not_synced_image_warning">Some of your photos are not synchronized.
+        \nIt could have happened because sync is disabled on other devices.</string>
+    <string name="dont_show_again">Don\'t show again</string>
+    <string name="hide">Hide</string>
 </resources>
