@@ -157,11 +157,24 @@ public class BaseActivity extends AppCompatActivity implements
         mFirebaseRef.removeAuthStateListener(mAuthListener);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawers();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void takeUserToLoginScreenOnUnAuth() {
         /* Move user to LoginActivity, and remove the backstack */
         Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    public boolean isDrawerOpen() {
+        return mDrawerLayout.isDrawerOpen(GravityCompat.START);
     }
 }
