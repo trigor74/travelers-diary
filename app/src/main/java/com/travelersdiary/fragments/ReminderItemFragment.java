@@ -248,6 +248,9 @@ public class ReminderItemFragment extends Fragment {
                 }
                 ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mRemindItem.isViewAsCheckboxes());
                 return true;
+            case R.id.action_reminder_delete:
+                delete();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -682,6 +685,13 @@ public class ReminderItemFragment extends Fragment {
             mItemKey = newItemRef.getKey();
         }
         return true;
+    }
+
+    private void delete() {
+        Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
+        firebaseRef.removeValue();
+        getActivity().finish();
+        Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
 
     private String validateData() {

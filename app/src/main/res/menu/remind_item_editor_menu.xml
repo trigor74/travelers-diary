@@ -15,5 +15,9 @@
             android:id="@+id/action_switch_checkboxes_remind_item"
             android:title="@string/reminder_show_checkboxes"
             app:showAsAction="never" />
+        <item
+            android:id="@+id/action_reminder_delete"
+            android:title="@string/delete"
+            app:showAsAction="never" />
     </group>
 </menu>
