@@ -35,8 +35,21 @@ public class DiaryActivity extends BaseActivity {
 
             diaryFragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, diaryFragment)
+                    .add(R.id.fragment_container, diaryFragment, DiaryFragment.class.getSimpleName())
                     .commit();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        DiaryFragment diaryFragment = (DiaryFragment) getSupportFragmentManager()
+                .findFragmentByTag(DiaryFragment.class.getSimpleName());
+        if (isDrawerOpen()) {
+            super.onBackPressed();
+        } else if (diaryFragment != null) {
+            diaryFragment.onBackPressed();
+        } else {
+            super.onBackPressed();
         }
     }
 

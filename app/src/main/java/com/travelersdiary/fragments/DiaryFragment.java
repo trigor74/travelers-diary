@@ -530,15 +530,7 @@ public class DiaryFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isEditingMode && !isNewDiaryNote) {
-                    if (mRtEditText.hasChanged()) {
-                        showDiscardDialog();
-                    } else {
-                        enableReviewingMode();
-                    }
-                } else {
-                    getActivity().finish();
-                }
+                onBackPressed();
                 return true;
             case R.id.action_save:
                 saveChanges();
@@ -558,6 +550,18 @@ public class DiaryFragment extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void onBackPressed() {
+        if (isEditingMode && !isNewDiaryNote) {
+            if (mRtEditText.hasChanged()) {
+                showDiscardDialog();
+            } else {
+                enableReviewingMode();
+            }
+        } else {
+            getActivity().finish();
         }
     }
 
