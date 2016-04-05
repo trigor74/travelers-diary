@@ -137,6 +137,16 @@ public class EditTravelDialog extends DialogFragment {
                                 public void onCancelled(FirebaseError firebaseError) {
                                 }
                             });
+
+                            // update active travel title if need
+                            String activeTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+                            if (mTravelKey.equals(activeTravelKey)) {
+                                Map<String, Object> activeTravelMap = new HashMap<String, Object>();
+                                activeTravelMap.put(Constants.FIREBASE_ACTIVE_TRAVEL_TITLE, title);
+                                activeTravelMap.put(Constants.FIREBASE_ACTIVE_TRAVEL_KEY, mTravelKey);
+                                Firebase activeTravelRef = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
+                                activeTravelRef.setValue(activeTravelMap);
+                            }
                         }
                     }
                 })

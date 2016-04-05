@@ -19,10 +19,17 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.services.LocationTrackingService;
+
+import java.util.Map;
 
 import butterknife.ButterKnife;
 
@@ -35,6 +42,8 @@ public class BaseActivity extends AppCompatActivity implements
 
     private Firebase mFirebaseRef;
     private Firebase.AuthStateListener mAuthListener;
+    private Query mActiveTravelQuery = null;
+    private ValueEventListener mActiveTravelListener;
 
     private SharedPreferences mSharedPreferences;
 
@@ -55,12 +64,64 @@ public class BaseActivity extends AppCompatActivity implements
                 }
             }
         };
+
+        mActiveTravelListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                if (map != null) {
+                    String activeTravelKey = (String) map.get(Constants.FIREBASE_ACTIVE_TRAVEL_KEY);
+                    String activeTravelTitle = (String) map.get(Constants.FIREBASE_ACTIVE_TRAVEL_TITLE);
+
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    String currentTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+
+                    if (currentTravelKey == null || !currentTravelKey.equals(activeTravelKey)) {
+                        // CHANGE ACTIVE TRAVEL HERE!!!
+                        // switch active travel logic:
+                        // 1. disable notifications for active travel 's reminder items
+                        // 2. set "active" to false for active travel 's reminder items
+                        // 3. set "active" to false for active travel
+                        // 4. set "active" to true for new travel
+                        // 5. set "active" to true for new travel 's reminder items
+                        // 6. enable notifications for new travel 's reminder items
+                        // 7. put new active travel's key and title to SharedPreferences
+
+                        // TODO: 05.04.16 ADD CHANGE ACTIVE TRAVEL LOGIC
+
+                        // 7.
+                        sharedPreferences.edit()
+                                .putString(Constants.KEY_ACTIVE_TRAVEL_KEY, activeTravelKey)
+                                .apply();
+                        sharedPreferences.edit()
+                                .putString(Constants.KEY_ACTIVE_TRAVEL_TITLE, activeTravelTitle)
+                                .apply();
+                    } else {
+                        // is changed title?
+                        // TODO: 05.04.16 add a check
+                        sharedPreferences.edit()
+                                .putString(Constants.KEY_ACTIVE_TRAVEL_TITLE, activeTravelTitle)
+                                .apply();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        };
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mFirebaseRef.addAuthStateListener(mAuthListener);
+        String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
+        if (userUID != null) {
+            mActiveTravelQuery = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
+            mActiveTravelQuery.addValueEventListener(mActiveTravelListener);
+        }
     }
 
     @Override
@@ -153,8 +214,9 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        super.onPause();
         mFirebaseRef.removeAuthStateListener(mAuthListener);
+        mActiveTravelQuery.removeEventListener(mActiveTravelListener);
+        super.onPause();
     }
 
     private void takeUserToLoginScreenOnUnAuth() {

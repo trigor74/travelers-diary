@@ -9,6 +9,9 @@ public final class Constants {
     public static final String FIREBASE_URL = BuildConfig.FIREBASE_ROOT_URL;
     public static final String FIREBASE_USERS = "users";
     public static final String FIREBASE_DIARY = "diary";
+    public static final String FIREBASE_ACTIVE_TRAVEL = "activeTravel";
+    public static final String FIREBASE_ACTIVE_TRAVEL_KEY = "activeTravelKey";
+    public static final String FIREBASE_ACTIVE_TRAVEL_TITLE = "activeTravelTitle";
     public static final String FIREBASE_TRAVELS = "travels";
     public static final String FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY = "default";
     public static final String FIREBASE_TRAVEL_TITLE = "title";
@@ -56,6 +59,8 @@ public final class Constants {
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
+    public static final String KEY_ACTIVE_TRAVEL_KEY = "ACTIVE_TRAVEL_KEY";
+    public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";

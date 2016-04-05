@@ -36,6 +36,10 @@ public class Utils {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID;
     }
 
+    public static String getFirebaseUserActiveTravelUrl(String userUID) {
+        return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_ACTIVE_TRAVEL;
+    }
+
     public static String getFirebaseUserTravelsUrl(String userUID) {
         return Constants.FIREBASE_URL + "/" + Constants.FIREBASE_USERS + "/" + userUID + "/" + Constants.FIREBASE_TRAVELS;
     }
