@@ -73,6 +73,9 @@
             android:name=".services.LocationTrackingService"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name=".services.WeatherIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

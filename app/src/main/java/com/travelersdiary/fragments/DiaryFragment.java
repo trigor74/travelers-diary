@@ -39,6 +39,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -72,6 +73,7 @@ import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.WeatherInfo;
 import com.travelersdiary.services.GeocoderIntentService;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.services.WeatherIntentService;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,6 +116,12 @@ public class DiaryFragment extends Fragment {
 
     @Bind(R.id.txt_travel)
     TextView mTxtTravel;
+
+    @Bind(R.id.img_weather_icon)
+    ImageView mImgWeatherIcon;
+
+    @Bind(R.id.txt_weather_info)
+    TextView mTxtWeatherInfo;
 
     @Bind(R.id.txt_location_info)
     TextView mTxtLocation;
@@ -368,6 +376,8 @@ public class DiaryFragment extends Fragment {
                     mImagesRecyclerView.setVisibility(View.GONE);
                 }
 
+                setWeatherViews();
+
                 if (mDiaryNote.getLocation() != null) {
                     mLocationLayout.setVisibility(View.VISIBLE);
 
@@ -421,6 +431,8 @@ public class DiaryFragment extends Fragment {
                         } else {
                             mImagesRecyclerView.setVisibility(View.GONE);
                         }
+
+                        setWeatherViews();
 
                         if (mDiaryNote.getLocation() != null) {
                             mLocationLayout.setVisibility(View.VISIBLE);
@@ -835,19 +847,42 @@ public class DiaryFragment extends Fragment {
     private void startWeatherRetrieval(LocationPoint location) {
         if (!isWeatherRetrievalInProgress) {
             isWeatherRetrievalInProgress = true;
-            // TODO: 17.03.2016 create service WeatherIntentService like GeocoderIntentService
-/*
-            Intent intent = new Intent(getContext(), GeocoderIntentService.class);
+            Intent intent = new Intent(getContext(), WeatherIntentService.class);
             intent.putExtra(WeatherIntentService.LOCATION_DATA_EXTRA, location);
             getActivity().startService(intent);
-*/
         }
     }
 
     @OnClick(R.id.txt_weather_info)
     public void updateWeather() {
-        if (mDiaryNote != null && mDiaryNote.getLocation() != null) {
+        if (isNewDiaryNote && mDiaryNote != null && mDiaryNote.getLocation() != null) {
             startWeatherRetrieval(mDiaryNote.getLocation());
+        }
+    }
+
+    @Subscribe
+    public void getWeather(WeatherInfo weather) {
+        if (weather.getWeatherMain() != null) {
+            mDiaryNote.setWeather(weather);
+            setWeatherViews();
+        }
+    }
+
+    private void setWeatherViews() {
+        if (mDiaryNote.getWeather() != null) {
+            WeatherInfo weather;
+            weather = mDiaryNote.getWeather();
+            Glide.with(DiaryFragment.this)
+                    .load(getString(R.string.weather_api_icon_url, weather.getWeatherIcon()))
+                    .override(32, 32)
+                    .into(mImgWeatherIcon);
+            mTxtWeatherInfo.setText(getString(R.string.weather_api_info_text,
+                    weather.getWeatherMain(),
+                    weather.getWeatherDescription(),
+                    weather.getTemp()));
+        } else {
+            mImgWeatherIcon.setImageBitmap(null);
+            mTxtWeatherInfo.setText(R.string.weather_api_na_text);
         }
     }
 
@@ -879,11 +914,6 @@ public class DiaryFragment extends Fragment {
     private void putMarker(LatLng coordinates) {
         mMap.addMarker(new MarkerOptions().position(coordinates));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 17f));
-    }
-
-    @Subscribe
-    public void getWeather(WeatherInfo weather) {
-        // TODO: 17.03.2016 store data and update views
     }
 
     private void setupMap() {

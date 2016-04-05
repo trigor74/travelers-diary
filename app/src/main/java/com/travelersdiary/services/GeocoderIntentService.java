@@ -4,14 +4,9 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.squareup.otto.Bus;
 import com.travelersdiary.R;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.LocationPoint;
@@ -48,7 +43,7 @@ public class GeocoderIntentService extends IntentService {
 
         LocationPoint location = (LocationPoint) intent.getSerializableExtra(GeocoderIntentService.LOCATION_DATA_EXTRA);
         if (location == null) {
-            errorMessage = getString(R.string.geocoder_no_location_data_provided);
+            errorMessage = getString(R.string.no_location_data_provided_text);
             Log.wtf(TAG, errorMessage);
             deliverResultToReceiver(GeocoderIntentService.FAILURE_RESULT, errorMessage);
             return;

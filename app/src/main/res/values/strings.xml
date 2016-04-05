@@ -106,13 +106,18 @@
         <item>600</item>
     </string-array>
 
-    <string name="geocoder_no_location_data_provided">No location data provided</string>
+    <string name="no_location_data_provided_text">No location data provided</string>
     <string name="geocoder_service_not_available">Sorry, the service is not available</string>
     <string name="geocoder_invalid_lat_long_used">Invalid latitude or longitude used</string>
     <string name="geocoder_no_address_found">Sorry, no address found</string>
     <string name="geocoder_address_found">Address found</string>
     <string name="geocoder_no_geocoder_available">No geocoder available</string>
     <string name="location_format_address_line_with_gps">(%1$.6f, %2$.6f)</string>
+
+    <string name="weather_api_data_url">http://api.openweathermap.org/data/2.5/weather?lat=%1$s&amp;lon=%2$s&amp;units=%3$s&amp;appid=%4$s&amp;lang=%5$s</string>
+    <string name="weather_api_icon_url">http://openweathermap.org/img/w/%s.png</string>
+    <string name="weather_api_info_text">%3$.0f ℃ %1$s, %2$s</string>
+    <string name="weather_api_na_text">N/A</string>
 
     <string name="travels_select_action_text">Select The Action</string>
 </resources>

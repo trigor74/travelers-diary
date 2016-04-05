@@ -44,6 +44,9 @@ public final class Constants {
     public static final String GOOGLE_DISPLAY_NAME = "displayName";
     public static final String GOOGLE_PROFILE_IMAGE = "profileImageURL";
 
+    // openweathermap
+    public static final String OPENWEATHERMAP_AIPID = BuildConfig.OPENWEATHERMAP_AIPID;
+
     // shared preferences
     public static final String KEY_PROVIDER = "PROVIDER";
     public static final String KEY_USER_UID = "USER_UID";
