@@ -11,6 +11,7 @@ import android.support.v7.app.NotificationCompat;
 
 import com.travelersdiary.R;
 import com.travelersdiary.activities.MainActivity;
+import com.travelersdiary.fragments.ReminderItemFragment;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -27,9 +28,10 @@ public class ReminderService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int id = intent.getIntExtra("hash", 0);
-        String title = intent.getStringExtra("title");
-        long time = intent.getLongExtra("time", System.currentTimeMillis());
+        //TODO: new extras not showing in notification when item saved
+        int id = intent.getIntExtra(ReminderItemFragment.KEY_HASH, 0);
+        String title = intent.getStringExtra(ReminderItemFragment.KEY_TITLE);
+        long time = intent.getLongExtra(ReminderItemFragment.KEY_TIME, System.currentTimeMillis());
 
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(time);

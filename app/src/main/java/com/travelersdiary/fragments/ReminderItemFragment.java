@@ -66,6 +66,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class ReminderItemFragment extends Fragment {
+    public static final String KEY_HASH = "hash";
+    public static final String KEY_TITLE = "title";
+    public static final String KEY_TIME = "time";
+
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
@@ -692,9 +696,9 @@ public class ReminderItemFragment extends Fragment {
             int hash = mItemKey.hashCode();
 
             Intent myIntent = new Intent(getActivity().getApplicationContext(), ReminderService.class);
-            myIntent.putExtra("hash", hash);
-            myIntent.putExtra("title", mRemindItem.getTitle());
-            myIntent.putExtra("time", mRemindItem.getTime());
+            myIntent.putExtra(KEY_HASH, hash);
+            myIntent.putExtra(KEY_TITLE, mRemindItem.getTitle());
+            myIntent.putExtra(KEY_TIME, mRemindItem.getTime());
 
             AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
             PendingIntent pendingIntent = PendingIntent.getService(getActivity().getApplicationContext(), hash, myIntent, 0);
