@@ -16,6 +16,7 @@ public final class Constants {
     public static final String FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY = "default";
     public static final String FIREBASE_TRAVEL_TITLE = "title";
     public static final String FIREBASE_TRAVEL_DESCRIPTION = "description";
+    public static final String FIREBASE_TRAVEL_ACTIVE = "active";
     public static final String FIREBASE_PICASA_ALABUM_ID = "picasaAlbumId";
     public static final String FIREBASE_PICASA_URI = "picasaUri";
     public static final String FIREBASE_TRACKS = "tracks";

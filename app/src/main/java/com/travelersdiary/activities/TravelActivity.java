@@ -130,6 +130,8 @@ public class TravelActivity extends BaseActivity {
                 break;
             case 1: // Reminder Tab
                 Intent remindItemIntent = new Intent(this, ReminderItemActivity.class);
+                remindItemIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
+                remindItemIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
                 startActivity(remindItemIntent);
                 break;
             case 2: // Map Tab

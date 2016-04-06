@@ -327,9 +327,11 @@ public class DiaryFragment extends Fragment {
     }
 
     private void initNewDiaryNote(DiaryNote diaryNote) {
-        // TODO: 20.03.16 change "default" to current active travel
-        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, "Uncategorized");
-        String travelId = getArguments().getString(Constants.KEY_TRAVEL_REF, "default");
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String currentTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY);
+        String currentTravelTitle = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_TITLE, getString(R.string.default_travel_title));
+        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, currentTravelTitle);
+        String travelId = getArguments().getString(Constants.KEY_TRAVEL_REF, currentTravelKey);
 
         diaryNote.setTitle("New Diary Note");
         diaryNote.setTravelId(travelId); // change to active

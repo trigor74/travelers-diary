@@ -172,11 +172,27 @@ public class ReminderItemFragment extends Fragment {
                 ArrayList<TodoTask> task = new ArrayList<>();
                 task.add(new TodoTask(mContext.getString(R.string.reminder_new_remind_item_default_text), false));
                 mRemindItem.setTask(task);
-                // TODO: 26.02.2016 set current active travelId
-                mRemindItem.setTravelId("default");
-                mRemindItem.setTravelTitle("Uncategorized");
-                // TODO: 26.02.2016 set active to true only if travelId is default or current
-                mRemindItem.setActive(true);
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                String currentTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY);
+
+                String travelKey = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
+                String travelTitle = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
+                if (travelKey == null) {
+                    travelKey = Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY;
+                    travelTitle = getString(R.string.default_travel_title);
+                }
+
+                mRemindItem.setTravelId(travelKey);
+                mRemindItem.setTravelTitle(travelTitle);
+
+                // set active to true only if travelId is default or current
+                if (travelKey.equals(Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY)
+                        || travelKey.equals(currentTravelKey)) {
+                    mRemindItem.setActive(true);
+                } else {
+                    mRemindItem.setActive(false);
+                }
                 mRemindItem.setCompleted(false);
 
                 setViews();

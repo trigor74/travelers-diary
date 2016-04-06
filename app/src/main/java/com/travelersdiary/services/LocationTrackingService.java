@@ -83,6 +83,7 @@ public class LocationTrackingService extends Service implements
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
+    // TODO: 07.04.16 optimize database
     /**
      * travel:      users/USER_UID/tracks/TRACK_UID/travelId:TRAVEL_UID
      * trackpoints: users/USER_UID/tracks/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
@@ -123,10 +124,11 @@ public class LocationTrackingService extends Service implements
                 }
                 break;
             case ACTION_START_TRACK:
-                // TODO: 18.03.2016 put travel id to SharedPreferences on change
-                //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_REF, null);
-                mTravelId = "default"; // TODO: 18.03.2016 remove after testing
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                mTravelId = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+                if (mTravelId == null) {
+                    mTravelId = Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY;
+                }
                 isTrackingEnabled = true;
 
                 Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
