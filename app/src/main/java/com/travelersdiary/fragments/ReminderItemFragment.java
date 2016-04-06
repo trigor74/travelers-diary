@@ -1,6 +1,8 @@
 package com.travelersdiary.fragments;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +51,7 @@ import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.models.TodoTask;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
+import com.travelersdiary.services.ReminderService;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -684,6 +687,24 @@ public class ReminderItemFragment extends Fragment {
             newItemRef.setValue(mRemindItem);
             mItemKey = newItemRef.getKey();
         }
+
+        if (mRemindItem.isActive()) {
+            int hash = mItemKey.hashCode();
+
+            Intent myIntent = new Intent(getActivity().getApplicationContext(), ReminderService.class);
+            myIntent.putExtra("hash", hash);
+            myIntent.putExtra("title", mRemindItem.getTitle());
+            myIntent.putExtra("time", mRemindItem.getTime());
+
+            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+            PendingIntent pendingIntent = PendingIntent.getService(getActivity().getApplicationContext(), hash, myIntent, 0);
+            if (mRemindItem.getTime() != 0 && mRemindItem.getTime() > System.currentTimeMillis()) {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, mRemindItem.getTime(), pendingIntent);
+            } else {
+                alarmManager.cancel(pendingIntent);
+            }
+        }
+
         return true;
     }
 
