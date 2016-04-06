@@ -62,6 +62,7 @@ public final class Constants {
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
     public static final String KEY_ACTIVE_TRAVEL_KEY = "ACTIVE_TRAVEL_KEY";
     public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
+    public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";

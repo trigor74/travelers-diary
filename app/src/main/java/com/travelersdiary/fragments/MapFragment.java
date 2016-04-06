@@ -91,6 +91,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
 
     @Override
     public void onPause() {
+        query.removeEventListener(listener);
+        diaryQuery.removeEventListener(diaryListener);
+        reminderQuery.removeEventListener(reminderListener);
+
         mMapView.onPause();
         super.onPause();
     }
@@ -214,13 +218,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         mMapView.onSaveInstanceState(outState);
     }
 
+    ValueEventListener listener;
+    Query query;
+
+    ValueEventListener reminderListener;
+    Query reminderQuery;
+
+    ValueEventListener diaryListener;
+    Query diaryQuery;
+
     private void retrieveDataAndShowOnMap() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         Firebase tracks = new Firebase(Utils.getFirebaseUserTracksUrl(userUID));
-        Query query = tracks.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(mTravelId);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query = tracks.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(mTravelId);
+        listener = query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -282,8 +295,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         });
 
         Firebase userDiaryRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
-        Query diaryQuery = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelId);
-        diaryQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        diaryQuery = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelId);
+        diaryListener = diaryQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
@@ -315,8 +328,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         });
 
         Firebase reminderRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
-        Query reminderQuery = reminderRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelId);
-        reminderQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+        reminderQuery = reminderRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelId);
+        reminderListener = reminderQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot child : dataSnapshot.getChildren()) {

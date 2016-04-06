@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -20,7 +21,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.bumptech.glide.Glide;
-import com.travelersdiary.application.Application;
 import com.travelersdiary.models.Photo;
 
 import java.io.File;
@@ -186,4 +186,14 @@ public class Utils {
         // String time = DateFormat.getMediumDateFormat(this).format(timestamp)
         return SimpleDateFormat.getDateTimeInstance().format(timestamp);
     }
+
+    public static int getToolbarHeight(Context context) {
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                new int[]{R.attr.actionBarSize});
+        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+
+        return toolbarHeight;
+    }
+
 }

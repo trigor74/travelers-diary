@@ -1,47 +1,55 @@
 package com.travelersdiary.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.fragments.DiaryFragment;
 
-import butterknife.Bind;
-
 public class DiaryActivity extends BaseActivity {
 
-    @Bind(R.id.diary_activity_toolbar)
-    Toolbar mToolbar;
+    public static final String NEW_DIARY_NOTE = "new diary note";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
 
-        setSupportActionBar(mToolbar);
+        boolean isNewNote = getIntent().getBooleanExtra(DiaryActivity.NEW_DIARY_NOTE, false);
 
-        setupNavigationView(mToolbar);
-
-        ActionBar supportActionBar = getSupportActionBar();
-        if (supportActionBar != null) {
-            supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setTitle("Diary title");
-        }
+        String travelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
+        String travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
         if (savedInstanceState == null) {
-            String key = getIntent().getStringExtra(Constants.KEY_DAIRY_NOTE_REF);
-
             DiaryFragment diaryFragment = new DiaryFragment();
-
             Bundle bundle = new Bundle();
-            bundle.putString(Constants.KEY_DAIRY_NOTE_REF, key);
-            diaryFragment.setArguments(bundle);
 
+            if (isNewNote) {
+                bundle.putBoolean(DiaryActivity.NEW_DIARY_NOTE, true);
+                bundle.putString(Constants.KEY_TRAVEL_TITLE, travelTitle);
+                bundle.putString(Constants.KEY_TRAVEL_REF, travelId);
+            } else {
+                String key = getIntent().getStringExtra(Constants.KEY_DAIRY_NOTE_REF);
+                bundle.putString(Constants.KEY_DAIRY_NOTE_REF, key);
+            }
+
+            diaryFragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, diaryFragment)
+                    .add(R.id.fragment_container, diaryFragment, DiaryFragment.class.getSimpleName())
                     .commit();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        DiaryFragment diaryFragment = (DiaryFragment) getSupportFragmentManager()
+                .findFragmentByTag(DiaryFragment.class.getSimpleName());
+        if (isDrawerOpen()) {
+            super.onBackPressed();
+        } else if (diaryFragment != null) {
+            diaryFragment.onBackPressed();
+        } else {
+            super.onBackPressed();
         }
     }
 

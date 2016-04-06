@@ -55,7 +55,9 @@ public class ReminderItemActivity extends BaseActivity {
     public void onBackPressed() {
         ReminderItemFragment reminderItemFragment = (ReminderItemFragment) getSupportFragmentManager()
                 .findFragmentByTag(REMIND_ITEM_FRAGMENT_TAG);
-        if (reminderItemFragment != null) {
+        if (isDrawerOpen()) {
+            super.onBackPressed();
+        } else if (reminderItemFragment != null) {
             reminderItemFragment.onBackPressed();
         } else {
             super.onBackPressed();

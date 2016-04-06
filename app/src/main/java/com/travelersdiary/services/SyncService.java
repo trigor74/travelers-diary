@@ -286,9 +286,12 @@ public class SyncService extends Service {
 
         Uri uri = Uri.parse(photo.getLocalUri());
         String path = Utils.getRealPathFromURI(this, uri);
-        File file = new File(path);
+        File file = null;
+        if (path != null) {
+            file = new File(path);
+        }
 
-        if (!file.exists()) {
+        if (file == null || !file.exists()) {
             photosToUpload--;
             Log.e(TAG, "--------> File is not exists!!! Photos to upload: " + photosToUpload);
             return;

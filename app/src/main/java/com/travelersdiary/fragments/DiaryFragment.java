@@ -19,9 +19,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -62,6 +64,8 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.AlbumImagesActivity;
+import com.travelersdiary.activities.BaseActivity;
+import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
@@ -99,6 +103,9 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.rte_toolbar_container)
     ViewGroup mToolbarContainer;
 
+    @Bind(R.id.diary_fragment_toolbar)
+    Toolbar mToolbar;
+
     @Bind(R.id.rte_toolbar)
     RTToolbar mRtToolbar;
 
@@ -135,6 +142,12 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.rte_content)
     ScrollView mScrollView;
 
+    @Bind(R.id.warning)
+    LinearLayout mWarning;
+
+    @Bind(R.id.warning_checkbox)
+    AppCompatCheckBox mWarningCheckbox;
+
     private ActionBar mSupportActionBar;
 
     private EditText mEdtDiaryNoteTitle;
@@ -160,6 +173,8 @@ public class DiaryFragment extends Fragment {
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
 
+    private SharedPreferences mSharedPreferences;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -175,18 +190,24 @@ public class DiaryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_diary, container, false);
         ButterKnife.bind(this, view);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        mUserUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
         mKey = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
 
-        //get toolbar
+        ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+        ((BaseActivity) getActivity()).setupNavigationView(mToolbar);
+
         mSupportActionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (mSupportActionBar != null) {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
             mSupportActionBar.setDisplayShowTitleEnabled(false);
         }
 
-        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+        mImagesRecyclerView.setVisibility(View.GONE);
+        mWarning.setVisibility(View.GONE);
+
+//        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
+        mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_diary_note_title);
         mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
@@ -224,7 +245,7 @@ public class DiaryFragment extends Fragment {
             }
         };
 
-        isNewDiaryNote = getArguments().getBoolean("editing mode", false);
+        isNewDiaryNote = getArguments().getBoolean(DiaryActivity.NEW_DIARY_NOTE, false);
 
         if (isNewDiaryNote) {
             mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID));
@@ -370,8 +391,18 @@ public class DiaryFragment extends Fragment {
                 if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                     mImages = mDiaryNote.getPhotos();
 
-                    mImagesRecyclerView.setVisibility(View.VISIBLE);
+                    boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
+                    if (showWarning) {
+                        for (int i = 0; i < mImages.size(); i++) {
+                            if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
+                                    mImages.get(i).getPicasaUri() == null) {
+                                mWarning.setVisibility(View.VISIBLE);
+                                break;
+                            }
+                        }
+                    }
 
+                    mImagesRecyclerView.setVisibility(View.VISIBLE);
                     ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                     mImagesRecyclerView.scrollToPosition(0);
                 } else {
@@ -426,8 +457,18 @@ public class DiaryFragment extends Fragment {
                         if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
                             mImages = mDiaryNote.getPhotos();
 
-                            mImagesRecyclerView.setVisibility(View.VISIBLE);
+                            boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
+                            if (showWarning) {
+                                for (int i = 0; i < mImages.size(); i++) {
+                                    if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
+                                            mImages.get(i).getPicasaUri() == null) {
+                                        mWarning.setVisibility(View.VISIBLE);
+                                        break;
+                                    }
+                                }
+                            }
 
+                            mImagesRecyclerView.setVisibility(View.VISIBLE);
                             ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
                             mImagesRecyclerView.scrollToPosition(0);
                         } else {
@@ -503,15 +544,7 @@ public class DiaryFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (isEditingMode && !isNewDiaryNote) {
-                    if (mRtEditText.hasChanged()) {
-                        showDiscardDialog();
-                    } else {
-                        enableReviewingMode();
-                    }
-                } else {
-                    getActivity().finish();
-                }
+                onBackPressed();
                 return true;
             case R.id.action_save:
                 saveChanges();
@@ -531,6 +564,18 @@ public class DiaryFragment extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void onBackPressed() {
+        if (isEditingMode && !isNewDiaryNote) {
+            if (mRtEditText.hasChanged()) {
+                showDiscardDialog();
+            } else {
+                enableReviewingMode();
+            }
+        } else {
+            getActivity().finish();
         }
     }
 
@@ -599,10 +644,11 @@ public class DiaryFragment extends Fragment {
                 mImages.add(0, new Photo(path.get(i)));
             }
 
-            mImagesRecyclerView.setVisibility(View.VISIBLE);
-
-            mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-            mImagesRecyclerView.scrollToPosition(0);
+            if (!mImages.isEmpty()) {
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(0);
+            }
         }
 
         if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
@@ -939,6 +985,14 @@ public class DiaryFragment extends Fragment {
                 }
             });
         }
+    }
+
+    @OnClick(R.id.btn_hide_warning)
+    public void hideWarning() {
+        if (mWarningCheckbox.isChecked()) {
+            mSharedPreferences.edit().putBoolean(Constants.KEY_SHOW_WARNING, false).apply();
+        }
+        mWarning.setVisibility(View.GONE);
     }
 
 }

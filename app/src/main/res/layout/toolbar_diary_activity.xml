@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/title"
         android:imeOptions="actionDone|flagNoEnterAction"
-        android:inputType="textAutoCorrect|textCapSentences"
+        android:inputType="textAutoCorrect|textCapSentences|textNoSuggestions"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
         android:textColor="@color/white" />

@@ -1,6 +1,8 @@
 package com.travelersdiary.fragments;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +51,7 @@ import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.models.TodoTask;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
+import com.travelersdiary.services.ReminderService;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -63,6 +66,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class ReminderItemFragment extends Fragment {
+    public static final String KEY_HASH = "hash";
+    public static final String KEY_TITLE = "title";
+    public static final String KEY_TIME = "time";
+
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
     private static int PLACE_PICKER_REQUEST = 1;
@@ -263,6 +270,9 @@ public class ReminderItemFragment extends Fragment {
                     item.setTitle(R.string.reminder_hide_checkboxes);
                 }
                 ((TodoTaskAdapter) mTodoItemTask.getAdapter()).setViewAsCheckboxes(mRemindItem.isViewAsCheckboxes());
+                return true;
+            case R.id.action_reminder_delete:
+                delete();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -697,7 +707,32 @@ public class ReminderItemFragment extends Fragment {
             newItemRef.setValue(mRemindItem);
             mItemKey = newItemRef.getKey();
         }
+
+        if (mRemindItem.isActive()) {
+            int hash = mItemKey.hashCode();
+
+            Intent myIntent = new Intent(getActivity().getApplicationContext(), ReminderService.class);
+            myIntent.putExtra(KEY_HASH, hash);
+            myIntent.putExtra(KEY_TITLE, mRemindItem.getTitle());
+            myIntent.putExtra(KEY_TIME, mRemindItem.getTime());
+
+            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+            PendingIntent pendingIntent = PendingIntent.getService(getActivity().getApplicationContext(), hash, myIntent, 0);
+            if (mRemindItem.getTime() != 0 && mRemindItem.getTime() > System.currentTimeMillis()) {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, mRemindItem.getTime(), pendingIntent);
+            } else {
+                alarmManager.cancel(pendingIntent);
+            }
+        }
+
         return true;
+    }
+
+    private void delete() {
+        Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
+        firebaseRef.removeValue();
+        getActivity().finish();
+        Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
 
     private String validateData() {

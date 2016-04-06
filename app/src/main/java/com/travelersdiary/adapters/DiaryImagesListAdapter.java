@@ -26,6 +26,7 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
 
     private final static int IMAGES = 0;
     private final static int SHOW_ALL = 1;
+    private final static int WARNING = 3;
     private final static int ITEM_COUNT = 12;
 
     private Fragment mFragment;
@@ -99,6 +100,12 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
             Glide.with(mFragment.getContext())
                     .load(R.drawable.ic_navigate_next_white_48dp)
                     .into(holder.image);
+        } else if (holder.getItemViewType() == WARNING) {
+            holder.image.setBackgroundColor(ContextCompat.getColor(mFragment.getContext(), R.color.darkRed));
+            holder.image.setPadding(35, 35, 35, 35);
+            Glide.with(mFragment.getContext())
+                    .load(R.drawable.ic_warning_white_48dp)
+                    .into(holder.image);
         }
     }
 
@@ -114,7 +121,12 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
     @Override
     public int getItemViewType(int position) {
         if (position < getItemCount() - 1) {
-            return IMAGES;
+            if (!Utils.checkFileExists(mFragment.getContext(), mImagesList.get(position).getLocalUri()) &&
+                    mImagesList.get(position).getPicasaUri() == null) {
+                return WARNING;
+            } else {
+                return IMAGES;
+            }
         } else {
             return SHOW_ALL;
         }

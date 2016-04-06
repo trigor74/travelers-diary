@@ -104,6 +104,36 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
         mDiaryList.addItemDecoration(itemDecoration);
 
+
+    }
+
+    @Override
+    public void finishActionMode() {
+        if (mDeleteMode != null) {
+            mDeleteMode.finish();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupAdapter();
+    }
+
+    @Override
+    public void onPause() {
+        finishActionMode();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        ButterKnife.unbind(this);
+        mAdapter.cleanup();
+        super.onDestroyView();
+    }
+
+    private void setupAdapter() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
@@ -183,26 +213,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         ;
 
         mDiaryList.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void finishActionMode() {
-        if (mDeleteMode != null) {
-            mDeleteMode.finish();
-        }
-    }
-
-    @Override
-    public void onPause() {
-        finishActionMode();
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroyView() {
-        ButterKnife.unbind(this);
-        mAdapter.cleanup();
-        super.onDestroyView();
     }
 
     private static IOnItemClickListener onItemClickListener = new IOnItemClickListener() {
