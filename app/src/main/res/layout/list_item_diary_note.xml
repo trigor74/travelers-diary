@@ -1,134 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/list_item_background_selector"
-    android:clickable="true"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="3dp"
+    android:layout_marginLeft="6dp"
+    android:layout_marginRight="6dp"
+    android:layout_marginTop="3dp"
+    card_view:cardCornerRadius="2dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="20dp">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/item_note_title_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="A Diary Note Title"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+        <FrameLayout
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/item_note_time_text_view"
+            <!--for normal preview: height=130dp-->
+            <ImageView
+                android:id="@+id/diary_note_list_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/rochesterday"
+                android:tint="#44000000" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/main_padding"
+                android:paddingRight="@dimen/main_padding"
+                android:paddingTop="@dimen/main_padding">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/half_padding">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/diary_note_day"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableLeft="@drawable/ic_pin_white_24dp"
+                            android:text="15"
+                            android:textColor="@color/white"
+                            android:textSize="32sp" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingLeft="4dp">
+
+                            <TextView
+                                android:id="@+id/diary_note_month"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="December"
+                                android:textColor="@color/white" />
+
+                            <TextView
+                                android:id="@+id/diary_note_year"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2015"
+                                android:textColor="@color/white" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/diary_note_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="Museum"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:typeface="serif" />
+
+                <LinearLayout
+                    android:id="@+id/photos_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right|center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingTop="4dp">
+
+                    <TextView
+                        android:id="@+id/diary_note_photo_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:id="@+id/img_photo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="8dp"
+                        android:src="@drawable/ic_photo_library_black_24dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:text="1 JAN 2016 09:00 AM"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/item_note_travel_title_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Travel Title"
-        android:textSize="18sp" />
-
-    <TextView
-        android:id="@+id/item_note_text_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="A Diary Note Text..."
-        android:textSize="16sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right"
-        android:orientation="horizontal"
-        android:paddingBottom="20dp">
-
-        <LinearLayout
-            android:id="@+id/photos_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/photo_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:alpha=".5"
-                android:paddingRight="8dp"
-                android:src="@drawable/ic_photo_camera_black_24dp" />
+            android:layout_below="@+id/header"
+            android:paddingLeft="@dimen/main_padding"
+            android:paddingRight="@dimen/main_padding">
 
             <TextView
-                android:id="@+id/item_note_photos_text_view"
+                android:id="@+id/diary_note_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="0"
-                android:textSize="16sp" />
+                android:paddingBottom="@dimen/main_padding"
+                android:paddingTop="10dp"
+                android:text="It's a solid  indicator that Google's just as tired of the malarkey It's a solid  indicator that Google's just as tired of the malarkey that Google's just as tired of..."
+                android:textSize="15sp" />
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/videos_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+    </RelativeLayout>
 
-            <ImageView
-                android:id="@+id/video_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:alpha=".5"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:src="@drawable/ic_videocam_black_24dp" />
-
-            <TextView
-                android:id="@+id/item_note_videos_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="0"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/audios_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/audio_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:alpha=".5"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:src="@drawable/ic_audio_black_24dp" />
-
-            <TextView
-                android:id="@+id/item_note_audios_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="0"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</LinearLayout>
+</android.support.v7.widget.CardView>
