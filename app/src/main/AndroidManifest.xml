@@ -33,34 +33,47 @@
 
         <activity
             android:name=".activities.LoginActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.FullScreen" />
         <activity
             android:name=".activities.MainActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.TravelActivity" />
+        <activity
+            android:name=".activities.TravelActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.DiaryActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".activities.GalleryAlbumActivity"
-            android:label="@string/albums" />
-        <activity android:name=".activities.AlbumImagesActivity" />
+            android:label="@string/albums"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.AlbumImagesActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.DiaryImagesActivity"
-            android:label="@string/images" />
-        <activity android:name=".activities.FullScreenImageActivity" />
+            android:label="@string/images"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.FullScreenImageActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.ReminderItemActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".activities.PreferencesActivity"
             android:label="@string/settings"
+            android:screenOrientation="portrait"
             android:theme="@style/SettingsTheme" />
 
         <service
