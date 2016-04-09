@@ -42,7 +42,9 @@ public class LocationTrackingService extends Service implements
     private Firebase mTrackRef = null;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 5;
+    public static final long SMALLEST_DISPLACEMENT_IN_METERS = 15;
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
@@ -78,15 +80,15 @@ public class LocationTrackingService extends Service implements
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
+        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT_IN_METERS);
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    // TODO: 07.04.16 optimize database
     /**
-     * travel:      users/USER_UID/tracks/TRACK_UID/travelId:TRAVEL_UID
-     * trackpoints: users/USER_UID/tracks/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
+     * track: users/USER_UID/tracks/TRAVEL_UID/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
+     * track/[TIMESTAMP:LOCATION_POINT] - TrackList class
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -132,10 +134,7 @@ public class LocationTrackingService extends Service implements
                 isTrackingEnabled = true;
 
                 Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
-                Firebase newTrackRef = userTracksRef.push();
-                Map<String, Object> map = new HashMap<>();
-                map.put(Constants.FIREBASE_TRACKS_TRAVELID, mTravelId);
-                newTrackRef.setValue(map);
+                Firebase newTrackRef = userTracksRef.child(mTravelId).push();
                 mTrackRef = newTrackRef.child(Constants.FIREBASE_TRACKS_TRACK);
 
                 if (mGoogleApiClient.isConnected() && !isRequestingLocationUpdates) {

@@ -8,24 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TrackListItem {
-    private String travelId;
+public class TrackList {
     private Map<Long, LocationPoint> track; // Key = timestamp
 
-    public TrackListItem() {
+    public TrackList() {
     }
 
-    public TrackListItem(String travelId, Map<Long, LocationPoint> track) {
-        this.travelId = travelId;
+    public TrackList(Map<Long, LocationPoint> track) {
         this.track = track;
-    }
-
-    public String getTravelId() {
-        return travelId;
-    }
-
-    public void setTravelId(String travelId) {
-        this.travelId = travelId;
     }
 
     public Map<Long, LocationPoint> getTrack() {
@@ -37,7 +27,7 @@ public class TrackListItem {
     }
 
     @JsonIgnore
-    public List<LatLng> getSortedLatLngTrack() {
+    public List<LatLng> getSortedLatLngTrackList() {
         if (track == null) {
             return null;
         }
