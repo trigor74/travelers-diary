@@ -1,7 +1,10 @@
 package com.travelersdiary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TrackPoint implements Serializable {
     private long time;
     private LocationPoint location;

@@ -1,7 +1,10 @@
 package com.travelersdiary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherInfo implements Serializable {
     private String unit; // Default, Metric, Imperial
     private String weatherMain; // Group of weather parameters (Rain, Snow, Extreme etc.)

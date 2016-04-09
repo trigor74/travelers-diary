@@ -1,10 +1,12 @@
 package com.travelersdiary.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationPoint implements Serializable {
     private double latitude;
     private double longitude;

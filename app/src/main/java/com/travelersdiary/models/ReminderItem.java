@@ -1,8 +1,11 @@
 package com.travelersdiary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReminderItem implements Serializable {
     private String travelId;
     private String travelTitle;

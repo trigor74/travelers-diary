@@ -1,8 +1,11 @@
 package com.travelersdiary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TravelersDiary implements Serializable {
     ActiveTravel activeTravel;
     Map<String, DiaryNote> diary;
