@@ -13,9 +13,12 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,10 +36,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,6 +75,7 @@ import com.travelersdiary.activities.DiaryImagesActivity;
 import com.travelersdiary.activities.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
 import com.travelersdiary.bus.BusProvider;
+import com.travelersdiary.models.AddressDetails;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
@@ -89,10 +95,40 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DiaryFragment extends Fragment {
+public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChangedListener {
 
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
+
+    @Bind(R.id.diary_fragment_toolbar)
+    Toolbar mToolbar;
+
+    @Bind(R.id.diary_note_big_title)
+    EditText mBigTitle;
+
+    @Bind(R.id.diary_note_date)
+    TextView mDateTextView;
+
+    @Bind(R.id.diary_note_time)
+    TextView mTimeTextView;
+
+    @Bind(R.id.diary_note_travel)
+    TextView mTravelTitle;
+
+    @Bind(R.id.diary_note_app_bar)
+    AppBarLayout mAppBarLayout;
+
+    @Bind(R.id.big_title_layout)
+    RelativeLayout mBigTitleLayout;
+
+    @Bind(R.id.diary_note_content)
+    NestedScrollView mContentScrollView;
+
+    @Bind(R.id.rte_toolbar_container)
+    ViewGroup mToolbarContainer;
+
+    @Bind(R.id.rte_toolbar)
+    RTToolbar mRtToolbar;
 
     @Bind(R.id.rt_editor)
     RTEditText mRtEditText;
@@ -100,29 +136,29 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.images_list)
     RecyclerView mImagesRecyclerView;
 
-    @Bind(R.id.rte_toolbar_container)
-    ViewGroup mToolbarContainer;
+    @Bind(R.id.warning)
+    LinearLayout mWarning;
 
-    @Bind(R.id.diary_fragment_toolbar)
-    Toolbar mToolbar;
+    @Bind(R.id.warning_checkbox)
+    AppCompatCheckBox mWarningCheckbox;
 
-    @Bind(R.id.rte_toolbar)
-    RTToolbar mRtToolbar;
+    @Bind(R.id.diary_footer_layout)
+    LinearLayout mDiaryFooterLayout;
 
-    @Bind(R.id.txt_date)
-    TextView mTxtDate;
+    @Bind(R.id.txt_location_1)
+    TextView mTxtLocation;
 
-    @Bind(R.id.txt_day)
-    TextView mTxtDay;
+    @Bind(R.id.txt_location_2)
+    TextView mTxtSubLocation;
 
-    @Bind(R.id.txt_month_year)
-    TextView mTxtMonthYear;
+    @Bind(R.id.diary_location_layout)
+    LinearLayout mLocationLayout;
 
-    @Bind(R.id.txt_time)
-    TextView mTxtTime;
+    @Bind(R.id.location_drop_down)
+    ImageView mLocationDropDown;
 
-    @Bind(R.id.txt_travel)
-    TextView mTxtTravel;
+    @Bind(R.id.diary_weather_layout)
+    LinearLayout mWeatherLayout;
 
     @Bind(R.id.img_weather_icon)
     ImageView mImgWeatherIcon;
@@ -130,50 +166,33 @@ public class DiaryFragment extends Fragment {
     @Bind(R.id.txt_weather_info)
     TextView mTxtWeatherInfo;
 
-    @Bind(R.id.txt_location_info)
-    TextView mTxtLocation;
+    private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.3f;
+    private static final int ALPHA_ANIMATIONS_DURATION = 200;
 
-    @Bind(R.id.diary_location)
-    LinearLayout mLocationLayout;
-
-    @Bind(R.id.location_drop_down)
-    ImageView mLocationDropDown;
-
-    @Bind(R.id.rte_content)
-    ScrollView mScrollView;
-
-    @Bind(R.id.warning)
-    LinearLayout mWarning;
-
-    @Bind(R.id.warning_checkbox)
-    AppCompatCheckBox mWarningCheckbox;
-
-    private ActionBar mSupportActionBar;
-
-    private EditText mEdtDiaryNoteTitle;
-
+    private boolean isTitleVisible = false;
     private boolean isEditingMode;
     private boolean isNewDiaryNote;
+    private boolean showSavedToast;
 
-    private RTManager mRtManager;
-    private InputMethodManager mInputMethodManager;
-
+    private SharedPreferences mSharedPreferences;
+    private ActionBar mSupportActionBar;
+    private EditText mEdtDiaryNoteTitle;
     private ArrayList<Photo> mImages = new ArrayList<>();
     private String mImagePath;
 
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
     private FirebaseListAdapter<Travel> mAdapter;
+    private String mUserUID;
+    private String mKey;
     private DiaryNote mDiaryNote;
     private String mTravelId;
 
-    private String mUserUID;
-    private String mKey;
+    private RTManager mRtManager;
+    private InputMethodManager mInputMethodManager;
 
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
-
-    private SharedPreferences mSharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -194,6 +213,7 @@ public class DiaryFragment extends Fragment {
         mUserUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
         mKey = getArguments().getString(Constants.KEY_DAIRY_NOTE_REF);
 
+
         ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
         ((BaseActivity) getActivity()).setupNavigationView(mToolbar);
 
@@ -206,7 +226,6 @@ public class DiaryFragment extends Fragment {
         mImagesRecyclerView.setVisibility(View.GONE);
         mWarning.setVisibility(View.GONE);
 
-//        mEdtDiaryNoteTitle = (EditText) (getActivity()).findViewById(R.id.edt_diary_note_title);
         mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_diary_note_title);
         mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
@@ -215,9 +234,28 @@ public class DiaryFragment extends Fragment {
                     Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.colorAccent);
                 } else {
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
-                    Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
-                    if (isEmpty(mEdtDiaryNoteTitle)) {
-                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                    if (mEdtDiaryNoteTitle != null) {
+                        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
+                        if (isEmpty(mEdtDiaryNoteTitle)) {
+                            mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                        }
+                    }
+                }
+            }
+        });
+
+        mBigTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+                    Utils.tintWidget(getContext(), mBigTitle, R.color.colorAccent);
+                } else {
+                    mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+                    if (mBigTitle != null) {
+                        Utils.tintWidget(getContext(), mBigTitle, R.color.white);
+                        if (isEmpty(mBigTitle)) {
+                            mBigTitle.setText(mDiaryNote.getTitle());
+                        }
                     }
                 }
             }
@@ -252,6 +290,7 @@ public class DiaryFragment extends Fragment {
             mDiaryNote = new DiaryNote();
             initNewDiaryNote(mDiaryNote);
             enableEditingMode();
+            mAppBarLayout.setExpanded(true);
             startLocationRetrieval();
         } else {
             addDataChangeListener();
@@ -263,9 +302,13 @@ public class DiaryFragment extends Fragment {
         return view;
     }
 
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mAppBarLayout.addOnOffsetChangedListener(this);
+        startAlphaAnimation(mEdtDiaryNoteTitle, 0, View.INVISIBLE);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
@@ -275,225 +318,6 @@ public class DiaryFragment extends Fragment {
 
         DiaryImagesListAdapter imagesAdapter = new DiaryImagesListAdapter(this, mImages);
         mImagesRecyclerView.setAdapter(imagesAdapter);
-    }
-
-    private void enableReviewingMode() {
-        isEditingMode = false;
-
-        retrieveData();
-
-        // make edit text field not editable
-        mRtEditText.setClickable(false);
-        mRtEditText.setLongClickable(false);
-        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
-                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        mRtEditText.setFocusable(false);
-
-        //setup title field
-        mEdtDiaryNoteTitle.setFocusable(false);
-        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, android.R.color.transparent);
-
-        //setup rte toolbar
-        mToolbarContainer.setVisibility(View.GONE);
-        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
-
-        //hide travel title drop down arrow
-        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-
-        //hide keyboard
-        mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
-
-        //show fab
-        mFabEditDiaryNote.setVisibility(View.VISIBLE);
-
-        //refresh toolbar
-        mSupportActionBar.invalidateOptionsMenu();
-    }
-
-    @OnClick(R.id.fab_edit_diary_note)
-    public void enableEditingMode() {
-        isEditingMode = true;
-
-        // reset edit text field to editable mode
-        mRtEditText.setVisibility(View.VISIBLE);
-        mRtEditText.setFocusable(true);
-        mRtEditText.setFocusableInTouchMode(true);
-        mRtEditText.setClickable(true);
-        mRtEditText.setLongClickable(true);
-        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
-                InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        mRtEditText.requestFocus();
-        mRtEditText.setSelection(mRtEditText.getText().length());
-
-        //setup rte toolbar
-        mToolbarContainer.setVisibility(View.VISIBLE);
-        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
-
-        //setup title field
-        mEdtDiaryNoteTitle.setFocusable(true);
-        mEdtDiaryNoteTitle.setFocusableInTouchMode(true);
-        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
-
-        //show travel title drop down arrow
-        mTxtTravel.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.drop_down_arrow, 0);
-
-        //show keyboard
-        mInputMethodManager.showSoftInput(mRtEditText, InputMethodManager.SHOW_IMPLICIT);
-
-        //hide fab
-        mFabEditDiaryNote.setVisibility(View.GONE);
-
-        //refresh toolbar
-        mSupportActionBar.invalidateOptionsMenu();
-    }
-
-    private void initNewDiaryNote(DiaryNote diaryNote) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String currentTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY);
-        String currentTravelTitle = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_TITLE, getString(R.string.default_travel_title));
-        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, currentTravelTitle);
-        String travelId = getArguments().getString(Constants.KEY_TRAVEL_REF, currentTravelKey);
-
-        diaryNote.setTitle("New Diary Note");
-        diaryNote.setTravelId(travelId); // change to active
-        diaryNote.setTravelTitle(travelTitle); // change to active
-        diaryNote.setTime(System.currentTimeMillis());
-
-        mEdtDiaryNoteTitle.setText(diaryNote.getTitle());
-
-        Date time = new Date(diaryNote.getTime());
-        mTxtDate.setText(new SimpleDateFormat("dd").format(time));
-        mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
-        mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
-        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
-
-        mTxtTravel.setText(diaryNote.getTravelTitle());
-    }
-
-
-    private void addDataChangeListener() {
-        mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
-                .child(mKey);
-
-        mValueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-                mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
-                mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
-
-                if (isEmpty(mRtEditText)) {
-                    mRtEditText.setVisibility(View.GONE);
-                } else {
-                    mRtEditText.setVisibility(View.VISIBLE);
-                }
-
-                if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
-                    mImages = mDiaryNote.getPhotos();
-
-                    boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
-                    if (showWarning) {
-                        for (int i = 0; i < mImages.size(); i++) {
-                            if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
-                                    mImages.get(i).getPicasaUri() == null) {
-                                mWarning.setVisibility(View.VISIBLE);
-                                break;
-                            }
-                        }
-                    }
-
-                    mImagesRecyclerView.setVisibility(View.VISIBLE);
-                    ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
-                    mImagesRecyclerView.scrollToPosition(0);
-                } else {
-                    mImagesRecyclerView.setVisibility(View.GONE);
-                }
-
-                setWeatherViews();
-
-                if (mDiaryNote.getLocation() != null) {
-                    mLocationLayout.setVisibility(View.VISIBLE);
-
-                    if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
-                        mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
-                    }
-                } else {
-                    mLocationLayout.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        mItemRef.addValueEventListener(mValueEventListener);
-    }
-
-    private void retrieveData() {
-        new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
-                .child(mKey)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
-                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
-
-                        Date time = new Date(mDiaryNote.getTime());
-                        mTxtDate.setText(new SimpleDateFormat("dd").format(time));
-                        mTxtDay.setText(new SimpleDateFormat("EEE").format(time));
-                        mTxtMonthYear.setText(new SimpleDateFormat("MMM, yyyy").format(time));
-                        mTxtTime.setText(new SimpleDateFormat("HH:mm").format(time));
-
-                        mTxtTravel.setText(mDiaryNote.getTravelTitle());
-
-                        mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
-
-                        if (isEmpty(mRtEditText)) {
-                            mRtEditText.setVisibility(View.GONE);
-                        }
-
-                        if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
-                            mImages = mDiaryNote.getPhotos();
-
-                            boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
-                            if (showWarning) {
-                                for (int i = 0; i < mImages.size(); i++) {
-                                    if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
-                                            mImages.get(i).getPicasaUri() == null) {
-                                        mWarning.setVisibility(View.VISIBLE);
-                                        break;
-                                    }
-                                }
-                            }
-
-                            mImagesRecyclerView.setVisibility(View.VISIBLE);
-                            ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
-                            mImagesRecyclerView.scrollToPosition(0);
-                        } else {
-                            mImagesRecyclerView.setVisibility(View.GONE);
-                        }
-
-                        setWeatherViews();
-
-                        if (mDiaryNote.getLocation() != null) {
-                            mLocationLayout.setVisibility(View.VISIBLE);
-
-                            if (mDiaryNote.getLocationAddressLine() != null && !mDiaryNote.getLocationAddressLine().isEmpty()) {
-                                mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
-                            }
-
-                            putMarker(new LatLng(mDiaryNote.getLocation().getLatitude(),
-                                    mDiaryNote.getLocation().getLongitude()));
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 
     @Override
@@ -512,6 +336,47 @@ public class DiaryFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mRtManager.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Photo photo = new Photo(mImagePath);
+                mImages.add(0, photo);
+
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(0);
+            } else {
+                new File(mImagePath).delete();
+            }
+        }
+
+        if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
+
+            for (int i = 0; i < path.size(); i++) {
+                mImages.add(0, new Photo(path.get(i)));
+            }
+
+            if (!mImages.isEmpty()) {
+                mImagesRecyclerView.setVisibility(View.VISIBLE);
+                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                mImagesRecyclerView.scrollToPosition(0);
+            }
+        }
+
+        if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            ArrayList<Photo> newImagesList = (ArrayList<Photo>) data.getSerializableExtra(DiaryImagesActivity.IMAGES_AFTER_DELETE);
+
+            mImages.clear();
+            mImages.addAll(newImagesList);
+
+            showSavedToast = false;
+            saveChanges();
+        }
     }
 
     @Override
@@ -547,8 +412,8 @@ public class DiaryFragment extends Fragment {
                 onBackPressed();
                 return true;
             case R.id.action_save:
+                showSavedToast = true;
                 saveChanges();
-                Toast.makeText(getContext(), R.string.saved, Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.action_diary_share:
                 share();
@@ -567,6 +432,34 @@ public class DiaryFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {
+        int maxScroll = appBarLayout.getTotalScrollRange();
+        float percentage = (float) Math.abs(offset) / (float) maxScroll;
+
+        handleToolbarTitleVisibility(percentage);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mRtManager != null) {
+            mRtManager.onDestroy(true);
+        }
+
+        if (mItemRef != null && mValueEventListener != null) {
+            mItemRef.removeEventListener(mValueEventListener);
+        }
+
+        mAdapter.cleanup();
+    }
+
     public void onBackPressed() {
         if (isEditingMode && !isNewDiaryNote) {
             if (mRtEditText.hasChanged()) {
@@ -577,6 +470,264 @@ public class DiaryFragment extends Fragment {
         } else {
             getActivity().finish();
         }
+    }
+
+    private void enableReviewingMode() {
+        isEditingMode = false;
+
+        retrieveData();
+
+        // make edit text field not editable
+        makeEditTextEditable(mRtEditText, false);
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+
+        //setup title fields
+        makeEditTextEditable(mEdtDiaryNoteTitle, false);
+        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, android.R.color.transparent);
+        makeEditTextEditable(mBigTitle, false);
+        Utils.tintWidget(getContext(), mBigTitle, android.R.color.transparent);
+
+        //setup rte toolbar
+        mToolbarContainer.setVisibility(View.GONE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.HIDE);
+
+        //hide travel title drop down arrow
+        mTravelTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+
+        //hide keyboard
+        mInputMethodManager.hideSoftInputFromWindow(mRtEditText.getWindowToken(), 0);
+
+        //show fab
+        setFabVisibility(mFabEditDiaryNote, View.VISIBLE);
+
+        //refresh toolbar
+        mSupportActionBar.invalidateOptionsMenu();
+    }
+
+    @OnClick(R.id.fab_edit_diary_note)
+    public void enableEditingMode() {
+        isEditingMode = true;
+
+        //collapse toolbar
+        mAppBarLayout.setExpanded(false, true);
+
+        // reset edit text field to editable mode
+        mRtEditText.setVisibility(View.VISIBLE);
+        makeEditTextEditable(mRtEditText, true);
+        mRtEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE |
+                InputType.TYPE_TEXT_FLAG_AUTO_CORRECT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        mRtEditText.requestFocus();
+        mRtEditText.setSelection(mRtEditText.getText().length());
+
+        //setup rte toolbar
+        mToolbarContainer.setVisibility(View.VISIBLE);
+        mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
+
+        //setup title fields
+        makeEditTextEditable(mEdtDiaryNoteTitle, true);
+        Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
+        makeEditTextEditable(mBigTitle, true);
+        Utils.tintWidget(getContext(), mBigTitle, R.color.white);
+
+        //show travel title drop down arrow
+        mTravelTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.drop_down_arrow, 0);
+
+        //show keyboard
+        mInputMethodManager.showSoftInput(mRtEditText, InputMethodManager.SHOW_IMPLICIT);
+
+        //hide fab
+        setFabVisibility(mFabEditDiaryNote, View.GONE);
+
+        //refresh toolbar
+        mSupportActionBar.invalidateOptionsMenu();
+    }
+
+    private void initNewDiaryNote(DiaryNote diaryNote) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String currentTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY);
+        String currentTravelTitle = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_TITLE, getString(R.string.default_travel_title));
+        String travelTitle = getArguments().getString(Constants.KEY_TRAVEL_TITLE, currentTravelTitle);
+        String travelId = getArguments().getString(Constants.KEY_TRAVEL_REF, currentTravelKey);
+
+        diaryNote.setTravelId(travelId);
+        diaryNote.setTravelTitle(travelTitle);
+        diaryNote.setTime(System.currentTimeMillis());
+
+        Date time = new Date(diaryNote.getTime());
+        String date = new SimpleDateFormat("EEEE, MMM dd, yyyy").format(time);
+        String timeText = new SimpleDateFormat("HH:mm").format(time);
+
+        mDateTextView.setText(date);
+        mTimeTextView.setText(timeText);
+
+        mTravelTitle.setText(diaryNote.getTravelTitle());
+    }
+
+    private void addDataChangeListener() {
+        mItemRef = new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
+                .child(mKey);
+
+        mValueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
+
+                mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                mBigTitle.setText(mDiaryNote.getTitle());
+                mTravelTitle.setText(mDiaryNote.getTravelTitle());
+
+                mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+                if (isEmpty(mRtEditText)) {
+                    mRtEditText.setVisibility(View.GONE);
+                } else {
+                    mRtEditText.setVisibility(View.VISIBLE);
+                }
+
+                if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
+                    mImages = mDiaryNote.getPhotos();
+
+                    boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
+                    if (showWarning) {
+                        for (int i = 0; i < mImages.size(); i++) {
+                            if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
+                                    mImages.get(i).getPicasaUri() == null) {
+                                mWarning.setVisibility(View.VISIBLE);
+                                break;
+                            }
+                        }
+                    }
+
+                    mImagesRecyclerView.setVisibility(View.VISIBLE);
+                    ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
+                    mImagesRecyclerView.scrollToPosition(0);
+                } else {
+                    mImagesRecyclerView.setVisibility(View.GONE);
+                }
+
+                mDiaryFooterLayout.setVisibility(View.VISIBLE);
+
+                setWeatherViews();
+
+                if (mDiaryNote.getLocation() != null) {
+                    mLocationLayout.setVisibility(View.VISIBLE);
+
+                    if (mDiaryNote.getAddressDetails() != null) {
+                        setLocationText(mDiaryNote.getAddressDetails());
+                    } else {
+                        mTxtLocation.setText(getResources()
+                                .getString(R.string.location_format_address_line_with_gps,
+                                        mDiaryNote.getLocation().getLatitude(),
+                                        mDiaryNote.getLocation().getLongitude()));
+                        mTxtSubLocation.setVisibility(View.GONE);
+                    }
+                } else {
+                    mLocationLayout.setVisibility(View.GONE);
+
+                    if (mDiaryNote.getWeather() == null) {
+                        mDiaryFooterLayout.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        mItemRef.addValueEventListener(mValueEventListener);
+    }
+
+    private void retrieveData() {
+        new Firebase(Utils.getFirebaseUserDiaryUrl(mUserUID))
+                .child(mKey)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
+
+                        mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
+                        mBigTitle.setText(mDiaryNote.getTitle());
+
+                        Date time = new Date(mDiaryNote.getTime());
+                        String date = new SimpleDateFormat("EEEE, MMM dd, yyyy").format(time);
+                        String timeText = new SimpleDateFormat("HH:mm").format(time);
+                        mDateTextView.setText(date);
+                        mTimeTextView.setText(timeText);
+
+                        mTravelTitle.setText(mDiaryNote.getTravelTitle());
+
+                        mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
+                        if (isEmpty(mRtEditText)) {
+                            mRtEditText.setVisibility(View.GONE);
+                        }
+
+                        if (mDiaryNote.getPhotos() != null && !mDiaryNote.getPhotos().isEmpty()) {
+                            mImages = mDiaryNote.getPhotos();
+
+                            boolean showWarning = mSharedPreferences.getBoolean(Constants.KEY_SHOW_WARNING, true);
+                            if (showWarning) {
+                                for (int i = 0; i < mImages.size(); i++) {
+                                    if (!Utils.checkFileExists(getContext(), mImages.get(i).getLocalUri()) &&
+                                            mImages.get(i).getPicasaUri() == null) {
+                                        mWarning.setVisibility(View.VISIBLE);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            mImagesRecyclerView.setVisibility(View.VISIBLE);
+                            ((DiaryImagesListAdapter) mImagesRecyclerView.getAdapter()).changeList(mImages);
+                            mImagesRecyclerView.scrollToPosition(0);
+                        } else {
+                            mImagesRecyclerView.setVisibility(View.GONE);
+                        }
+
+                        mDiaryFooterLayout.setVisibility(View.VISIBLE);
+
+                        setWeatherViews();
+
+                        if (mDiaryNote.getLocation() != null) {
+                            mLocationLayout.setVisibility(View.VISIBLE);
+
+                            if (mDiaryNote.getAddressDetails() != null) {
+                                setLocationText(mDiaryNote.getAddressDetails());
+                            } else {
+                                mTxtLocation.setText(getResources()
+                                        .getString(R.string.location_format_address_line_with_gps,
+                                                mDiaryNote.getLocation().getLatitude(),
+                                                mDiaryNote.getLocation().getLongitude()));
+                                mTxtSubLocation.setVisibility(View.GONE);
+                            }
+
+                            putMarker(new LatLng(mDiaryNote.getLocation().getLatitude(),
+                                    mDiaryNote.getLocation().getLongitude()));
+                        } else {
+                            mLocationLayout.setVisibility(View.GONE);
+
+                            if (mDiaryNote.getWeather() == null) {
+                                mDiaryFooterLayout.setVisibility(View.GONE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        Toast.makeText(getContext(), firebaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void setLocationText(AddressDetails addressDetails) {
+        mTxtLocation.setText(addressDetails.getLocality());
+        String subAddress = String.format("%s%s%s%s",
+                addressDetails.getFeatureName() == null || addressDetails.getFeatureName().equals("Unnamed Rd") ? "" : addressDetails.getFeatureName() + ", ",
+                addressDetails.getThoroughfare() == null || addressDetails.getThoroughfare().equals("Unnamed Rd") ? "" : addressDetails.getThoroughfare() + ", ",
+                addressDetails.getAdminArea() == null || addressDetails.getAdminArea().equals("Unnamed Rd") ? "" : addressDetails.getAdminArea() + ", ",
+                addressDetails.getCountryName() == null || addressDetails.getCountryName().equals("Unnamed Rd") ? "" : addressDetails.getCountryName());
+        mTxtSubLocation.setText(subAddress);
+        mTxtSubLocation.setVisibility(View.VISIBLE);
     }
 
     public void showDiscardDialog() {
@@ -621,46 +772,6 @@ public class DiaryFragment extends Fragment {
         startActivityForResult(intent, Constants.GALLERY_REQUEST_CODE);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Photo photo = new Photo(mImagePath);
-                mImages.add(0, photo);
-
-                mImagesRecyclerView.setVisibility(View.VISIBLE);
-
-                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-                mImagesRecyclerView.scrollToPosition(0);
-            } else {
-                new File(mImagePath).delete();
-            }
-        }
-
-        if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
-
-            for (int i = 0; i < path.size(); i++) {
-                mImages.add(0, new Photo(path.get(i)));
-            }
-
-            if (!mImages.isEmpty()) {
-                mImagesRecyclerView.setVisibility(View.VISIBLE);
-                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-                mImagesRecyclerView.scrollToPosition(0);
-            }
-        }
-
-        if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<Photo> newImagesList = (ArrayList<Photo>) data.getSerializableExtra(DiaryImagesActivity.IMAGES_AFTER_DELETE);
-
-            mImages.clear();
-            mImages.addAll(newImagesList);
-
-            saveChanges();
-        }
-    }
-
     private File createImageFile() throws IOException {
         String travelTitle = mDiaryNote.getTravelTitle();
         travelTitle = travelTitle.replaceAll(" ", "_");
@@ -698,22 +809,26 @@ public class DiaryFragment extends Fragment {
 
     private void saveChanges() {
         //save title
-        if (!isEmpty(mEdtDiaryNoteTitle)) {
-            mDiaryNote.setTitle(mEdtDiaryNoteTitle.getText().toString());
+        if (isTitleVisible) {
+            if (!isEmpty(mEdtDiaryNoteTitle)) {
+                mDiaryNote.setTitle(mEdtDiaryNoteTitle.getText().toString());
+            } else {
+                Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
+                mEdtDiaryNoteTitle.requestFocus();
+                return;
+            }
         } else {
-            Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
-            mEdtDiaryNoteTitle.requestFocus();
-            return;
+            if (!isEmpty(mBigTitle)) {
+                mDiaryNote.setTitle(mBigTitle.getText().toString());
+            } else {
+                Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
+                mBigTitle.requestFocus();
+                return;
+            }
         }
 
         //save text
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
-
-        //save travel
-//        if (mTravelId != null) {
-//            mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
-//            mDiaryNote.setTravelId(mTravelId);
-//        }
 
         //save images
         mDiaryNote.setPhotos(mImages);
@@ -721,7 +836,6 @@ public class DiaryFragment extends Fragment {
         if (mKey != null) {
             mItemRef.setValue(mDiaryNote);
         } else {
-//            mDiaryNote.setTime(System.currentTimeMillis());
             Firebase newTravelRef = mItemRef.push();
             newTravelRef.setValue(mDiaryNote);
             mKey = newTravelRef.getKey();
@@ -731,6 +845,10 @@ public class DiaryFragment extends Fragment {
         mRtEditText.resetHasChanged();
 
         enableReviewingMode();
+
+        if (showSavedToast) {
+            Toast.makeText(getContext(), R.string.saved, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void share() {
@@ -775,26 +893,6 @@ public class DiaryFragment extends Fragment {
         Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mRtManager != null) {
-            mRtManager.onDestroy(true);
-        }
-
-        if (mItemRef != null && mValueEventListener != null) {
-            mItemRef.removeEventListener(mValueEventListener);
-        }
-
-        mAdapter.cleanup();
-    }
-
     private String getStringExtra(Intent intent, String key) {
         String s = intent.getStringExtra(key);
         return s == null ? "" : s;
@@ -804,7 +902,30 @@ public class DiaryFragment extends Fragment {
         return etText.getText().toString().trim().length() == 0;
     }
 
-    @OnClick(R.id.txt_travel)
+    private void makeEditTextEditable(EditText editText, boolean editable) {
+        editText.setClickable(editable);
+        editText.setLongClickable(editable);
+        editText.setFocusable(editable);
+        editText.setFocusableInTouchMode(editable);
+    }
+
+    private void setFabVisibility(FloatingActionButton fab, int visibility) {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
+        if (visibility == View.VISIBLE) {
+            // bring things back to normal state
+            params.setBehavior(new FloatingActionButton.Behavior());
+            params.setAnchorId(R.id.diary_note_app_bar);
+            fab.setLayoutParams(params);
+        } else {
+            // hide fab
+            params.setBehavior(null);
+            params.setAnchorId(View.NO_ID);
+            fab.setLayoutParams(params);
+            fab.setVisibility(visibility);
+        }
+    }
+
+    @OnClick(R.id.diary_note_travel)
     public void onTravelSpinnerClick() {
         if (isEditingMode) {
             new AlertDialog.Builder(getContext())
@@ -819,9 +940,9 @@ public class DiaryFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which) {
                             Travel travel = mAdapter.getItem(which);
                             mTravelId = mAdapter.getRef(which).getKey();
-                            mTxtTravel.setText(travel.getTitle());
+                            mTravelTitle.setText(travel.getTitle());
                             if (mTravelId != null) {
-                                mDiaryNote.setTravelTitle(mTxtTravel.getText().toString());
+                                mDiaryNote.setTravelTitle(mTravelTitle.getText().toString());
                                 mDiaryNote.setTravelId(mTravelId);
                                 mDiaryNote.setPicasaAlbumId(travel.getPicasaAlbumId());
                             }
@@ -844,11 +965,11 @@ public class DiaryFragment extends Fragment {
             mLocationLayout.setVisibility(View.VISIBLE);
 
             mDiaryNote.setLocation(location);
-            mDiaryNote.setLocationAddressLine(getResources()
+            mTxtLocation.setText(getResources()
                     .getString(R.string.location_format_address_line_with_gps,
                             location.getLatitude(),
                             location.getLongitude()));
-            mTxtLocation.setText(mDiaryNote.getLocationAddressLine());
+            mTxtSubLocation.setVisibility(View.GONE);
 
             putMarker(location.getLatLng());
 
@@ -869,7 +990,7 @@ public class DiaryFragment extends Fragment {
         }
     }
 
-    @OnClick(R.id.txt_location_info)
+    @OnClick(R.id.location_refresh_pin)
     public void updateAddress() {
         if (isNewDiaryNote) {
             startLocationRetrieval();
@@ -882,9 +1003,9 @@ public class DiaryFragment extends Fragment {
     public void getAddress(GeocoderIntentService.GeocoderResult result) {
         isAddressRetrievalInProgress = false;
         if (result != null) {
-            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT) {
-                mDiaryNote.setLocationAddressLine(result.message);
-                mTxtLocation.setText(result.message);
+            if (result.resultCode == GeocoderIntentService.SUCCESS_RESULT && result.addressDetails != null) {
+                setLocationText(result.addressDetails);
+                mDiaryNote.setAddressDetails(result.addressDetails);
             }
         }
     }
@@ -901,7 +1022,7 @@ public class DiaryFragment extends Fragment {
         }
     }
 
-    @OnClick(R.id.txt_weather_info)
+    @OnClick(R.id.img_weather_icon)
     public void updateWeather() {
         if (isNewDiaryNote && mDiaryNote != null && mDiaryNote.getLocation() != null) {
             startWeatherRetrieval(mDiaryNote.getLocation());
@@ -922,19 +1043,20 @@ public class DiaryFragment extends Fragment {
             weather = mDiaryNote.getWeather();
             Glide.with(DiaryFragment.this)
                     .load(getString(R.string.weather_api_icon_url, weather.getWeatherIcon()))
-                    .override(32, 32)
+                    .crossFade()
                     .into(mImgWeatherIcon);
             mTxtWeatherInfo.setText(getString(R.string.weather_api_info_text,
-                    weather.getWeatherMain(),
-                    weather.getWeatherDescription(),
-                    weather.getTemp()));
+                    weather.getTemp(),
+                    weather.getWeatherDescription()));
+            mWeatherLayout.setVisibility(View.VISIBLE);
         } else {
             mImgWeatherIcon.setImageBitmap(null);
             mTxtWeatherInfo.setText(R.string.weather_api_na_text);
+            mWeatherLayout.setVisibility(View.GONE);
         }
     }
 
-    @OnClick(R.id.diary_location)
+    @OnClick(R.id.diary_location_layout)
     public void showMap() {
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -945,11 +1067,11 @@ public class DiaryFragment extends Fragment {
         if (mMapFragment.isHidden()) {
             anim.start();
             fragmentTransaction.show(mMapFragment).commit();
-            mScrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            mContentScrollView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    mScrollView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    mScrollView.fullScroll(ScrollView.FOCUS_DOWN);
+                    mContentScrollView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    mContentScrollView.fullScroll(ScrollView.FOCUS_DOWN);
                 }
             });
         } else {
@@ -966,7 +1088,7 @@ public class DiaryFragment extends Fragment {
 
     private void setupMap() {
         if (mMap == null) {
-            mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+            mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.diary_note_map_fragment);
             mMap = mMapFragment.getMap();
             mMap.getUiSettings().setScrollGesturesEnabled(false);
             mMap.getUiSettings().setZoomGesturesEnabled(false);
@@ -993,6 +1115,52 @@ public class DiaryFragment extends Fragment {
             mSharedPreferences.edit().putBoolean(Constants.KEY_SHOW_WARNING, false).apply();
         }
         mWarning.setVisibility(View.GONE);
+    }
+
+    private void handleToolbarTitleVisibility(float percentage) {
+        if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
+            if (!isTitleVisible) {
+                // show collapsed toolbar title
+                startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                // hide expanded toolbar title
+                startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                // pass text to collapsed toolbar title
+                mEdtDiaryNoteTitle.setText(mBigTitle.getText());
+                // handle focus
+                if (mBigTitle.isFocused()) {
+                    int position = mBigTitle.getSelectionStart();
+                    mEdtDiaryNoteTitle.requestFocus();
+                    mEdtDiaryNoteTitle.setSelection(position);
+                }
+                isTitleVisible = true;
+            }
+        } else {
+            if (isTitleVisible) {
+                // hide collapsed toolbar title
+                startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                // show expanded toolbar title
+                startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                // pass text to expanded toolbar title
+                mBigTitle.setText(mEdtDiaryNoteTitle.getText());
+                // handle focus
+                if (mEdtDiaryNoteTitle.isFocused()) {
+                    int position = mEdtDiaryNoteTitle.getSelectionStart();
+                    mBigTitle.requestFocus();
+                    mBigTitle.setSelection(position);
+                }
+                isTitleVisible = false;
+            }
+        }
+    }
+
+    public static void startAlphaAnimation(View v, long duration, int visibility) {
+        AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
+                ? new AlphaAnimation(0f, 1f)
+                : new AlphaAnimation(1f, 0f);
+
+        alphaAnimation.setDuration(duration);
+        alphaAnimation.setFillAfter(true);
+        v.startAnimation(alphaAnimation);
     }
 
 }

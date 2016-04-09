@@ -87,11 +87,13 @@ public class DiaryImagesListAdapter extends RecyclerView.Adapter<DiaryImagesList
             if (Utils.checkFileExists(mFragment.getContext(), mImagesList.get(position).getLocalUri())) {
                 Glide.with(mFragment.getContext())
                         .load(mImagesList.get(position).getLocalUri())
+                        .placeholder(R.drawable.image_loading)
                         .centerCrop()
                         .into(holder.image);
             } else {
                 Glide.with(mFragment.getContext())
                         .load(mImagesList.get(position).getPicasaUri())
+                        .placeholder(R.drawable.image_loading)
                         .centerCrop()
                         .into(holder.image);
             }

@@ -1,8 +1,11 @@
 package com.travelersdiary.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DiaryNote implements Serializable {
     private String travelId;
     private String travelTitle;
@@ -11,7 +14,7 @@ public class DiaryNote implements Serializable {
     private String title;
     private String text;
     private LocationPoint location;
-    private String locationAddressLine;
+    private AddressDetails addressDetails;
     private WeatherInfo weather;
     private ArrayList<Photo> photos;
     private ArrayList<String> audios;
@@ -21,7 +24,7 @@ public class DiaryNote implements Serializable {
     }
 
     public DiaryNote(String travelId, String travelTitle, String picasaAlbumId, long time,
-                     String title, String text, LocationPoint location, String addressLine, WeatherInfo weather,
+                     String title, String text, LocationPoint location, AddressDetails address, WeatherInfo weather,
                      ArrayList<Photo> photos, ArrayList<String> audios, ArrayList<String> videos) {
         this.travelId = travelId;
         this.travelTitle = travelTitle;
@@ -30,7 +33,7 @@ public class DiaryNote implements Serializable {
         this.title = title;
         this.text = text;
         this.location = location;
-        this.locationAddressLine = addressLine;
+        this.addressDetails = address;
         this.weather = weather;
         this.photos = photos;
         this.audios = audios;
@@ -85,12 +88,12 @@ public class DiaryNote implements Serializable {
         this.location = location;
     }
 
-    public String getLocationAddressLine() {
-        return locationAddressLine;
+    public AddressDetails getAddressDetails() {
+        return addressDetails;
     }
 
-    public void setLocationAddressLine(String locationAddressLine) {
-        this.locationAddressLine = locationAddressLine;
+    public void setAddressDetails(AddressDetails addressDetails) {
+        this.addressDetails = addressDetails;
     }
 
     public WeatherInfo getWeather() {

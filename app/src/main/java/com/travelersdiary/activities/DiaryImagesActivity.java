@@ -306,7 +306,10 @@ public class DiaryImagesActivity extends AppCompatActivity
         if (isSelectMode) {
             enableReviewMode();
         } else {
-            super.onBackPressed();
+            Intent intent = new Intent();
+            intent.putExtra(IMAGES_AFTER_DELETE, mImages);
+            setResult(RESULT_OK, intent);
+            finish();
         }
     }
 

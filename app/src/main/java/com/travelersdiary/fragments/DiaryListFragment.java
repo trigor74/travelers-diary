@@ -16,9 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.travelersdiary.Constants;
@@ -29,10 +31,11 @@ import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.DiaryNote;
-import com.travelersdiary.recyclerview.DividerItemDecoration;
+import com.travelersdiary.models.Photo;
 
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -92,19 +95,13 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-//        mDiaryList.setLayoutManager(new LinearLayoutManager(getContext()));
-
         mLayoutManager = new LinearLayoutManager(getContext());
         mDiaryList.setLayoutManager(mLayoutManager);
 
         // animation
         mDiaryList.setItemAnimator(new DefaultItemAnimator());
 
-        // decoration
-        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
-        mDiaryList.addItemDecoration(itemDecoration);
-
-
+        setupAdapter();
     }
 
     @Override
@@ -112,12 +109,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         if (mDeleteMode != null) {
             mDeleteMode.finish();
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setupAdapter();
     }
 
     @Override
@@ -154,65 +145,124 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                 query) {
 
             @Override
-            protected void populateViewHolder(DiaryListFragment.ViewHolder viewHolder, DiaryNote model, int position) {
+            protected void populateViewHolder(DiaryListFragment.ViewHolder holder, DiaryNote model, int position) {
                 //Note title
-                viewHolder.textViewTitle.setText(model.getTitle());
+                holder.tvTitle.setText("");
+                holder.tvTitle.setText(model.getTitle());
 
-                //Note time
-                // String time = DateFormat.getMediumDateFormat(this).format(model.getTime())
-                String time = SimpleDateFormat.getDateTimeInstance().format(model.getTime());
-                viewHolder.textViewTime.setText(time);
+                //Note date
+                Calendar c = Calendar.getInstance();
+                c.setTimeInMillis(model.getTime());
+                int day = c.get(Calendar.DAY_OF_MONTH);
+                String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+                int year = c.get(Calendar.YEAR);
 
-                //Travel
-                String travelTitle = model.getTravelTitle();
-                String travelId = model.getTravelId();
-                viewHolder.textViewTravelTitle.setText(travelTitle);
-                if (travelId == null || travelId.equalsIgnoreCase(Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY)) {
-                    viewHolder.textViewTravelTitle.setVisibility(View.GONE);
-                } else {
-                    viewHolder.textViewTravelTitle.setVisibility(View.VISIBLE);
-                }
+                holder.tvDay.setText("");
+                holder.tvMonth.setText("");
+                holder.tvYear.setText("");
+                holder.tvDay.setText(String.format(Locale.getDefault(), "%02d", day));
+                holder.tvMonth.setText(month);
+                holder.tvYear.setText(String.valueOf(year));
 
                 //Note text
                 String text = model.getText();
-                text = text.replaceAll("<.*?>", "");
-                if (text.length() > 200) {
-                    text = text.substring(0, 200).concat("...");
+                if (text.isEmpty()) {
+                    holder.tvText.setVisibility(View.GONE);
+                    holder.layoutPhotos.setPadding(0, holder.layoutPhotos.getPaddingTop(),
+                            0, (int) getResources().getDimension(R.dimen.main_padding));
+                    if (model.getPhotos() == null) {
+                        holder.tvTitle.setPadding(0, 0, 0, (int) getResources().getDimension(R.dimen.main_padding));
+                    }
+                } else {
+                    text = text.replaceAll("<.*?>", "");
+                    if (text.length() > 200) {
+                        text = text.substring(0, 200).concat("...");
+                    }
+                    holder.tvText.setVisibility(View.VISIBLE);
+                    holder.tvText.setText("");
+                    holder.tvText.setText(text);
+                    holder.layoutPhotos.setPadding(0, holder.layoutPhotos.getPaddingTop(), 0,
+                            (int) getResources().getDimension(R.dimen.half_padding));
                 }
-                viewHolder.textViewText.setText(text);
 
-                //Icons photo, video, audio
+                //Photo
                 if (model.getPhotos() != null) {
-                    Integer photos = model.getPhotos().size();
-                    viewHolder.textViewPhotos.setText(String.valueOf(photos));
-                    viewHolder.layoutPhotos.setVisibility(View.VISIBLE);
-                } else {
-                    viewHolder.textViewPhotos.setText("0");
-                    viewHolder.layoutPhotos.setVisibility(View.GONE);
-                }
+                    int photos = model.getPhotos().size();
+                    holder.tvPhotoCount.setText("");
+                    holder.tvPhotoCount.setText(String.valueOf(photos));
+                    holder.layoutPhotos.setVisibility(View.VISIBLE);
+                    holder.imgBackground.setVisibility(View.VISIBLE);
+                    holder.tvTitle.setPadding(0, 0, 0, 0);
 
-                if (model.getVideos() != null) {
-                    Integer videos = model.getVideos().size();
-                    viewHolder.textViewVideos.setText(String.valueOf(videos));
-                    viewHolder.layoutVideos.setVisibility(View.VISIBLE);
-                } else {
-                    viewHolder.textViewVideos.setText("0");
-                    viewHolder.layoutVideos.setVisibility(View.GONE);
-                }
+                    String img = "";
 
-                if (model.getAudios() != null) {
-                    Integer audios = model.getAudios().size();
-                    viewHolder.textViewAudios.setText(String.valueOf(audios));
-                    viewHolder.layoutAudios.setVisibility(View.VISIBLE);
+                    for (Photo photo : model.getPhotos()) {
+                        if (Utils.checkFileExists(getContext(), photo.getLocalUri())) {
+                            img = photo.getLocalUri();
+                            break;
+                        } else if (photo.getPicasaUri() != null) {
+                            img = photo.getPicasaUri();
+                            break;
+                        }
+                    }
+
+                    if (!img.isEmpty()) {
+                        whiteStyle(holder);
+                        holder.imgBackground.setImageDrawable(null);
+                        Glide.with(getContext())
+                                .load(img)
+                                .crossFade()
+                                .into(holder.imgBackground);
+                    } else {
+                        holder.imgBackground.setVisibility(View.GONE);
+                        blackStyle(holder);
+                    }
                 } else {
-                    viewHolder.textViewAudios.setText("0");
-                    viewHolder.layoutAudios.setVisibility(View.GONE);
+                    holder.tvPhotoCount.setText("0");
+                    holder.layoutPhotos.setVisibility(View.GONE);
+                    holder.imgBackground.setVisibility(View.GONE);
+                    blackStyle(holder);
                 }
             }
-        }
-        ;
+        };
 
         mDiaryList.setAdapter(mAdapter);
+    }
+
+    private void blackStyle(ViewHolder holder) {
+        holder.tvDay.setTextColor(getResources().getColor(R.color.black));
+        holder.tvDay.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_black_24dp, 0, 0, 0);
+        holder.tvDay.setAlpha(.2f);
+        holder.tvMonth.setTextColor(getResources().getColor(R.color.black));
+        holder.tvMonth.setAlpha(.2f);
+        holder.tvYear.setTextColor(getResources().getColor(R.color.black));
+        holder.tvYear.setAlpha(.2f);
+        holder.tvTitle.setTextColor(getResources().getColor(R.color.black));
+        holder.tvTitle.setAlpha(.8f);
+
+        holder.tvPhotoCount.setTextColor(getResources().getColor(R.color.black));
+        holder.tvPhotoCount.setAlpha(.5f);
+        holder.imgPhoto.setImageDrawable(null);
+        holder.imgPhoto.setImageDrawable(getResources().getDrawable(R.drawable.ic_photo_library_black_24dp));
+        holder.imgPhoto.setAlpha(.5f);
+    }
+
+    private void whiteStyle(ViewHolder holder) {
+        holder.tvDay.setTextColor(getResources().getColor(R.color.white));
+        holder.tvDay.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_white_24dp, 0, 0, 0);
+        holder.tvDay.setAlpha(.8f);
+        holder.tvMonth.setTextColor(getResources().getColor(R.color.white));
+        holder.tvMonth.setAlpha(.8f);
+        holder.tvYear.setTextColor(getResources().getColor(R.color.white));
+        holder.tvYear.setAlpha(.8f);
+        holder.tvTitle.setTextColor(getResources().getColor(R.color.white));
+        holder.tvTitle.setAlpha(.8f);
+
+        holder.tvPhotoCount.setTextColor(getResources().getColor(R.color.white));
+        holder.tvPhotoCount.setAlpha(.8f);
+        holder.imgPhoto.setImageDrawable(null);
+        holder.imgPhoto.setImageDrawable(getResources().getDrawable(R.drawable.ic_photo_library_white_24dp));
+        holder.imgPhoto.setAlpha(.8f);
     }
 
     private static IOnItemClickListener onItemClickListener = new IOnItemClickListener() {
@@ -254,27 +304,24 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     };
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
-        @Bind(R.id.item_note_title_text_view)
-        TextView textViewTitle;
-        @Bind(R.id.item_note_time_text_view)
-        TextView textViewTime;
-        @Bind(R.id.item_note_travel_title_text_view)
-        TextView textViewTravelTitle;
-        @Bind(R.id.item_note_text_text_view)
-        TextView textViewText;
+        @Bind(R.id.diary_note_list_image)
+        ImageView imgBackground;
+        @Bind(R.id.diary_note_day)
+        TextView tvDay;
+        @Bind(R.id.diary_note_month)
+        TextView tvMonth;
+        @Bind(R.id.diary_note_year)
+        TextView tvYear;
+        @Bind(R.id.diary_note_title)
+        TextView tvTitle;
+        @Bind(R.id.diary_note_text)
+        TextView tvText;
         @Bind(R.id.photos_layout)
         LinearLayout layoutPhotos;
-        @Bind(R.id.videos_layout)
-        LinearLayout layoutVideos;
-        @Bind(R.id.audios_layout)
-        LinearLayout layoutAudios;
-        @Bind(R.id.item_note_photos_text_view)
-        TextView textViewPhotos;
-        @Bind(R.id.item_note_videos_text_view)
-        TextView textViewVideos;
-        @Bind(R.id.item_note_audios_text_view)
-        TextView textViewAudios;
+        @Bind(R.id.diary_note_photo_count)
+        TextView tvPhotoCount;
+        @Bind(R.id.img_photo)
+        ImageView imgPhoto;
 
         public ViewHolder(View view) {
             super(view);

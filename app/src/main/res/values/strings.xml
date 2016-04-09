@@ -116,7 +116,7 @@
 
     <string name="weather_api_data_url">http://api.openweathermap.org/data/2.5/weather?lat=%1$s&amp;lon=%2$s&amp;units=%3$s&amp;appid=%4$s&amp;lang=%5$s</string>
     <string name="weather_api_icon_url">http://openweathermap.org/img/w/%s.png</string>
-    <string name="weather_api_info_text">%3$.0f ℃ %1$s, %2$s</string>
+    <string name="weather_api_info_text">%1$.0f ℃, %2$s</string>
     <string name="weather_api_na_text">N/A</string>
 
     <string name="travels_select_action_text">Select The Action</string>

@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.travelersdiary.R;
 import com.travelersdiary.bus.BusProvider;
+import com.travelersdiary.models.AddressDetails;
 import com.travelersdiary.models.LocationPoint;
 
 import java.io.IOException;
@@ -22,10 +23,12 @@ public class GeocoderIntentService extends IntentService {
     public class GeocoderResult {
         public int resultCode;
         public String message;
+        public AddressDetails addressDetails;
 
-        public GeocoderResult(int resultCode, String message) {
+        public GeocoderResult(int resultCode, String message, AddressDetails addressDetails) {
             this.resultCode = resultCode;
             this.message = message;
+            this.addressDetails = addressDetails;
         }
     }
 
@@ -45,7 +48,7 @@ public class GeocoderIntentService extends IntentService {
         if (location == null) {
             errorMessage = getString(R.string.no_location_data_provided_text);
             Log.wtf(TAG, errorMessage);
-            deliverResultToReceiver(GeocoderIntentService.FAILURE_RESULT, errorMessage);
+            BusProvider.bus().post(new GeocoderResult(GeocoderIntentService.FAILURE_RESULT, errorMessage, null));
             return;
         }
 
@@ -74,7 +77,7 @@ public class GeocoderIntentService extends IntentService {
                 errorMessage = getString(R.string.geocoder_no_address_found);
                 Log.e(TAG, errorMessage);
             }
-            deliverResultToReceiver(GeocoderIntentService.FAILURE_RESULT, errorMessage);
+            BusProvider.bus().post(new GeocoderResult(GeocoderIntentService.FAILURE_RESULT, errorMessage, null));
         } else {
             Address address = addresses.get(0);
             ArrayList<String> addressFragments = new ArrayList<>();
@@ -88,17 +91,40 @@ public class GeocoderIntentService extends IntentService {
             // getPostalCode() ("94043", for example)
             // getCountryCode() ("US", for example)
             // getCountryName() ("United States", for example)
+
             for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
             String foundAddress = TextUtils.join(System.getProperty("line.separator"), addressFragments);
             Log.i(TAG, getString(R.string.geocoder_address_found) + ": " + foundAddress);
-            deliverResultToReceiver(GeocoderIntentService.SUCCESS_RESULT,
-                    TextUtils.join(System.getProperty("line.separator"), addressFragments));
+
+            BusProvider.bus().post(new GeocoderResult(GeocoderIntentService.SUCCESS_RESULT,
+                    TextUtils.join(System.getProperty("line.separator"), addressFragments), setupAddressDetails(address)));
         }
     }
 
-    private void deliverResultToReceiver(int resultCode, String message) {
-        BusProvider.bus().post(new GeocoderResult(resultCode, message));
+    private AddressDetails setupAddressDetails(Address address) {
+        AddressDetails addressDetails = new AddressDetails();
+
+        addressDetails.setAdminArea(address.getAdminArea());
+        addressDetails.setSubAdminArea(address.getSubAdminArea());
+
+        addressDetails.setLocality(address.getLocality());
+        addressDetails.setSubLocality(address.getSubLocality());
+
+        addressDetails.setThoroughfare(address.getThoroughfare());
+        addressDetails.setSubThoroughfare(address.getSubThoroughfare());
+
+        addressDetails.setCountryCode(address.getCountryCode());
+        addressDetails.setCountryName(address.getCountryName());
+
+        addressDetails.setFeatureName(address.getFeatureName());
+
+        addressDetails.setPhone(address.getPhone());
+        addressDetails.setPostalCode(address.getPostalCode());
+        addressDetails.setPremises(address.getPremises());
+
+        return addressDetails;
     }
+
 }
