@@ -19,10 +19,18 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 import com.travelersdiary.services.LocationTrackingService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 
@@ -35,6 +43,8 @@ public class BaseActivity extends AppCompatActivity implements
 
     private Firebase mFirebaseRef;
     private Firebase.AuthStateListener mAuthListener;
+    private Query mActiveTravelQuery = null;
+    private ValueEventListener mActiveTravelListener;
 
     private SharedPreferences mSharedPreferences;
 
@@ -55,12 +65,122 @@ public class BaseActivity extends AppCompatActivity implements
                 }
             }
         };
+
+        mActiveTravelListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
+                if (map != null) {
+                    // CHANGE ACTIVE TRAVEL HERE!!!
+                    // switch active travel logic:
+                    // 1. disable notifications for active travel 's reminder items
+                    // 2. set "active" to false for active travel 's reminder items except for "default"
+                    // 3. set "active" to false for active travel
+                    // ***
+                    // 4. set "active" to true for new travel
+                    // 5. set "active" to true for new travel 's reminder items
+                    // 6. enable notifications for new travel 's reminder items
+                    // 7. put new active travel's key and title to SharedPreferences
+
+                    String newActiveTravelKey = (String) map.get(Constants.FIREBASE_ACTIVE_TRAVEL_KEY);
+                    String newActiveTravelTitle = (String) map.get(Constants.FIREBASE_ACTIVE_TRAVEL_TITLE);
+
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+                    String oldActiveTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+
+                    if (oldActiveTravelKey != null && !oldActiveTravelKey.equals(newActiveTravelKey)) {
+                        // 1.
+                        // TODO: 06.04.16 add disable notifications logic
+
+                        // 2.
+                        if (!Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(oldActiveTravelKey)) {
+                            new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
+                                    .orderByChild(Constants.FIREBASE_REMINDER_TRAVELID)
+                                    .equalTo(oldActiveTravelKey)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Map<String, Object> map = new HashMap<String, Object>();
+                                            map.put(Constants.FIREBASE_REMINDER_ACTIVE, false);
+                                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                                child.getRef().updateChildren(map);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(FirebaseError firebaseError) {
+                                        }
+                                    });
+                        }
+
+                        // 3.
+                        Map<String, Object> activeTravelMap = new HashMap<String, Object>();
+                        activeTravelMap.put(Constants.FIREBASE_TRAVEL_ACTIVE, false);
+                        new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
+                                .child(oldActiveTravelKey)
+                                .updateChildren(activeTravelMap);
+                    }
+
+                    if (oldActiveTravelKey == null || !oldActiveTravelKey.equals(newActiveTravelKey)) {
+                        // 4.
+                        Map<String, Object> newActiveTravelMap = new HashMap<String, Object>();
+                        newActiveTravelMap.put(Constants.FIREBASE_TRAVEL_ACTIVE, true);
+                        new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
+                                .child(newActiveTravelKey)
+                                .updateChildren(newActiveTravelMap);
+
+                        // 5.
+                        new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
+                                .orderByChild(Constants.FIREBASE_REMINDER_TRAVELID)
+                                .equalTo(newActiveTravelKey)
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        Map<String, Object> map = new HashMap<String, Object>();
+                                        map.put(Constants.FIREBASE_REMINDER_ACTIVE, true);
+                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                            child.getRef().updateChildren(map);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(FirebaseError firebaseError) {
+                                    }
+                                });
+
+                        // 6.
+                        // TODO: 06.04.16 add enable notifications logic
+
+                    }
+
+                    // 7.
+                    sharedPreferences.edit()
+                            .putString(Constants.KEY_ACTIVE_TRAVEL_KEY, newActiveTravelKey)
+                            .apply();
+                    sharedPreferences.edit()
+                            .putString(Constants.KEY_ACTIVE_TRAVEL_TITLE, newActiveTravelTitle)
+                            .apply();
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        };
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mFirebaseRef.addAuthStateListener(mAuthListener);
+        String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
+        if (userUID != null) {
+            mActiveTravelQuery = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
+            mActiveTravelQuery.addValueEventListener(mActiveTravelListener);
+        }
     }
 
     @Override
@@ -153,8 +273,11 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        super.onPause();
         mFirebaseRef.removeAuthStateListener(mAuthListener);
+        if (mActiveTravelQuery != null) {
+            mActiveTravelQuery.removeEventListener(mActiveTravelListener);
+        }
+        super.onPause();
     }
 
     @Override

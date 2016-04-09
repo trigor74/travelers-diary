@@ -9,10 +9,14 @@ public final class Constants {
     public static final String FIREBASE_URL = BuildConfig.FIREBASE_ROOT_URL;
     public static final String FIREBASE_USERS = "users";
     public static final String FIREBASE_DIARY = "diary";
+    public static final String FIREBASE_ACTIVE_TRAVEL = "activeTravel";
+    public static final String FIREBASE_ACTIVE_TRAVEL_KEY = "activeTravelKey";
+    public static final String FIREBASE_ACTIVE_TRAVEL_TITLE = "activeTravelTitle";
     public static final String FIREBASE_TRAVELS = "travels";
     public static final String FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY = "default";
     public static final String FIREBASE_TRAVEL_TITLE = "title";
     public static final String FIREBASE_TRAVEL_DESCRIPTION = "description";
+    public static final String FIREBASE_TRAVEL_ACTIVE = "active";
     public static final String FIREBASE_PICASA_ALABUM_ID = "picasaAlbumId";
     public static final String FIREBASE_PICASA_URI = "picasaUri";
     public static final String FIREBASE_TRACKS = "tracks";
@@ -44,6 +48,9 @@ public final class Constants {
     public static final String GOOGLE_DISPLAY_NAME = "displayName";
     public static final String GOOGLE_PROFILE_IMAGE = "profileImageURL";
 
+    // openweathermap
+    public static final String OPENWEATHERMAP_AIPID = BuildConfig.OPENWEATHERMAP_AIPID;
+
     // shared preferences
     public static final String KEY_PROVIDER = "PROVIDER";
     public static final String KEY_USER_UID = "USER_UID";
@@ -53,6 +60,8 @@ public final class Constants {
     public static final String KEY_DISPLAY_NAME = "DISPLAY_NAME";
     public static final String KEY_PROFILE_IMAGE = "PROFILE_IMAGE";
     public static final String KEY_COVER_IMAGE = "COVER_IMAGE";
+    public static final String KEY_ACTIVE_TRAVEL_KEY = "ACTIVE_TRAVEL_KEY";
+    public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
     public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
 
     // travel

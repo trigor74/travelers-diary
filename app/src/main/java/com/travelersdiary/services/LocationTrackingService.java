@@ -42,7 +42,9 @@ public class LocationTrackingService extends Service implements
     private Firebase mTrackRef = null;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 5;
+    public static final long SMALLEST_DISPLACEMENT_IN_METERS = 15;
+
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
@@ -78,14 +80,15 @@ public class LocationTrackingService extends Service implements
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
+        mLocationRequest.setSmallestDisplacement(SMALLEST_DISPLACEMENT_IN_METERS);
         mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     /**
-     * travel:      users/USER_UID/tracks/TRACK_UID/travelId:TRAVEL_UID
-     * trackpoints: users/USER_UID/tracks/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
+     * track: users/USER_UID/tracks/TRAVEL_UID/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
+     * track/[TIMESTAMP:LOCATION_POINT] - TrackList class
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -123,17 +126,15 @@ public class LocationTrackingService extends Service implements
                 }
                 break;
             case ACTION_START_TRACK:
-                // TODO: 18.03.2016 put travel id to SharedPreferences on change
-                //SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                //mTravelId = sharedPreferences.getString(Constants.KEY_TRAVEL_REF, null);
-                mTravelId = "default"; // TODO: 18.03.2016 remove after testing
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                mTravelId = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+                if (mTravelId == null) {
+                    mTravelId = Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY;
+                }
                 isTrackingEnabled = true;
 
                 Firebase userTracksRef = new Firebase(Utils.getFirebaseUserTracksUrl(mUserUID));
-                Firebase newTrackRef = userTracksRef.push();
-                Map<String, Object> map = new HashMap<>();
-                map.put(Constants.FIREBASE_TRACKS_TRAVELID, mTravelId);
-                newTrackRef.setValue(map);
+                Firebase newTrackRef = userTracksRef.child(mTravelId).push();
                 mTrackRef = newTrackRef.child(Constants.FIREBASE_TRACKS_TRACK);
 
                 if (mGoogleApiClient.isConnected() && !isRequestingLocationUpdates) {

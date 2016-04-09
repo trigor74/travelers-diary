@@ -74,6 +74,9 @@
             android:enabled="true"
             android:exported="true" />
         <service
+            android:name=".services.WeatherIntentService"
+            android:exported="false" />
+        <service
             android:name=".services.ReminderService"
             android:exported="false" />
     </application>

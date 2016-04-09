@@ -61,6 +61,7 @@ android {
         it.buildConfigField 'String', 'GOOGLE_API_SERVER_KEY', GoogleApiServerKey
         it.buildConfigField 'String', 'GOOGLE_ANDROID_CLIENT_ID', GoogleAndroidClientId
         it.buildConfigField 'String', 'FIREBASE_ROOT_URL', FirebaseRootUrl
+        it.buildConfigField 'String', 'OPENWEATHERMAP_AIPID', WeatherApiKey
     }
 
     packagingOptions {

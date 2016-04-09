@@ -40,7 +40,7 @@ import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.ReminderItem;
-import com.travelersdiary.models.TrackListItem;
+import com.travelersdiary.models.TrackList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +62,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
     private Map<Marker, String> mNoteRefsMap = new HashMap<>();
     private Map<Marker, String> mTodoRefsMap = new HashMap<>();
     private Map<Marker, Circle> mTodoCirclesMap = new HashMap<>();
+    private Map<String, Polyline> mRoutesMap = new HashMap<>(); // key = track key (track UID)
     private Map<Polyline, Marker> mRouteStartMarksMap = new HashMap<>();
     private Map<Polyline, Marker> mRouteEndMarksMap = new HashMap<>();
 
@@ -231,60 +232,74 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
+        /**
+         * track: users/USER_UID/tracks/TRAVEL_UID/TRACK_UID/track/[TIMESTAMP:LOCATION_POINT]
+         * track/[TIMESTAMP:LOCATION_POINT] - TrackList class
+         */
         Firebase tracks = new Firebase(Utils.getFirebaseUserTracksUrl(userUID));
-        query = tracks.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(mTravelId);
+        query = tracks.child(mTravelId);
         listener = query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
 
-                    TrackListItem track = child.getValue(TrackListItem.class);
-                    //child.getKey();
+                    String trackKey = child.getKey();
 
-                    TreeMap<Long, LocationPoint> sortedTrack = new TreeMap<>(track.getTrack());
-                    if (!sortedTrack.isEmpty()) {
-                        Long firstTime = sortedTrack.firstEntry().getKey();
-                        LatLng firstPoint = sortedTrack.firstEntry().getValue().getLatLng();
-                        Long lastTime = sortedTrack.lastEntry().getKey();
-                        LatLng lastPoint = sortedTrack.lastEntry().getValue().getLatLng();
+                    TrackList track = child.getValue(TrackList.class);
+                    if (track != null) {
+                        TreeMap<Long, LocationPoint> sortedTrack = new TreeMap<>(track.getTrack());
+                        if (!sortedTrack.isEmpty()) {
+                            Long firstTime = sortedTrack.firstEntry().getKey();
+                            LatLng firstPoint = sortedTrack.firstEntry().getValue().getLatLng();
+                            Long lastTime = sortedTrack.lastEntry().getKey();
+                            LatLng lastPoint = sortedTrack.lastEntry().getValue().getLatLng();
 
-                        List<LatLng> trackPoints = new ArrayList<>(sortedTrack.size());
-                        for (Map.Entry<Long, LocationPoint> entry : sortedTrack.entrySet()) {
-                            LatLng latLng = entry.getValue().getLatLng();
-                            trackPoints.add(latLng);
-                            mLatLngBoundsBuilder.include(latLng);
-                            mHasLatLngBoundsBuilderPoints = true;
+                            List<LatLng> trackPoints = new ArrayList<>(sortedTrack.size());
+                            for (Map.Entry<Long, LocationPoint> entry : sortedTrack.entrySet()) {
+                                LatLng latLng = entry.getValue().getLatLng();
+                                trackPoints.add(latLng);
+                                mLatLngBoundsBuilder.include(latLng);
+                                mHasLatLngBoundsBuilderPoints = true;
+                            }
+
+                            Polyline route;
+                            if (mRoutesMap.containsKey(trackKey)) {
+                                route = mRoutesMap.get(trackKey);
+                                mRouteStartMarksMap.get(route).remove();
+                                mRouteEndMarksMap.get(route).remove();
+                                route.remove();
+                            }
+
+                            route = mMap.addPolyline(new PolylineOptions()
+                                    .width(5f)
+                                    .color(ContextCompat.getColor(getContext(), R.color.mapRouteColor))
+                                    .geodesic(true)
+                                    .zIndex(2f));
+                            route.setPoints(trackPoints);
+
+                            Marker startMarker = mMap.addMarker(new MarkerOptions()
+                                    .title("Start")
+                                    .snippet(Utils.getMediumDate(firstTime))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                    .position(firstPoint));
+
+                            Marker endMarker = mMap.addMarker(new MarkerOptions()
+                                    .title("End")
+                                    .snippet(Utils.getMediumDate(lastTime))
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                                    .position(lastPoint));
+
+                            //store polyline and start/end markers of the track
+                            mRoutesMap.put(trackKey, route);
+                            mRouteStartMarksMap.put(route, startMarker);
+                            mRouteEndMarksMap.put(route, endMarker);
                         }
-
-                        Polyline route = mMap.addPolyline(new PolylineOptions()
-                                .width(5f)
-                                .color(ContextCompat.getColor(getContext(), R.color.mapRouteColor))
-                                .geodesic(true)
-                                .zIndex(2f));
-                        route.setPoints(trackPoints);
-
-                        Marker startMarker = mMap.addMarker(new MarkerOptions()
-                                .title("Start")
-                                .snippet(Utils.getMediumDate(firstTime))
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                                .position(firstPoint));
-
-                        Marker endMarker = mMap.addMarker(new MarkerOptions()
-                                .title("End")
-                                .snippet(Utils.getMediumDate(lastTime))
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                                .position(lastPoint));
-
-                        //store start/end markers of the track
-                        mRouteStartMarksMap.put(route, startMarker);
-                        mRouteEndMarksMap.put(route, endMarker);
                     }
                 }
 
                 if (mHasLatLngBoundsBuilderPoints) {
                     LatLngBounds latLngBounds = mLatLngBoundsBuilder.build();
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 16));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 32));
                 }
             }
 
@@ -299,6 +314,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         diaryListener = diaryQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (mNoteRefsMap != null) {
+                    for (Map.Entry<Marker, String> entry :
+                            mNoteRefsMap.entrySet()) {
+                        entry.getKey().remove();
+                    }
+                    mNoteRefsMap.clear();
+                }
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     DiaryNote note = child.getValue(DiaryNote.class);
                     if (note.getLocation() != null) {
@@ -328,10 +350,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
         });
 
         Firebase reminderRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
-        reminderQuery = reminderRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(mTravelId);
+        reminderQuery = reminderRef.orderByChild(Constants.FIREBASE_REMINDER_TRAVELID).equalTo(mTravelId);
         reminderListener = reminderQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (mTodoRefsMap != null) {
+                    for (Map.Entry<Marker, String> entry :
+                            mTodoRefsMap.entrySet()) {
+                        Marker marker = entry.getKey();
+                        if (marker != null) {
+                            Circle circle = mTodoCirclesMap.get(marker);
+                            if (circle != null) {
+                                circle.remove();
+                            }
+                            marker.remove();
+                        }
+                    }
+                    mTodoRefsMap.clear();
+                    if (mTodoCirclesMap != null) {
+                        mTodoCirclesMap.clear();
+                    }
+                }
+
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     ReminderItem item = child.getValue(ReminderItem.class);
                     if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(item.getType()) &&
@@ -371,5 +411,47 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
 
             }
         });
+    }
+
+    public void setNotesVisible(boolean visible) {
+        for (Map.Entry<Marker, String> entry :
+                mNoteRefsMap.entrySet()) {
+            Marker marker = entry.getKey();
+            if (marker != null) {
+                marker.setVisible(visible);
+            }
+        }
+    }
+
+    public void setTodoItemsVisible(boolean visible) {
+        for (Map.Entry<Marker, String> entry :
+                mTodoRefsMap.entrySet()) {
+            Marker marker = entry.getKey();
+            if (marker != null) {
+                Circle circle = mTodoCirclesMap.get(marker);
+                if (circle != null) {
+                    circle.setVisible(visible);
+                }
+                marker.setVisible(visible);
+            }
+        }
+    }
+
+    public void setTracksVisible(boolean visible) {
+        for (Map.Entry<String, Polyline> entry :
+                mRoutesMap.entrySet()) {
+            Polyline route = entry.getValue();
+            if (route != null) {
+                Marker start = mRouteStartMarksMap.get(route);
+                if (start != null) {
+                    start.setVisible(visible);
+                }
+                Marker end = mRouteEndMarksMap.get(route);
+                if (end != null) {
+                    end.setVisible(visible);
+                }
+                route.setVisible(visible);
+            }
+        }
     }
 }
