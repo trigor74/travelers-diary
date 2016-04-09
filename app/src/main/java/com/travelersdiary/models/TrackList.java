@@ -3,12 +3,13 @@ package com.travelersdiary.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TrackList {
+public class TrackList implements Serializable {
     private Map<Long, LocationPoint> track; // Key = timestamp
 
     public TrackList() {
