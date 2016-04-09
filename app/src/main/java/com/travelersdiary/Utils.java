@@ -136,6 +136,10 @@ public class Utils {
     }
 
     public static boolean checkFileExists(Context context, String uri) {
+        if (uri == null) {
+            return false;
+        }
+
         Uri uriPath = Uri.parse(uri);
         String path = Utils.getRealPathFromURI(context, uriPath);
 
