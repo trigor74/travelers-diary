@@ -519,7 +519,7 @@
       "repeat": false,
       "task": [
         {
-          "checked": false,
+          "checked": true,
           "item": "Запросити друзів на прогулянку"
         },
         {
@@ -527,7 +527,7 @@
           "item": "Зробити бутерброди"
         },
         {
-          "checked": false,
+          "checked": true,
           "item": "Купити мінеральну воду"
         }
       ],
