@@ -29,6 +29,11 @@
             android:title="@string/share"
             app:showAsAction="never" />
         <item
+            android:id="@+id/action_diary_edit"
+            android:icon="@drawable/ic_edit_white_24dp"
+            android:title="@string/edit"
+            app:showAsAction="never" />
+        <item
             android:id="@+id/action_diary_delete"
             android:icon="@drawable/ic_delete_white_24dp"
             android:title="@string/delete"

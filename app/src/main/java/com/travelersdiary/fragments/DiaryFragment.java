@@ -418,6 +418,9 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             case R.id.action_diary_share:
                 share();
                 return true;
+            case R.id.action_diary_edit:
+                enableEditingMode();
+                return true;
             case R.id.action_diary_delete:
                 delete();
                 return true;
