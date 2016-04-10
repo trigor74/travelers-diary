@@ -364,9 +364,8 @@ public class ReminderItemFragment extends Fragment {
         remindTypeSpinner.setAdapter(remindTypesAdapter);
 
         // task text
-        TodoTaskAdapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes());
+        TodoTaskAdapter todoTaskAdapter = new TodoTaskAdapter(mRemindItem.getTask(), mRemindItem.isViewAsCheckboxes(), mRemindItem.isCompleted());
         todoTaskAdapter.setOnTaskCompletedListener(mOnTaskCompletedListener);
-        todoTaskAdapter.setCompleted(mRemindItem.isCompleted());
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
         mTodoItemTask.setLayoutManager(layoutManager);
         mTodoItemTask.setAdapter(todoTaskAdapter);

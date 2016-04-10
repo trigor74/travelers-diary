@@ -221,11 +221,19 @@ public class TodoTaskAdapter extends RecyclerView.Adapter<TodoTaskAdapter.ViewHo
     public TodoTaskAdapter(ArrayList<TodoTask> itemList) {
         this.mTodoTaskItemList = itemList;
         this.mViewAsCheckboxes = false;
+        this.mCompleted = false;
     }
 
     public TodoTaskAdapter(ArrayList<TodoTask> itemList, boolean viewAsCheckboxes) {
         this.mTodoTaskItemList = itemList;
         this.mViewAsCheckboxes = viewAsCheckboxes;
+        this.mCompleted = false;
+    }
+
+    public TodoTaskAdapter(ArrayList<TodoTask> itemList, boolean viewAsCheckboxes, boolean completed) {
+        this.mTodoTaskItemList = itemList;
+        this.mViewAsCheckboxes = viewAsCheckboxes;
+        this.mCompleted = completed;
     }
 
     private Context mContext;
