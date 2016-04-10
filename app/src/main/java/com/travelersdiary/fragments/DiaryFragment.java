@@ -56,6 +56,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.onegravity.rteditor.RTEditText;
 import com.onegravity.rteditor.RTManager;
@@ -145,18 +146,6 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     @Bind(R.id.diary_footer_layout)
     LinearLayout mDiaryFooterLayout;
 
-    @Bind(R.id.txt_location_1)
-    TextView mTxtLocation;
-
-    @Bind(R.id.txt_location_2)
-    TextView mTxtSubLocation;
-
-    @Bind(R.id.diary_location_layout)
-    LinearLayout mLocationLayout;
-
-    @Bind(R.id.location_drop_down)
-    ImageView mLocationDropDown;
-
     @Bind(R.id.diary_weather_layout)
     LinearLayout mWeatherLayout;
 
@@ -165,6 +154,18 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
 
     @Bind(R.id.txt_weather_info)
     TextView mTxtWeatherInfo;
+
+    @Bind(R.id.diary_location_layout)
+    LinearLayout mLocationLayout;
+
+    @Bind(R.id.txt_location_1)
+    TextView mTxtLocation;
+
+    @Bind(R.id.txt_location_2)
+    TextView mTxtSubLocation;
+
+    @Bind(R.id.location_drop_down)
+    ImageView mLocationDropDown;
 
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.3f;
     private static final int ALPHA_ANIMATIONS_DURATION = 200;
@@ -224,7 +225,6 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         }
 
         mImagesRecyclerView.setVisibility(View.GONE);
-        mWarning.setVisibility(View.GONE);
 
         mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_diary_note_title);
         mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -297,7 +297,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             enableReviewingMode();
         }
 
-        setupMap();
+//        setupMap();
 
         return view;
     }
@@ -606,11 +606,11 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                 }
 
                 mDiaryFooterLayout.setVisibility(View.VISIBLE);
-
                 setWeatherViews();
 
                 if (mDiaryNote.getLocation() != null) {
                     mLocationLayout.setVisibility(View.VISIBLE);
+                    setupMap();
 
                     if (mDiaryNote.getAddressDetails() != null) {
                         setLocationText(mDiaryNote.getAddressDetails());
@@ -621,6 +621,9 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                                         mDiaryNote.getLocation().getLongitude()));
                         mTxtSubLocation.setVisibility(View.GONE);
                     }
+
+                    putMarker(new LatLng(mDiaryNote.getLocation().getLatitude(),
+                            mDiaryNote.getLocation().getLongitude()));
                 } else {
                     mLocationLayout.setVisibility(View.GONE);
 
@@ -685,11 +688,11 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                         }
 
                         mDiaryFooterLayout.setVisibility(View.VISIBLE);
-
                         setWeatherViews();
 
                         if (mDiaryNote.getLocation() != null) {
                             mLocationLayout.setVisibility(View.VISIBLE);
+                            setupMap();
 
                             if (mDiaryNote.getAddressDetails() != null) {
                                 setLocationText(mDiaryNote.getAddressDetails());
@@ -962,6 +965,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     @Subscribe
     public void getLocation(LocationPoint location) {
         if (isNewDiaryNote) {
+            mDiaryFooterLayout.setVisibility(View.VISIBLE);
             mLocationLayout.setVisibility(View.VISIBLE);
 
             mDiaryNote.setLocation(location);
@@ -970,6 +974,10 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                             location.getLatitude(),
                             location.getLongitude()));
             mTxtSubLocation.setVisibility(View.GONE);
+
+            if (mMap == null) {
+                setupMap();
+            }
 
             putMarker(location.getLatLng());
 
@@ -1081,8 +1089,14 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         }
     }
 
+    private Marker mMarker = null;
+
     private void putMarker(LatLng coordinates) {
-        mMap.addMarker(new MarkerOptions().position(coordinates));
+        if (mMarker == null) {
+            mMarker = mMap.addMarker(new MarkerOptions().position(coordinates));
+        } else {
+            mMarker.setPosition(coordinates);
+        }
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 17f));
     }
 

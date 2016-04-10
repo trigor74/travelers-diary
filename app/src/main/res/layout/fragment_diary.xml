@@ -158,15 +158,15 @@
                         android:scrollbars="horizontal" />
 
                     <LinearLayout
+                        android:id="@+id/warning"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingBottom="16dp"
                         android:paddingLeft="16dp"
-                        android:paddingRight="16dp">
+                        android:paddingRight="16dp"
+                        android:visibility="gone">
 
-                        <include
-                            android:id="@+id/warning"
-                            layout="@layout/warning" />
+                        <include layout="@layout/warning" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -176,7 +176,8 @@
                         android:orientation="vertical"
                         android:paddingBottom="16dp"
                         android:paddingLeft="16dp"
-                        android:paddingRight="16dp">
+                        android:paddingRight="16dp"
+                        android:visibility="gone">
 
                         <View
                             android:layout_width="match_parent"
@@ -190,21 +191,25 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingTop="16dp">
+                            android:paddingTop="16dp"
+                            android:visibility="gone"
+                            android:weightSum="12">
 
                             <ImageView
                                 android:id="@+id/img_weather_icon"
-                                android:layout_width="32dp"
+                                android:layout_width="0dp"
                                 android:layout_height="32dp"
-                                android:alpha=".8"
-                                android:src="@drawable/ic_place_black_24dp" />
+                                android:layout_weight="1"
+                                android:alpha=".8" />
 
                             <TextView
                                 android:id="@+id/txt_weather_info"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="11"
                                 android:focusable="false"
                                 android:focusableInTouchMode="false"
+                                android:paddingLeft="4dp"
                                 android:textColor="@color/black" />
                         </LinearLayout>
 
@@ -216,6 +221,7 @@
                             android:orientation="horizontal"
                             android:paddingBottom="8dp"
                             android:paddingTop="16dp"
+                            android:visibility="gone"
                             android:weightSum="12">
 
                             <ImageView
