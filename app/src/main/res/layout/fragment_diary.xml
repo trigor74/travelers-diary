@@ -81,7 +81,6 @@
                             android:layout_alignStart="@+id/diary_note_big_title"
                             android:layout_below="@+id/diary_note_big_title"
                             android:layout_marginLeft="4dp"
-                            android:text="Webnesday, Dec 15, 2015"
                             android:textColor="@android:color/white" />
 
                         <TextView
@@ -92,7 +91,6 @@
                             android:layout_alignStart="@+id/diary_note_date"
                             android:layout_below="@+id/diary_note_date"
                             android:layout_marginTop="4dp"
-                            android:text="3:00 PM"
                             android:textColor="@android:color/white" />
 
                         <TextView
@@ -109,7 +107,6 @@
                             android:paddingLeft="6dp"
                             android:paddingRight="6dp"
                             android:paddingTop="3dp"
-                            android:text="Great Britain, London"
                             android:textColor="@android:color/white" />
                     </RelativeLayout>
                 </FrameLayout>
@@ -126,15 +123,11 @@
             android:layout_below="@+id/diary_note_app_bar"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <include
-                android:id="@+id/rte_toolbar_container"
-                layout="@layout/rte_toolbar" />
-
             <android.support.v4.widget.NestedScrollView
                 android:id="@+id/diary_note_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/rte_toolbar_container"
+
                 android:layout_alignParentTop="true"
                 android:fillViewport="true"
                 android:scrollbarStyle="insideOverlay">
@@ -246,7 +239,7 @@
                                     android:focusableInTouchMode="false"
                                     android:maxLines="1"
                                     android:textColor="@color/black"
-                                    android:textSize="20dp" />
+                                    android:textSize="20sp" />
 
                                 <TextView
                                     android:id="@+id/txt_location_2"
@@ -276,6 +269,17 @@
                 </LinearLayout>
             </android.support.v4.widget.NestedScrollView>
         </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@id/diary_note_content"
+            app:layout_anchorGravity="bottom">
+
+            <include
+                android:id="@+id/rte_toolbar_container"
+                layout="@layout/rte_toolbar" />
+        </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_edit_diary_note"
