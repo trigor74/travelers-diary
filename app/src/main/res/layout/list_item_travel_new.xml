@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/travel_cover_1"
-        android:tint="#22000000" />
+        android:tint="#33000000" />
 
     <ImageView
         android:id="@+id/active_travel_icon"

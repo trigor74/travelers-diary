@@ -3285,14 +3285,16 @@
       "description": "Деякі цікаві місця міста",
       "start": 1454673194642,
       "stop": -1,
-      "title": "Мандрівка Черкасами"
+      "title": "Мандрівка Черкасами",
+      "defaultCover": "android.resource://com.travelersdiary/drawable/cherkasy"
     },
     "default": {
       "active": false,
       "description": "Default category",
       "start": -1,
       "stop": -1,
-      "title": "Uncategorized"
+      "title": "Uncategorized",
+      "defaultCover": "android.resource://com.travelersdiary/drawable/travel_cover_default"
     }
   }
 }

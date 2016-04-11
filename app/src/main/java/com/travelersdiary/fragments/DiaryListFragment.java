@@ -258,19 +258,19 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     private void whiteStyle(ViewHolder holder) {
         holder.tvDay.setTextColor(getResources().getColor(R.color.white));
         holder.tvDay.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_pin_white_24dp, 0, 0, 0);
-        holder.tvDay.setAlpha(.8f);
+        holder.tvDay.setAlpha(1.0f);
         holder.tvMonth.setTextColor(getResources().getColor(R.color.white));
-        holder.tvMonth.setAlpha(.8f);
+        holder.tvMonth.setAlpha(1.0f);
         holder.tvYear.setTextColor(getResources().getColor(R.color.white));
-        holder.tvYear.setAlpha(.8f);
+        holder.tvYear.setAlpha(1.0f);
         holder.tvTitle.setTextColor(getResources().getColor(R.color.white));
-        holder.tvTitle.setAlpha(.8f);
+        holder.tvTitle.setAlpha(1.0f);
 
         holder.tvPhotoCount.setTextColor(getResources().getColor(R.color.white));
-        holder.tvPhotoCount.setAlpha(.8f);
+        holder.tvPhotoCount.setAlpha(1.0f);
         holder.imgPhoto.setImageDrawable(null);
         holder.imgPhoto.setImageDrawable(getResources().getDrawable(R.drawable.ic_photo_library_white_24dp));
-        holder.imgPhoto.setAlpha(.8f);
+        holder.imgPhoto.setAlpha(1.0f);
     }
 
     private static IOnItemClickListener onItemClickListener = new IOnItemClickListener() {
