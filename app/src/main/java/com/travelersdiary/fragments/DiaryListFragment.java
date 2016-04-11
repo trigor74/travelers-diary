@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -147,15 +146,17 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                 query) {
 
             @Override
-            public void onBindViewHolder(ViewHolder viewHolder, int position) {
-                viewHolder.selectedOverlay.setVisibility(isSelected(position) ? View.VISIBLE : View.INVISIBLE);
-                super.onBindViewHolder(viewHolder, position);
-            }
-
-            @Override
             protected void populateViewHolder(DiaryListFragment.ViewHolder holder, DiaryNote model, int position) {
-                //Note title
+                //cleanup
                 holder.tvTitle.setText("");
+                holder.tvDay.setText("");
+                holder.tvMonth.setText("");
+                holder.tvYear.setText("");
+                holder.tvText.setText("");
+                String img = "";
+                holder.tvPhotoCount.setText("");
+
+                //Note title
                 holder.tvTitle.setText(model.getTitle());
 
                 //Note date
@@ -165,9 +166,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                 String month = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
                 int year = c.get(Calendar.YEAR);
 
-                holder.tvDay.setText("");
-                holder.tvMonth.setText("");
-                holder.tvYear.setText("");
                 holder.tvDay.setText(String.format(Locale.getDefault(), "%02d", day));
                 holder.tvMonth.setText(month);
                 holder.tvYear.setText(String.valueOf(year));
@@ -175,34 +173,29 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                 //Note text
                 String text = model.getText();
                 if (text.isEmpty()) {
-                    holder.tvText.setVisibility(View.GONE);
-                    holder.layoutPhotos.setPadding(0, holder.layoutPhotos.getPaddingTop(),
-                            0, (int) getResources().getDimension(R.dimen.main_padding));
                     if (model.getPhotos() == null) {
-                        holder.tvTitle.setPadding(0, 0, 0, (int) getResources().getDimension(R.dimen.main_padding));
+                        holder.tvText.setVisibility(View.GONE);
+                        holder.content.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.tvText.setVisibility(View.VISIBLE);
+                        holder.content.setVisibility(View.GONE);
                     }
                 } else {
                     text = text.replaceAll("<.*?>", "");
                     if (text.length() > 200) {
                         text = text.substring(0, 200).concat("...");
                     }
+                    holder.content.setVisibility(View.VISIBLE);
                     holder.tvText.setVisibility(View.VISIBLE);
-                    holder.tvText.setText("");
                     holder.tvText.setText(text);
-                    holder.layoutPhotos.setPadding(0, holder.layoutPhotos.getPaddingTop(), 0,
-                            (int) getResources().getDimension(R.dimen.half_padding));
                 }
 
                 //Photo
                 if (model.getPhotos() != null) {
                     int photos = model.getPhotos().size();
-                    holder.tvPhotoCount.setText("");
                     holder.tvPhotoCount.setText(String.valueOf(photos));
                     holder.layoutPhotos.setVisibility(View.VISIBLE);
                     holder.imgBackground.setVisibility(View.VISIBLE);
-                    holder.tvTitle.setPadding(0, 0, 0, 0);
-
-                    String img = "";
 
                     for (Photo photo : model.getPhotos()) {
                         if (Utils.checkFileExists(getContext(), photo.getLocalUri())) {
@@ -231,6 +224,9 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                     holder.imgBackground.setVisibility(View.GONE);
                     blackStyle(holder);
                 }
+
+                // card view selection
+                holder.selectedOverlay.setVisibility(isSelected(position) ? View.VISIBLE : View.INVISIBLE);
             }
         };
 
@@ -298,6 +294,10 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         @Override
         public void onItemLongClick(View view, int position) {
             if (mDeleteMode == null) {
+                // colorize status bar when action mode enabled
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    Utils.setStatusBarColor((AppCompatActivity) view.getContext(), R.color.colorPrimaryDark);
+                }
                 mDeleteMode = ((AppCompatActivity) view.getContext()).startSupportActionMode(mDeleteModeCallback);
             }
             if (mDeleteMode != null) {
@@ -314,8 +314,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     static class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.diary_selected_overlay)
         RelativeLayout selectedOverlay;
-        @Bind(R.id.card_view)
-        CardView cardView;
         @Bind(R.id.diary_note_list_image)
         ImageView imgBackground;
         @Bind(R.id.diary_note_day)
@@ -334,12 +332,12 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         TextView tvPhotoCount;
         @Bind(R.id.img_photo)
         ImageView imgPhoto;
+        @Bind(R.id.content)
+        LinearLayout content;
 
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
-
-            selectedOverlay.setLayoutParams(cardView.getLayoutParams());
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
