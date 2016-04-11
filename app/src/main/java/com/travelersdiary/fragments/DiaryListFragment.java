@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -143,6 +145,12 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
                 R.layout.list_item_diary_note,
                 DiaryListFragment.ViewHolder.class,
                 query) {
+
+            @Override
+            public void onBindViewHolder(ViewHolder viewHolder, int position) {
+                viewHolder.selectedOverlay.setVisibility(isSelected(position) ? View.VISIBLE : View.INVISIBLE);
+                super.onBindViewHolder(viewHolder, position);
+            }
 
             @Override
             protected void populateViewHolder(DiaryListFragment.ViewHolder holder, DiaryNote model, int position) {
@@ -304,6 +312,10 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     };
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        @Bind(R.id.diary_selected_overlay)
+        RelativeLayout selectedOverlay;
+        @Bind(R.id.card_view)
+        CardView cardView;
         @Bind(R.id.diary_note_list_image)
         ImageView imgBackground;
         @Bind(R.id.diary_note_day)
@@ -326,6 +338,8 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         public ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
+
+            selectedOverlay.setLayoutParams(cardView.getLayoutParams());
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
