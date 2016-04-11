@@ -12,17 +12,21 @@ public class Travel implements Serializable {
     private String description;
     private boolean active;
     private String picasaAlbumId;
+    private String defaultCover;
+    private String userCover;
 
     public Travel() {
     }
 
-    public Travel(long start, long stop, String title, String description, boolean active, String picasaAlbumId) {
+    public Travel(long start, long stop, String title, String description, boolean active, String picasaAlbumId, String defaultCover, String userCover) {
         this.start = start;
         this.stop = stop;
         this.title = title;
         this.description = description;
         this.active = active;
         this.picasaAlbumId = picasaAlbumId;
+        this.defaultCover = defaultCover;
+        this.userCover = userCover;
     }
 
     public long getStart() {
@@ -71,5 +75,21 @@ public class Travel implements Serializable {
 
     public void setPicasaAlbumId(String picasaAlbumId) {
         this.picasaAlbumId = picasaAlbumId;
+    }
+
+    public String getDefaultCover() {
+        return defaultCover;
+    }
+
+    public void setDefaultCover(String defaultCover) {
+        this.defaultCover = defaultCover;
+    }
+
+    public String getUserCover() {
+        return userCover;
+    }
+
+    public void setUserCover(String userCover) {
+        this.userCover = userCover;
     }
 }

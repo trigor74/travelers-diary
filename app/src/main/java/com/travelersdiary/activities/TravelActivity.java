@@ -36,6 +36,8 @@ public class TravelActivity extends BaseActivity {
     @Bind(R.id.travel_activity_fab)
     FloatingActionButton mTravelActivityFab;
 
+    public static final String NEW_TRAVEL = "new travel";
+
     private String mTravelTitle;
     private String mTravelId;
 

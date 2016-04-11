@@ -92,9 +92,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
 
     @Override
     public void onPause() {
-        query.removeEventListener(listener);
-        diaryQuery.removeEventListener(diaryListener);
-        reminderQuery.removeEventListener(reminderListener);
+        if (query != null && listener != null) query.removeEventListener(listener);
+        if (diaryQuery != null && diaryListener != null)
+            diaryQuery.removeEventListener(diaryListener);
+        if (reminderQuery != null && reminderListener != null)
+            reminderQuery.removeEventListener(reminderListener);
 
         mMapView.onPause();
         super.onPause();

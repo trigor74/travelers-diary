@@ -8,14 +8,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
 import com.travelersdiary.R;
 import com.travelersdiary.adapters.ViewPagerAdapter;
-import com.travelersdiary.dialogs.EditTravelDialog;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.fragments.TravelsListFragment;
@@ -42,9 +40,8 @@ public class MainActivity extends BaseActivity {
     public void onFabClick() {
         switch (mViewPager.getCurrentItem()) {
             case 0: // Travels Tab
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                EditTravelDialog addTravelDialog = new EditTravelDialog();
-                addTravelDialog.show(fragmentManager, "dialog");
+                Intent travelIntent = new Intent(this, EditTravelActivity.class);
+                startActivity(travelIntent);
                 break;
             case 1: // Diary Tab
                 Intent diaryIntent = new Intent(this, DiaryActivity.class);

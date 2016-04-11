@@ -19,6 +19,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
 import com.travelersdiary.models.Photo;
@@ -198,6 +199,10 @@ public class Utils {
         styledAttributes.recycle();
 
         return toolbarHeight;
+    }
+
+    public static boolean isEmpty(EditText etText) {
+        return etText.getText().toString().trim().length() == 0;
     }
 
 }

@@ -236,7 +236,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
                     if (mEdtDiaryNoteTitle != null) {
                         Utils.tintWidget(getContext(), mEdtDiaryNoteTitle, R.color.white);
-                        if (isEmpty(mEdtDiaryNoteTitle)) {
+                        if (Utils.isEmpty(mEdtDiaryNoteTitle)) {
                             mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                         }
                     }
@@ -253,7 +253,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     mRtManager.setToolbarVisibility(RTManager.ToolbarVisibility.SHOW);
                     if (mBigTitle != null) {
                         Utils.tintWidget(getContext(), mBigTitle, R.color.white);
-                        if (isEmpty(mBigTitle)) {
+                        if (Utils.isEmpty(mBigTitle)) {
                             mBigTitle.setText(mDiaryNote.getTitle());
                         }
                     }
@@ -581,7 +581,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                 mTravelTitle.setText(mDiaryNote.getTravelTitle());
 
                 mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
-                if (isEmpty(mRtEditText)) {
+                if (Utils.isEmpty(mRtEditText)) {
                     mRtEditText.setVisibility(View.GONE);
                 } else {
                     mRtEditText.setVisibility(View.VISIBLE);
@@ -665,7 +665,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                         mTravelTitle.setText(mDiaryNote.getTravelTitle());
 
                         mRtEditText.setRichTextEditing(true, mDiaryNote.getText());
-                        if (isEmpty(mRtEditText)) {
+                        if (Utils.isEmpty(mRtEditText)) {
                             mRtEditText.setVisibility(View.GONE);
                         }
 
@@ -816,18 +816,18 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     private void saveChanges() {
         //save title
         if (isTitleVisible) {
-            if (!isEmpty(mEdtDiaryNoteTitle)) {
+            if (!Utils.isEmpty(mEdtDiaryNoteTitle)) {
                 mDiaryNote.setTitle(mEdtDiaryNoteTitle.getText().toString());
             } else {
-                Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.title_field_is_empty, Toast.LENGTH_SHORT).show();
                 mEdtDiaryNoteTitle.requestFocus();
                 return;
             }
         } else {
-            if (!isEmpty(mBigTitle)) {
+            if (!Utils.isEmpty(mBigTitle)) {
                 mDiaryNote.setTitle(mBigTitle.getText().toString());
             } else {
-                Toast.makeText(getContext(), "Title field is empty", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.title_field_is_empty, Toast.LENGTH_SHORT).show();
                 mBigTitle.requestFocus();
                 return;
             }
@@ -902,10 +902,6 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     private String getStringExtra(Intent intent, String key) {
         String s = intent.getStringExtra(key);
         return s == null ? "" : s;
-    }
-
-    private boolean isEmpty(EditText etText) {
-        return etText.getText().toString().trim().length() == 0;
     }
 
     private void makeEditTextEditable(EditText editText, boolean editable) {

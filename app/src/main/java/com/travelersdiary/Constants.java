@@ -16,6 +16,8 @@ public final class Constants {
     public static final String FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY = "default";
     public static final String FIREBASE_TRAVEL_TITLE = "title";
     public static final String FIREBASE_TRAVEL_DESCRIPTION = "description";
+    public static final String FIREBASE_TRAVEL_DEFAULT_COVER = "defaultCover";
+    public static final String FIREBASE_TRAVEL_USER_COVER = "userCover";
     public static final String FIREBASE_TRAVEL_ACTIVE = "active";
     public static final String FIREBASE_PICASA_ALABUM_ID = "picasaAlbumId";
     public static final String FIREBASE_PICASA_URI = "picasaUri";
@@ -63,6 +65,7 @@ public final class Constants {
     public static final String KEY_ACTIVE_TRAVEL_KEY = "ACTIVE_TRAVEL_KEY";
     public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
     public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
+    public static final String KEY_TRAVEL_COVER = "TRAVEL_COVER";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";
@@ -76,11 +79,13 @@ public final class Constants {
     public static final String KEY_REMINDER_ITEM_REF = "REMINDER_ITEM_REF";
 
     public static final int PHOTO_SPAN_COUNT = 3;
+    public static final int TRAVEL_DEFAULT_COVER_COUNT = 13;
 
     // request codes
     public static final int REQUEST_IMAGE_CAPTURE = 1;
     public static final int GALLERY_REQUEST_CODE = 21;
     public static final int ENTER_ALBUM_REQUEST_CODE = 22;
     public static final int IMAGES_DELETE_REQUEST_CODE = 31;
+    public static final int PICK_IMAGE_REQUEST_CODE = 41;
 
 }

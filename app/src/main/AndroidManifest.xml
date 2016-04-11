@@ -75,6 +75,9 @@
             android:label="@string/settings"
             android:screenOrientation="portrait"
             android:theme="@style/SettingsTheme" />
+        <activity
+            android:name=".activities.EditTravelActivity"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".services.SyncService"

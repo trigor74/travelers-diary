@@ -34,10 +34,11 @@
     <string name="nothing_selected">Nothing selected</string>
     <string name="error">Error</string>
     <string name="no_images">No images</string>
+    <string name="unknown">Unknown</string>
 
 
     <string name="edit_travel_dialog_title_create">Create new travel</string>
-    <string name="edit_travel_dialog_title_edit">Edit travel</string>
+    <string name="edit_travel">Edit travel</string>
     <string name="edit_travel_dialog_default_title">Travel at %s</string>
 
     <string name="default_travel_title">Uncategorized</string>
@@ -124,4 +125,7 @@
         \nIt could have happened because sync is disabled on other devices.</string>
     <string name="dont_show_again">Don\'t show again</string>
     <string name="hide">Hide</string>
+    <string name="new_travel">New travel</string>
+    <string name="description">Description</string>
+    <string name="title_field_is_empty">Title field is empty</string>
 </resources>
