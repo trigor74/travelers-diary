@@ -1,43 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:orientation="horizontal"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp">
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingBottom="20dp"
-        android:paddingTop="20dp">
-
-        <TextView
-            android:id="@+id/item_travel_title_text_view"
-            style="@style/ListItemPrimaryText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="A Travel Title" />
-
-        <TextView
-            android:id="@+id/item_travel_description_text_view"
-            style="@style/ListItemSecondaryText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="A Travel description" />
-    </LinearLayout>
+    android:layout_height="192dp"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <ImageView
-        android:id="@+id/item_travel_active_icon"
+        android:id="@+id/travel_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/travel_cover_1"
+        android:tint="#22000000" />
+
+    <ImageView
+        android:id="@+id/active_travel_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:alpha=".5"
-        android:paddingLeft="16dp"
+        android:layout_gravity="end"
+        android:padding="16dp"
         android:src="@drawable/ic_explore_black_24dp"
-        android:visibility="invisible" />
+        android:tint="@color/white" />
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/travel_title"
+            style="@style/TextShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="3"
+            android:text="Great Britain"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/travel_date"
+            style="@style/TextShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingTop="6dp"
+            android:text="Dec 14 - Jan 28, 2015"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/travel_selected_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:background="#80000000"
+        android:visibility="invisible">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_tick_circle_green"
+            android:tint="@color/white" />
+
+    </RelativeLayout>
+
+    <!--separator-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="@color/white" />
+</FrameLayout>

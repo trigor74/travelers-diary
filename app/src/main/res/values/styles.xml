@@ -55,4 +55,9 @@
         <item name="background">@color/colorPrimary</item>
     </style>
 
+    <style name="TextShadow">
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowRadius">1.0</item>
+    </style>
+
 </resources>
