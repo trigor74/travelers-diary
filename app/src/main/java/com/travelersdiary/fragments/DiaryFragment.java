@@ -261,6 +261,14 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             }
         });
 
+        mRtEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mAppBarLayout.setExpanded(false);
+                }
+            }
+        });
+
         // create RTManager
         RTApi rtApi = new RTApi(getContext(), new RTProxyImpl(getActivity()), new RTMediaFactoryImpl(getContext(), true));
         mRtManager = new RTManager(rtApi, savedInstanceState);
@@ -291,6 +299,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             initNewDiaryNote(mDiaryNote);
             enableEditingMode();
             mAppBarLayout.setExpanded(true);
+            mBigTitle.requestFocus();
             startLocationRetrieval();
         } else {
             addDataChangeListener();
