@@ -302,11 +302,14 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
             }
             if (mDeleteMode != null) {
                 mAdapter.setSelectable(true);
-                mAdapter.setSelected(position, true);
-
-                int selectedItems = mAdapter.getSelectedItemCount();
-                int items = mAdapter.getItemCount();
-                mDeleteMode.setTitle(view.getContext().getString(R.string.diary_list_action_mode_title_text, selectedItems, items));
+                mAdapter.tapSelection(position);
+                if (mAdapter.getSelectedItemCount() == 0) {
+                    mDeleteMode.finish();
+                } else {
+                    int selectedItems = mAdapter.getSelectedItemCount();
+                    int items = mAdapter.getItemCount();
+                    mDeleteMode.setTitle(view.getContext().getString(R.string.diary_list_action_mode_title_text, selectedItems, items));
+                }
             }
         }
     };

@@ -121,6 +121,9 @@
     <string name="weather_api_na_text">N/A</string>
 
     <string name="travels_select_action_text">Select The Action</string>
+    <string name="travels_delete_question_text">Delete Travel?</string>
+    <string name="travels_delete_warning_text">You\'ll lose all diary notes, reminder items and tracks for the selected travel!</string>
+
     <string name="not_synced_image_warning">Some of your photos are not synchronized.
         \nIt could have happened because sync is disabled on other devices.</string>
     <string name="dont_show_again">Don\'t show again</string>
