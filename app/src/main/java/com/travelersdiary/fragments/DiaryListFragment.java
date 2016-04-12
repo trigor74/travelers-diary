@@ -101,8 +101,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
 
         // animation
         mDiaryList.setItemAnimator(new DefaultItemAnimator());
-
-        setupAdapter();
     }
 
     @Override
@@ -110,6 +108,12 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
         if (mDeleteMode != null) {
             mDeleteMode.finish();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        setupAdapter();
     }
 
     @Override
