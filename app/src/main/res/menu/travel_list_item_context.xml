@@ -2,8 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_item_set_active"
-        android:title="@string/make_active"
+        android:id="@+id/menu_item_start"
+        android:title="@string/start_travel_text"
+        android:visible="false"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_item_stop"
+        android:title="@string/stop_travel_text"
+        android:visible="false"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_item_open"

@@ -3283,6 +3283,7 @@
     "-K9lGrsk08ky4QNPUn5_": {
       "active": true,
       "description": "Деякі цікаві місця міста",
+      "creationTime": 1454673194642,
       "start": 1454673194642,
       "stop": -1,
       "title": "Мандрівка Черкасами",
@@ -3291,6 +3292,7 @@
     "default": {
       "active": false,
       "description": "Default category",
+      "creationTime": -1,
       "start": -1,
       "stop": -1,
       "title": "Uncategorized",

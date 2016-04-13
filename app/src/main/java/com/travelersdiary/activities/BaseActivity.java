@@ -1,5 +1,6 @@
 package com.travelersdiary.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -27,6 +29,7 @@ import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
 
 import java.util.HashMap;
@@ -78,6 +81,8 @@ public class BaseActivity extends AppCompatActivity implements
                     // 3. set "active" to false for active travel
                     // ***
                     // 4. set "active" to true for new travel
+                    //    add start time if absent
+                    //    clear stop time (set to -1)
                     // 5. set "active" to true for new travel 's reminder items
                     // 6. enable notifications for new travel 's reminder items
                     // 7. put new active travel's key and title to SharedPreferences
@@ -127,9 +132,31 @@ public class BaseActivity extends AppCompatActivity implements
                         // 4.
                         Map<String, Object> newActiveTravelMap = new HashMap<String, Object>();
                         newActiveTravelMap.put(Constants.FIREBASE_TRAVEL_ACTIVE, true);
+                        newActiveTravelMap.put(Constants.FIREBASE_TRAVEL_STOP_TIME, -1);
                         new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
                                 .child(newActiveTravelKey)
                                 .updateChildren(newActiveTravelMap);
+                        //set start time if absent
+                        if (!Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(newActiveTravelKey)) {
+                            new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
+                                    .child(newActiveTravelKey)
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Travel travel = dataSnapshot.getValue(Travel.class);
+                                            if (travel.getStart() < 0) {
+                                                Map<String, Object> map = new HashMap<String, Object>();
+                                                map.put(Constants.FIREBASE_TRAVEL_START_TIME, System.currentTimeMillis());
+                                                dataSnapshot.getRef().updateChildren(map);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(FirebaseError firebaseError) {
+
+                                        }
+                                    });
+                        }
 
                         // 5.
                         new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
@@ -253,6 +280,26 @@ public class BaseActivity extends AppCompatActivity implements
                 startActivity(intent);
                 return true;
             case R.id.nav_start_tracking:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                String activeTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+                if (Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(activeTravelKey)) {
+                    if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        mDrawerLayout.closeDrawers();
+                    }
+                    new AlertDialog.Builder(this)
+                            .setInverseBackgroundForced(true)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(getString(R.string.dialog_cannot_tracking_title_text))
+                            .setMessage(getString(R.string.dialog_cannot_tracking_message_text))
+                            .setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // nothing
+                                }
+                            })
+                            .show();
+                    return true;
+                }
                 Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
                 intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
                 startService(intentStartTracking);
