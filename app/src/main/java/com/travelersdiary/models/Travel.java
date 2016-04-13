@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Travel implements Serializable {
+    private long creationTime; //time creation
     private long start; //time stamp
     private long stop; //time stamp
     private String title;
@@ -18,7 +19,10 @@ public class Travel implements Serializable {
     public Travel() {
     }
 
-    public Travel(long start, long stop, String title, String description, boolean active, String picasaAlbumId, String defaultCover, String userCover) {
+    public Travel(long creationTime, long start, long stop,
+                  String title, String description, boolean active,
+                  String picasaAlbumId, String defaultCover, String userCover) {
+        this.creationTime = creationTime;
         this.start = start;
         this.stop = stop;
         this.title = title;
@@ -27,6 +31,14 @@ public class Travel implements Serializable {
         this.picasaAlbumId = picasaAlbumId;
         this.defaultCover = defaultCover;
         this.userCover = userCover;
+    }
+
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
     }
 
     public long getStart() {

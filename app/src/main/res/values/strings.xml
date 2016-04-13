@@ -11,7 +11,8 @@
     <string name="settings">Settings</string>
     <string name="edit">Edit</string>
     <string name="open">Open</string>
-    <string name="make_active">Make Active</string>
+    <string name="start_travel_text">Start travel</string>
+    <string name="stop_travel_text">Stop travel</string>
     <string name="save">Save</string>
     <string name="saved">Saved</string>
     <string name="create">Create</string>
@@ -131,4 +132,7 @@
     <string name="new_travel">New travel</string>
     <string name="description">Description</string>
     <string name="title_field_is_empty">Title field is empty</string>
+
+    <string name="dialog_cannot_tracking_title_text">Cannot start tracking!</string>
+    <string name="dialog_cannot_tracking_message_text">No active travel</string>
 </resources>

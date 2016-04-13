@@ -168,9 +168,10 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
             Travel travel = new Travel();
             travel.setTitle(title);
             travel.setDescription(description);
-            travel.setStart(currentTime);
+            travel.setCreationTime(currentTime);
+            travel.setStart(-1);
             travel.setStop(-1);
-            travel.setActive(false); // TODO: why not active if start time == creation time?
+            travel.setActive(false);
             travel.setDefaultCover(mTravelDefaultCover);
             travel.setUserCover(mTravelUserCover);
 
