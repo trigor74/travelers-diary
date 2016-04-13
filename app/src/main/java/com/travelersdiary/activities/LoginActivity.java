@@ -28,11 +28,13 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.Utils;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -300,6 +302,13 @@ public class LoginActivity extends AppCompatActivity implements
             } else {
                 showErrorDialog(getString(R.string.login_activity_error_message_invalid_provider, authData.getProvider()));
             }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put(Constants.FIREBASE_USER_NAME, mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
+            map.put(Constants.FIREBASE_USER_EMAIL, mSharedPreferences.getString(Constants.KEY_EMAIL, null));
+            new Firebase(Utils.getFirebaseUserUrl(authData.getUid()))
+                    .updateChildren(map);
+
             /* Go to main activity */
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
