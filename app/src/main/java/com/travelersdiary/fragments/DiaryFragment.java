@@ -576,6 +576,10 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             public void onDataChange(DataSnapshot dataSnapshot) {
                 mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
 
+                if (mDiaryNote == null) {
+                    return;
+                }
+
                 mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                 mBigTitle.setText(mDiaryNote.getTitle());
                 mTravelTitle.setText(mDiaryNote.getTravelTitle());
@@ -652,6 +656,10 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         mDiaryNote = dataSnapshot.getValue(DiaryNote.class);
+
+                        if (mDiaryNote == null) {
+                            return;
+                        }
 
                         mEdtDiaryNoteTitle.setText(mDiaryNote.getTitle());
                         mBigTitle.setText(mDiaryNote.getTitle());
