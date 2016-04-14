@@ -275,18 +275,24 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = null;
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.nav_travels:
                 intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 return true;
             case R.id.nav_diary:
                 intent = new Intent(this, DiaryListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 return true;
             case R.id.nav_reminder:
                 intent = new Intent(this, ReminderListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 return true;
             case R.id.nav_start_tracking:
@@ -379,5 +385,22 @@ public class BaseActivity extends AppCompatActivity implements
     private void switchStartStop(boolean isStarted) {
         mMenu.findItem(R.id.nav_start_tracking).setVisible(!isStarted);
         mMenu.findItem(R.id.nav_stop_tracking).setVisible(isStarted);
+    }
+
+    public void setCheckedItem(int id) {
+
+        mNavigationView.setCheckedItem(id);
+
+//        switch (id) {
+//            case 0:
+//                mNavigationView.setCheckedItem(R.id.nav_travels);
+//                break;
+//            case 1:
+//                mNavigationView.setCheckedItem(R.id.nav_diary);
+//                break;
+//            case 2:
+//                mNavigationView.setCheckedItem(R.id.nav_reminder);
+//                break;
+//        }
     }
 }

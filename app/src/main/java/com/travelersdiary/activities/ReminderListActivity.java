@@ -29,7 +29,6 @@ public class ReminderListActivity extends BaseActivity {
         setContentView(R.layout.activity_reminder_list);
 
         setSupportActionBar(mToolbar);
-
         setupNavigationView(mToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
@@ -44,6 +43,21 @@ public class ReminderListActivity extends BaseActivity {
                     .add(R.id.fragment_container, fragment, REMINDER_LIST_FRAGMENT_TAG)
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        super.setCheckedItem(R.id.nav_reminder);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("Exit me", true);
+        startActivity(intent);
+        finish();
     }
 
     @Override

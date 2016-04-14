@@ -34,7 +34,6 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
 
         setSupportActionBar(mToolbar);
-
         setupNavigationView(mToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
@@ -44,7 +43,7 @@ public class MainActivity extends BaseActivity {
         }
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean syncServiceEnabled = sharedPreferences.getBoolean("sync_service_check_box", true);
+        boolean syncServiceEnabled = sharedPreferences.getBoolean("sync_service_check_box", false);
 
         if (savedInstanceState == null) {
             TravelsListFragment fragment = new TravelsListFragment();
@@ -56,6 +55,15 @@ public class MainActivity extends BaseActivity {
                 Intent intent = new Intent(this, SyncService.class);
                 startService(intent);
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        super.setCheckedItem(R.id.nav_travels);
+        if (getIntent().getBooleanExtra("Exit me", false)) {
+            finish();
         }
     }
 
