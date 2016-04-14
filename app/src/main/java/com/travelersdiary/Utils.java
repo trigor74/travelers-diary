@@ -28,6 +28,7 @@ import com.travelersdiary.models.Photo;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Helper class with methods
@@ -189,8 +190,10 @@ public class Utils {
     }
 
     public static String getMediumDate(long timestamp) {
-        // String time = DateFormat.getMediumDateFormat(this).format(timestamp)
-        return SimpleDateFormat.getDateTimeInstance().format(timestamp);
+        String date = SimpleDateFormat.getDateInstance().format(timestamp);
+        String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(timestamp);
+        return date + ", " + time;
+
     }
 
     public static int getToolbarHeight(Context context) {
