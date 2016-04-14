@@ -21,6 +21,7 @@
         android:checkableBehavior="none">
         <item
             android:id="@+id/nav_start_tracking"
+            android:enabled="false"
             android:icon="@drawable/ic_start_circle_outline_black_24dp"
             android:title="@string/start_tracking_text" />
         <item

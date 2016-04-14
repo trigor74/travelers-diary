@@ -224,6 +224,14 @@ public class BaseActivity extends AppCompatActivity implements
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         mMenu = mNavigationView.getMenu();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String activeTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+        if (Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(activeTravelKey) || activeTravelKey == null) {
+            enableStartTrackingButton(false);
+        } else {
+            enableStartTrackingButton(true);
+        }
     }
 
     public void setupNavigationView(Toolbar toolbar) {
@@ -363,6 +371,10 @@ public class BaseActivity extends AppCompatActivity implements
         startService(intentStopTracking);
 
         switchStartStop(false);
+    }
+
+    public void enableStartTrackingButton(boolean enable) {
+        mMenu.findItem(R.id.nav_start_tracking).setEnabled(enable);
     }
 
     private void switchStartStop(boolean isStarted) {
