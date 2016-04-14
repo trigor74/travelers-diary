@@ -43,7 +43,7 @@
             android:clickable="true"
             android:elevation="4dp"
             android:src="@drawable/ic_add_white_24dp"
-            app:layout_behavior="com.travelersdiary.ui.ScrollingFABBehavior" />
+            app:layout_behavior="com.travelersdiary.ui.FABScrollBehavior" />
 
     </android.support.design.widget.CoordinatorLayout>
 
