@@ -209,6 +209,10 @@ public class Utils {
         return etText.getText().toString().trim().length() == 0;
     }
 
+    public static boolean isTabletLandMode(Context context) {
+        return context.getResources().getBoolean(R.bool.isTabletLand);
+    }
+
     public static void startAlphaAnimation(View v, long duration, int visibility) {
         AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
                 ? new AlphaAnimation(0f, 1f)

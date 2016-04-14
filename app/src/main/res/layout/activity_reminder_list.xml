@@ -20,15 +20,15 @@
 
     </LinearLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/main_activity_fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:clickable="true"
-            android:elevation="4dp"
-            android:src="@drawable/ic_add_white_24dp"
-            app:layout_behavior="com.travelersdiary.ui.FABScrollBehavior" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/main_activity_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:elevation="4dp"
+        android:src="@drawable/ic_add_white_24dp"
+        app:layout_behavior="com.travelersdiary.ui.ScrollingFABBehavior" />
 
 </android.support.design.widget.CoordinatorLayout>

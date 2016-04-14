@@ -8,6 +8,8 @@ public final class Constants {
     // firebase
     public static final String FIREBASE_URL = BuildConfig.FIREBASE_ROOT_URL;
     public static final String FIREBASE_USERS = "users";
+    public static final String FIREBASE_USER_EMAIL = "email";
+    public static final String FIREBASE_USER_NAME = "name";
     public static final String FIREBASE_DIARY = "diary";
     public static final String FIREBASE_ACTIVE_TRAVEL = "activeTravel";
     public static final String FIREBASE_ACTIVE_TRAVEL_KEY = "activeTravelKey";
