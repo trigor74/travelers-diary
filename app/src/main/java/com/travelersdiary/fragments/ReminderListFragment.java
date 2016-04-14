@@ -2,12 +2,15 @@ package com.travelersdiary.fragments;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +19,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
@@ -29,10 +34,11 @@ import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
-import com.travelersdiary.recyclerview.DividerItemDecoration;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -99,15 +105,11 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
         // animation
         mReminderList.setItemAnimator(new DefaultItemAnimator());
 
-        // decoration
-        RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext());
-        mReminderList.addItemDecoration(itemDecoration);
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-        Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
-        Query query;
+        final Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
+        final Query query;
 
         String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
         if (travelId != null && !travelId.isEmpty()) {
@@ -122,30 +124,45 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
                 ReminderListFragment.ViewHolder.class,
                 query) {
             @Override
-            protected void populateViewHolder(ReminderListFragment.ViewHolder viewHolder, ReminderItem model, int position) {
+            protected void populateViewHolder(final ReminderListFragment.ViewHolder holder, ReminderItem model, final int position) {
 
-                viewHolder.textViewTitle.setText(model.getTitle());
+                holder.completedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put(Constants.FIREBASE_REMINDER_COMPLETED, isChecked);
+                        getRef(position).updateChildren(map);
+
+                        if (isChecked) {
+                            holder.title.setPaintFlags(holder.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        } else {
+                            holder.title.setPaintFlags(holder.title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                        }
+                    }
+                });
+
+                holder.title.setText(model.getTitle());
                 String type = model.getType();
                 if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
                     // remind at time
                     long time = model.getTime();
                     String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
-                    viewHolder.textViewInfo.setText(timeText);
-                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
+                    holder.info.setText(timeText);
+                    holder.typeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
                 } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
                     // remind at location
-                    viewHolder.textViewInfo.setText(model.getWaypoint().getTitle());
-                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
+                    holder.info.setText(model.getWaypoint().getTitle());
+                    holder.typeIcon.setImageResource(R.drawable.ic_location_on_black_24dp);
                 } else {
                     // don't remind
-                    viewHolder.textViewInfo.setText(R.string.reminder_dont_remind_text);
-                    viewHolder.imageViewItemTypeIcon.setImageResource(R.drawable.ic_alarm_off_black_24dp);
+                    holder.info.setText(R.string.reminder_dont_remind_text);
+                    holder.typeIcon.setImageResource(R.drawable.ic_alarm_off_black_24dp);
                 }
-                if (model.isCompleted()) {
-                    viewHolder.imageViewCompletedIcon.setVisibility(View.VISIBLE);
-                } else {
-                    viewHolder.imageViewCompletedIcon.setVisibility(View.INVISIBLE);
-                }
+
+                holder.completedCheckBox.setChecked(model.isCompleted());
+
+                // card view selection
+                holder.selectedOverlay.setVisibility(isSelected(position) ? View.VISIBLE : View.INVISIBLE);
             }
         };
 
@@ -215,15 +232,18 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
     };
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
-        @Bind(R.id.item_reminder_todo_item_title_text_view)
-        TextView textViewTitle;
-        @Bind(R.id.item_reminder_todo_item_remind_info_text_view)
-        TextView textViewInfo;
-        @Bind(R.id.item_reminder_todo_item_type_icon)
-        ImageView imageViewItemTypeIcon;
-        @Bind(R.id.item_reminder_completed_icon)
-        ImageView imageViewCompletedIcon;
+        @Bind(R.id.reminder_selected_overlay)
+        RelativeLayout selectedOverlay;
+        @Bind(R.id.reminder_card_view)
+        CardView cardView;
+        @Bind(R.id.reminder_title)
+        TextView title;
+        @Bind(R.id.reminder_info)
+        TextView info;
+        @Bind(R.id.reminder_type_icon)
+        ImageView typeIcon;
+        @Bind(R.id.reminder_completed_checkbox)
+        AppCompatCheckBox completedCheckBox;
 
         public ViewHolder(View view) {
             super(view);

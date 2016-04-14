@@ -1,64 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/reminder_card_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/list_item_background_selector"
-    android:clickable="true"
-    android:orientation="horizontal"
-    android:paddingBottom="20dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="20dp">
-    <!--android:background="?android:attr/activatedBackgroundIndicator"-->
-    <!--android:background="?android:attr/selectableItemBackground"-->
+    android:layout_height="136dp"
+    android:layout_marginBottom="3dp"
+    android:layout_marginLeft="6dp"
+    android:layout_marginRight="6dp"
+    android:layout_marginTop="3dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="4dp">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/item_reminder_todo_item_title_text_view"
-            style="@style/ListItemPrimaryText"
-            android:layout_width="match_parent"
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/reminder_completed_checkbox"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="A TODO Item Title" />
+            android:layout_centerVertical="true" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp">
-
-            <ImageView
-                android:id="@+id/item_reminder_todo_item_type_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:alpha=".5"
-                android:src="@drawable/ic_alarm_black_24dp" />
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_toEndOf="@+id/reminder_completed_checkbox"
+            android:layout_toRightOf="@+id/reminder_completed_checkbox"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/item_reminder_todo_item_remind_info_text_view"
-                style="@style/ListItemSecondaryText"
-                android:layout_width="match_parent"
+                android:id="@+id/reminder_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:paddingLeft="16sp"
-                android:text="A todo item place or time info" />
+                android:alpha=".8"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Go to museum"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+
+                <ImageView
+                    android:id="@+id/reminder_type_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha=".5"
+                    android:src="@drawable/ic_alarm_black_24dp" />
+
+                <TextView
+                    android:id="@+id/reminder_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingLeft="8dp"
+                    android:text="25 Feb, 5:20 PM" />
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/item_reminder_completed_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:alpha=".5"
-        android:paddingLeft="16dp"
-        android:src="@drawable/ic_done_all_black_24dp"
-        android:visibility="visible" />
+    <RelativeLayout
+        android:id="@+id/reminder_selected_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:background="#80000000"
+        android:visibility="invisible">
 
-</LinearLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_tick_circle_green"
+            android:tint="@color/white" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
