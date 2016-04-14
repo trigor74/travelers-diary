@@ -272,29 +272,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
                                 route.remove();
                             }
 
-                            route = mMap.addPolyline(new PolylineOptions()
-                                    .width(5f)
-                                    .color(ContextCompat.getColor(getContext(), R.color.mapRouteColor))
-                                    .geodesic(true)
-                                    .zIndex(2f));
-                            route.setPoints(trackPoints);
+                            if (getContext() != null) {
+                                route = mMap.addPolyline(new PolylineOptions()
+                                        .width(5f)
+                                        .color(ContextCompat.getColor(getContext(), R.color.mapRouteColor))
+                                        .geodesic(true)
+                                        .zIndex(2f));
+                                route.setPoints(trackPoints);
 
-                            Marker startMarker = mMap.addMarker(new MarkerOptions()
-                                    .title("Start")
-                                    .snippet(Utils.getMediumDate(firstTime))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                                    .position(firstPoint));
 
-                            Marker endMarker = mMap.addMarker(new MarkerOptions()
-                                    .title("End")
-                                    .snippet(Utils.getMediumDate(lastTime))
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                                    .position(lastPoint));
+                                Marker startMarker = mMap.addMarker(new MarkerOptions()
+                                        .title("Start")
+                                        .snippet(Utils.getMediumDate(firstTime))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                        .position(firstPoint));
 
-                            //store polyline and start/end markers of the track
-                            mRoutesMap.put(trackKey, route);
-                            mRouteStartMarksMap.put(route, startMarker);
-                            mRouteEndMarksMap.put(route, endMarker);
+                                Marker endMarker = mMap.addMarker(new MarkerOptions()
+                                        .title("End")
+                                        .snippet(Utils.getMediumDate(lastTime))
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                                        .position(lastPoint));
+
+                                //store polyline and start/end markers of the track
+                                mRoutesMap.put(trackKey, route);
+                                mRouteStartMarksMap.put(route, startMarker);
+                                mRouteEndMarksMap.put(route, endMarker);
+                            }
                         }
                     }
                 }
@@ -382,23 +385,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
                         if (title == null || title.isEmpty()) {
                             title = getResources().getString(R.string.reminder_no_title_text);
                         }
-                        Marker todoMarker = mMap.addMarker(new MarkerOptions()
-                                .title(title)
-                                .snippet(item.getWaypoint().getTitle())
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
-                                .position(item.getWaypoint().getLocation().getLatLng()));
-                        Circle todoCircle = mMap.addCircle(new CircleOptions()
-                                .center(item.getWaypoint().getLocation().getLatLng())
-                                .radius(item.getDistance())
-                                .fillColor(ContextCompat.getColor(getContext(), R.color.mapCircleFillColor))
-                                .strokeColor(ContextCompat.getColor(getContext(), R.color.mapCircleStrokeColor))
-                                .strokeWidth(2));
-                        mLatLngBoundsBuilder.include(item.getWaypoint().getLocation().getLatLng());
-                        mHasLatLngBoundsBuilderPoints = true;
 
-                        //store reminder mark refs and circle
-                        mTodoRefsMap.put(todoMarker, child.getKey());
-                        mTodoCirclesMap.put(todoMarker, todoCircle);
+                        if (getContext() != null) {
+                            Marker todoMarker = mMap.addMarker(new MarkerOptions()
+                                    .title(title)
+                                    .snippet(item.getWaypoint().getTitle())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
+                                    .position(item.getWaypoint().getLocation().getLatLng()));
+                            Circle todoCircle = mMap.addCircle(new CircleOptions()
+                                    .center(item.getWaypoint().getLocation().getLatLng())
+                                    .radius(item.getDistance())
+                                    .fillColor(ContextCompat.getColor(getContext(), R.color.mapCircleFillColor))
+                                    .strokeColor(ContextCompat.getColor(getContext(), R.color.mapCircleStrokeColor))
+                                    .strokeWidth(2));
+
+                            mLatLngBoundsBuilder.include(item.getWaypoint().getLocation().getLatLng());
+                            mHasLatLngBoundsBuilderPoints = true;
+
+                            //store reminder mark refs and circle
+                            mTodoRefsMap.put(todoMarker, child.getKey());
+                            mTodoCirclesMap.put(todoMarker, todoCircle);
+                        }
                     }
                 }
 

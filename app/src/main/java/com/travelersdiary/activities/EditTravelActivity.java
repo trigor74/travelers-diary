@@ -76,8 +76,8 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
             mTravelTitle.setText(extras.getString(Constants.KEY_TRAVEL_TITLE));
             mTravelDescription.setText(extras.getString(Constants.KEY_TRAVEL_DESCRIPTION));
             mTravelKey = extras.getString(Constants.KEY_TRAVEL_REF);
-            mTravelDefaultCover = extras.getString(Constants.FIREBASE_TRAVEL_DEFAULT_COVER);
-            mTravelUserCover = extras.getString(Constants.FIREBASE_TRAVEL_USER_COVER);
+            mTravelDefaultCover = extras.getString(Constants.KEY_TRAVEL_DEFAULT_COVER);
+            mTravelUserCover = extras.getString(Constants.KEY_TRAVEL_USER_COVER);
             if (mTravelKey != null && !mTravelKey.isEmpty()) {
                 if (supportActionBar != null) supportActionBar.setTitle(R.string.edit_travel);
             }

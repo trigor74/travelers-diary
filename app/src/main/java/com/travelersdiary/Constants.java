@@ -76,6 +76,10 @@ public final class Constants {
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";
     public static final String KEY_TRAVEL_TITLE = "TRAVEL_TITLE";
     public static final String KEY_TRAVEL_DESCRIPTION = "TRAVEL_DESCRIPTION";
+    public static final String KEY_TRAVEL_DEFAULT_COVER = "TRAVEL_DEFAULT_COVER";
+    public static final String KEY_TRAVEL_USER_COVER = "TRAVEL_USER_COVER";
+    public static final String KEY_TRAVEL_IS_ACTIVE = "TRAVEL_IS ACTIVE";
+
 
     // dairy
     public static final String KEY_DAIRY_NOTE_REF = "DAIRY_NOTE_REF";

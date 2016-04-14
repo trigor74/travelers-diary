@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/travel_menu">
+        <item
+            android:id="@+id/action_travel_start"
+            android:title="@string/start_travel_text"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_travel_stop"
+            android:title="@string/stop_travel_text"
+            android:visible="false"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_travel_edit"
+            android:icon="@drawable/ic_edit_white_24dp"
+            android:title="@string/edit"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_travel_delete"
+            android:icon="@drawable/ic_delete_white_24dp"
+            android:title="@string/delete"
+            app:showAsAction="never" />
+    </group>
+
+</menu>

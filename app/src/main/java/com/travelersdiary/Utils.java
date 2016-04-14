@@ -5,6 +5,9 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -13,9 +16,11 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -23,12 +28,20 @@ import android.view.animation.AlphaAnimation;
 import android.widget.EditText;
 
 import com.bumptech.glide.Glide;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+import com.travelersdiary.activities.BaseActivity;
 import com.travelersdiary.models.Photo;
+import com.travelersdiary.services.LocationTrackingService;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Helper class with methods
@@ -221,6 +234,116 @@ public class Utils {
         alphaAnimation.setDuration(duration);
         alphaAnimation.setFillAfter(true);
         v.startAnimation(alphaAnimation);
+    }
+
+    public static void startTravel(Context context, String travelKey, String travelTitle) {
+        /*
+          For switch active travel logic see listener mActiveTravelListener in BaseActivity class
+        */
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+        String activeTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+        if (activeTravelKey != null && !Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(activeTravelKey)) {
+            setStopTime(context, activeTravelKey);
+        }
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIREBASE_ACTIVE_TRAVEL_TITLE, travelTitle);
+        map.put(Constants.FIREBASE_ACTIVE_TRAVEL_KEY, travelKey);
+        Firebase activeTravelRef = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
+        activeTravelRef.setValue(map);
+
+        ((BaseActivity) context).enableStartTrackingButton(true);
+    }
+
+    public static void stopTravel(Context context, String travelKey) {
+        if (!Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY.equals(travelKey)) {
+            setStopTime(context, travelKey);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            String activeTravelKey = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+            if (activeTravelKey != null && activeTravelKey.equals(travelKey)) {
+                startTravel(context, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY, context.getString(R.string.default_travel_title));
+            }
+            ((BaseActivity) context).stopTracking();
+            ((BaseActivity) context).enableStartTrackingButton(false);
+        }
+    }
+
+    public static void setStopTime(Context context, String travelKey) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(Constants.FIREBASE_TRAVEL_STOP_TIME, System.currentTimeMillis());
+        new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
+                .child(travelKey)
+                .updateChildren(map);
+    }
+
+    public static void deleteTravel(final Context context, final String travelKey) {
+        new AlertDialog.Builder(context)
+                .setInverseBackgroundForced(true)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle(context.getString(R.string.travels_delete_question_text))
+                .setMessage(context.getString(R.string.travels_delete_warning_text))
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        String activeTravel = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
+                        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+                        // delete reminder items
+                        new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
+                                .orderByChild(Constants.FIREBASE_REMINDER_TRAVELID)
+                                .equalTo(travelKey)
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                            child.getRef().removeValue();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(FirebaseError firebaseError) {
+                                    }
+                                });
+
+                        if (activeTravel != null && activeTravel.equals(travelKey)) {
+                            // stop tracking
+                            Intent intentStopTracking = new Intent(context, LocationTrackingService.class);
+                            intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
+                            context.startService(intentStopTracking);
+
+                            // TODO: 06.04.16 remove notifications for current active travel
+                            //
+                            sharedPreferences.edit()
+                                    .putString(Constants.KEY_ACTIVE_TRAVEL_KEY, null)
+                                    .apply();
+                            sharedPreferences.edit()
+                                    .putString(Constants.KEY_ACTIVE_TRAVEL_TITLE, null)
+                                    .apply();
+                            Utils.startTravel(context, Constants.FIREBASE_TRAVELS_DEFAULT_TRAVEL_KEY,
+                                    context.getString(R.string.default_travel_title));
+                        }
+                        // delete tracks
+                        new Firebase(Utils.getFirebaseUserTracksUrl(userUID))
+                                .child(travelKey)
+                                .removeValue();
+                        // delete travel
+                        new Firebase(Utils.getFirebaseUserTravelsUrl(userUID))
+                                .child(travelKey)
+                                .removeValue();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .show();
     }
 
 }
