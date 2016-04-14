@@ -1,5 +1,6 @@
 package com.travelersdiary.activities;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,6 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -27,6 +31,9 @@ import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.models.Travel;
+
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -50,9 +57,13 @@ public class TravelActivity extends BaseActivity {
     private String mTravelDescription;
     private String mTravelDefaultCover;
     private String mTravelUserCover;
+    private long mTravelStartTime;
+    private long mTravelStopTime;
+    private long mTravelCreationTime;
+    private boolean isTravelActive;
 
     private Menu mMenu;
-    private boolean isTravelActive;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +76,9 @@ public class TravelActivity extends BaseActivity {
         mTravelDefaultCover = getIntent().getStringExtra(Constants.KEY_TRAVEL_DEFAULT_COVER);
         mTravelUserCover = getIntent().getStringExtra(Constants.KEY_TRAVEL_USER_COVER);
         isTravelActive = getIntent().getBooleanExtra(Constants.KEY_TRAVEL_IS_ACTIVE, false);
+        mTravelCreationTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_CREATION_TIME, -1);
+        mTravelStartTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_START_TIME, -1);
+        mTravelStopTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_STOP_TIME, -1);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -88,6 +102,10 @@ public class TravelActivity extends BaseActivity {
                     if (travel != null) {
                         getSupportActionBar().setTitle(travel.getTitle());
                         isTravelActive = travel.isActive();
+
+                        mTravelCreationTime = travel.getCreationTime();
+                        mTravelStartTime = travel.getStart();
+                        mTravelStopTime = travel.getStop();
                     }
                 }
 
@@ -189,12 +207,66 @@ public class TravelActivity extends BaseActivity {
                 editIntent.putExtra(Constants.KEY_TRAVEL_USER_COVER, mTravelUserCover);
                 startActivity(editIntent);
                 return true;
+            case R.id.action_travel_info:
+                showInfo();
+                return true;
             case R.id.action_travel_delete:
                 Utils.deleteTravel(this, mTravelId);
                 return true;
             default:
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showInfo() {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_info);
+        dialog.setTitle("Travel info");
+
+        TextView title = (TextView) dialog.findViewById(R.id.travel_title_info);
+        title.setText(mTravelTitle);
+        TextView description = (TextView) dialog.findViewById(R.id.travel_description_info);
+        description.setText(mTravelDescription);
+
+        LinearLayout startLayout = (LinearLayout) dialog.findViewById(R.id.start_time_layout);
+        TextView start = (TextView) dialog.findViewById(R.id.travel_start_time);
+        if (mTravelStartTime != -1) {
+            startLayout.setVisibility(View.VISIBLE);
+            start.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelStartTime),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelStartTime)));
+        } else {
+            startLayout.setVisibility(View.GONE);
+        }
+
+        LinearLayout stopLayout = (LinearLayout) dialog.findViewById(R.id.end_time_layout);
+        TextView stop = (TextView) dialog.findViewById(R.id.travel_stop_time);
+        if (mTravelStopTime != -1) {
+            stopLayout.setVisibility(View.VISIBLE);
+            stop.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelStopTime),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelStopTime)));
+        } else {
+            stopLayout.setVisibility(View.GONE);
+        }
+
+        LinearLayout creationLayout = (LinearLayout) dialog.findViewById(R.id.creation_time_layout);
+        TextView creation = (TextView) dialog.findViewById(R.id.travel_creation_time);
+        if (mTravelCreationTime != -1) {
+            creationLayout.setVisibility(View.VISIBLE);
+            creation.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelCreationTime),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelCreationTime)));
+        } else {
+            creationLayout.setVisibility(View.GONE);
+        }
+
+        Button closeDialog = (Button) dialog.findViewById(R.id.btn_close_info);
+        closeDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 
     @OnClick(R.id.travel_activity_fab)

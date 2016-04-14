@@ -78,7 +78,10 @@ public final class Constants {
     public static final String KEY_TRAVEL_DESCRIPTION = "TRAVEL_DESCRIPTION";
     public static final String KEY_TRAVEL_DEFAULT_COVER = "TRAVEL_DEFAULT_COVER";
     public static final String KEY_TRAVEL_USER_COVER = "TRAVEL_USER_COVER";
-    public static final String KEY_TRAVEL_IS_ACTIVE = "TRAVEL_IS ACTIVE";
+    public static final String KEY_TRAVEL_IS_ACTIVE = "TRAVEL_IS_ACTIVE";
+    public static final String KEY_TRAVEL_CREATION_TIME = "KEY_TRAVEL_CREATION_TIME";
+    public static final String KEY_TRAVEL_START_TIME = "KEY_TRAVEL_START_TIME";
+    public static final String KEY_TRAVEL_STOP_TIME = "KEY_TRAVEL_STOP_TIME";
 
 
     // dairy

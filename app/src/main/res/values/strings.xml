@@ -137,4 +137,9 @@
     <string name="dialog_cannot_tracking_message_text">No active travel</string>
     <string name="completed">Completed</string>
     <string name="your_text_here">Your text here</string>
+    <string name="info">Info</string>
+    <string name="travel_title_text">Travel title</string>
+    <string name="info_dialog_start_text">Start:</string>
+    <string name="info_dialog_end_text">End:</string>
+    <string name="info_dialog_created_text">Created:</string>
 </resources>
