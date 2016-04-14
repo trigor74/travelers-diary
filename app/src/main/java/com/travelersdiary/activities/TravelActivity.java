@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.travelersdiary.Constants;
@@ -89,14 +88,7 @@ public class TravelActivity extends BaseActivity {
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 if (tab.getPosition() < 2) {
-                    Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
-                    try {
-                        IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
-                        actionModeFinishCallback.finishActionMode();
-                    } catch (ClassCastException e) {
-                        throw new ClassCastException(fragment.toString()
-                                + " must implement IActionModeFinishCallback");
-                    }
+                    finishActionMode(tab.getPosition());
                 }
 
                 if (tab.getPosition() == 2) {
@@ -110,15 +102,21 @@ public class TravelActivity extends BaseActivity {
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
+    private void finishActionMode(int tabPosition) {
+        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tabPosition);
+        try {
+            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
+            actionModeFinishCallback.finishActionMode();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.toString()
+                    + " must implement IActionModeFinishCallback");
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDrawerOpened(View drawerView) {
+        finishActionMode(mTabLayout.getSelectedTabPosition());
+        super.onDrawerOpened(drawerView);
     }
 
     @OnClick(R.id.travel_activity_fab)
