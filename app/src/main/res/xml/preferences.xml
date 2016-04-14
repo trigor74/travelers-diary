@@ -6,7 +6,7 @@
         android:title="Google Photos settings">
 
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="sync_service_check_box"
             android:summary="Your pictures will be uploaded to Google Photos"
             android:title="Sync pictures with Google Photos?" />
