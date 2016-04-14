@@ -264,19 +264,18 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent = new Intent(this, MainActivity.class);
-
+        Intent intent = null;
         switch (item.getItemId()) {
             case R.id.nav_travels:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 0);
+                intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.nav_diary:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 1);
+                intent = new Intent(this, DiaryListActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.nav_reminder:
-                intent.putExtra(MainActivity.KEY_TAB_POSITION, 2);
+                intent = new Intent(this, ReminderListActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.nav_start_tracking:
@@ -300,14 +299,14 @@ public class BaseActivity extends AppCompatActivity implements
                             .show();
                     return true;
                 }
-                Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
-                intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
-                startService(intentStartTracking);
+                intent = new Intent(this, LocationTrackingService.class);
+                intent.setAction(LocationTrackingService.ACTION_START_TRACK);
+                startService(intent);
                 return true;
             case R.id.nav_stop_tracking:
-                Intent intentStopTracking = new Intent(this, LocationTrackingService.class);
-                intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
-                startService(intentStopTracking);
+                intent = new Intent(this, LocationTrackingService.class);
+                intent.setAction(LocationTrackingService.ACTION_STOP_TRACK);
+                startService(intent);
                 return true;
             case R.id.nav_settings:
                 intent = new Intent(this, PreferencesActivity.class);

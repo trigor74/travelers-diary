@@ -46,6 +46,12 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activities.DiaryListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ReminderListActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.TravelActivity"
             android:screenOrientation="portrait" />
         <activity
