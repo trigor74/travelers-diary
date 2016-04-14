@@ -36,7 +36,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -226,7 +225,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
 
         mImagesRecyclerView.setVisibility(View.GONE);
 
-        mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_diary_note_title);
+        mEdtDiaryNoteTitle = (EditText) mToolbar.findViewById(R.id.edt_title);
         mEdtDiaryNoteTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
@@ -317,7 +316,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         super.onViewCreated(view, savedInstanceState);
 
         mAppBarLayout.addOnOffsetChangedListener(this);
-        startAlphaAnimation(mEdtDiaryNoteTitle, 0, View.INVISIBLE);
+        Utils.startAlphaAnimation(mEdtDiaryNoteTitle, 0, View.INVISIBLE);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
@@ -1143,9 +1142,9 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         if (percentage >= PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR) {
             if (!isTitleVisible) {
                 // show collapsed toolbar title
-                startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                Utils.startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 // hide expanded toolbar title
-                startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                Utils.startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
                 // pass text to collapsed toolbar title
                 mEdtDiaryNoteTitle.setText(mBigTitle.getText());
                 // handle focus
@@ -1159,9 +1158,9 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         } else {
             if (isTitleVisible) {
                 // hide collapsed toolbar title
-                startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
+                Utils.startAlphaAnimation(mEdtDiaryNoteTitle, ALPHA_ANIMATIONS_DURATION, View.INVISIBLE);
                 // show expanded toolbar title
-                startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
+                Utils.startAlphaAnimation(mBigTitleLayout, ALPHA_ANIMATIONS_DURATION, View.VISIBLE);
                 // pass text to expanded toolbar title
                 mBigTitle.setText(mEdtDiaryNoteTitle.getText());
                 // handle focus
@@ -1175,14 +1174,6 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         }
     }
 
-    public static void startAlphaAnimation(View v, long duration, int visibility) {
-        AlphaAnimation alphaAnimation = (visibility == View.VISIBLE)
-                ? new AlphaAnimation(0f, 1f)
-                : new AlphaAnimation(1f, 0f);
 
-        alphaAnimation.setDuration(duration);
-        alphaAnimation.setFillAfter(true);
-        v.startAnimation(alphaAnimation);
-    }
 
 }

@@ -113,7 +113,7 @@
 
                 <include
                     android:id="@+id/diary_fragment_toolbar"
-                    layout="@layout/toolbar_diary_activity" />
+                    layout="@layout/toolbar_with_edit_text" />
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
 

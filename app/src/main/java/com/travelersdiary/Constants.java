@@ -31,6 +31,7 @@ public final class Constants {
     public static final String FIREBASE_REMINDER_TRAVELID = "travelId";
     public static final String FIREBASE_REMINDER_TRAVEL_TITLE = "travelTitle";
     public static final String FIREBASE_REMINDER_ACTIVE = "active";
+    public static final String FIREBASE_REMINDER_COMPLETED = "completed";
     public static final String FIREBASE_REMINDER_TASK = "task";
     public static final String FIREBASE_REMINDER_TASK_ITEM = "item";
     public static final String FIREBASE_REMINDER_TASK_ITEM_CHECKED = "checked";
@@ -68,7 +69,6 @@ public final class Constants {
     public static final String KEY_ACTIVE_TRAVEL_KEY = "ACTIVE_TRAVEL_KEY";
     public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
     public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
-    public static final String KEY_TRAVEL_COVER = "TRAVEL_COVER";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";

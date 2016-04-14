@@ -135,4 +135,6 @@
 
     <string name="dialog_cannot_tracking_title_text">Cannot start tracking!</string>
     <string name="dialog_cannot_tracking_message_text">No active travel</string>
+    <string name="completed">Completed</string>
+    <string name="your_text_here">Your text here</string>
 </resources>
