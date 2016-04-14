@@ -18,15 +18,16 @@
     </group>
     <group
         android:id="@+id/menu_tracking"
-        android:checkableBehavior="single">
+        android:checkableBehavior="none">
         <item
             android:id="@+id/nav_start_tracking"
-            android:icon="@drawable/ic_route_record"
+            android:icon="@drawable/ic_start_circle_outline_black_24dp"
             android:title="@string/start_tracking_text" />
         <item
             android:id="@+id/nav_stop_tracking"
-            android:icon="@drawable/ic_route_record"
-            android:title="@string/stop_tracking_text" />
+            android:icon="@drawable/ic_stop_circle_outline_black_24dp"
+            android:title="@string/stop_tracking_text"
+            android:visible="false" />
     </group>
     <group
         android:id="@+id/menu_bottom"
