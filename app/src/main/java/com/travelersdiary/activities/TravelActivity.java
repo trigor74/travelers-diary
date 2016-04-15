@@ -17,11 +17,12 @@ import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
+import com.travelersdiary.interfaces.IFABCallback;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class TravelActivity extends BaseActivity {
+public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Bind(R.id.travel_activity_toolbar)
     Toolbar mToolbar;
@@ -141,4 +142,12 @@ public class TravelActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void hideFloatingActionButton(boolean hide) {
+        if (hide) {
+            mTravelActivityFab.hide();
+        } else {
+            mTravelActivityFab.show();
+        }
+    }
 }
