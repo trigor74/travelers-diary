@@ -10,7 +10,6 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -20,7 +19,6 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -50,7 +48,7 @@ import java.util.TreeMap;
 
 import butterknife.ButterKnife;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLongClickListener, OnInfoWindowClickListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoWindowClickListener {
 
     private String mTravelId = null;
 
@@ -65,9 +63,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
     private Map<String, Polyline> mRoutesMap = new HashMap<>(); // key = track key (track UID)
     private Map<Polyline, Marker> mRouteStartMarksMap = new HashMap<>();
     private Map<Polyline, Marker> mRouteEndMarksMap = new HashMap<>();
-
-    private ArrayList<LatLng> mRoutePoints;
-    private Marker myMarker;
 
     @Nullable
     @Override
@@ -105,76 +100,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-
-        mMap.setOnMapLongClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
 
         if (mTravelId != null && !mTravelId.isEmpty()) {
             retrieveDataAndShowOnMap();
         }
-        //mMap.setMyLocationEnabled(true);
-    }
-
-    // TODO: 20.03.16 remove examples
-
-    /**
-     * example of drawing track lines
-     */
-    private void drawTrack() {
-        mRoutePoints = new ArrayList<>();
-
-        LatLng mapPoint1 = new LatLng(15.127, 16.123);
-        LatLng mapPoint2 = new LatLng(16.127, 17.123);
-        LatLng mapPoint3 = new LatLng(23.645, 19.23);
-        LatLng mapPoint4 = new LatLng(53.127, 43.123);
-
-        mRoutePoints.add(mapPoint1);
-        mRoutePoints.add(mapPoint2);
-        mRoutePoints.add(mapPoint3);
-        mRoutePoints.add(mapPoint4);
-
-        Polyline route = mMap.addPolyline(new PolylineOptions()
-                .width(5f)
-                .color(getResources().getColor(R.color.colorPrimaryDark))
-                .geodesic(true)
-                .zIndex(2f));
-        route.setPoints(mRoutePoints);
-    }
-
-    /**
-     * example of adding markers
-     */
-    private void addMarkers() {
-        mMap.addMarker(new MarkerOptions()
-                .title("Start")
-                .snippet("27 Dec 10:30")
-                .position(mRoutePoints.get(0)));
-
-        mMap.addMarker(new MarkerOptions()
-                .title("End")
-                .snippet("27 Dec 15:40")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                .position(mRoutePoints.get(mRoutePoints.size() - 1)));
-
-
-        mMap.addMarker(new MarkerOptions()
-                .title("Custom marker")
-                .snippet("move me")
-                .draggable(true)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                .position(new LatLng(30.543, 33.154)));
-    }
-
-    /**
-     * adding marker on long click
-     */
-    @Override
-    public void onMapLongClick(LatLng latLng) {
-        myMarker = mMap.addMarker(new MarkerOptions()
-                .title("My Marker")
-                .draggable(true)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-                .position(latLng));
+        mMap.setMyLocationEnabled(true);
     }
 
     /**
@@ -182,11 +113,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnMapLo
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-        if (marker.equals(myMarker)) {
-            Toast.makeText(getContext(), "Info window clicked", Toast.LENGTH_SHORT).show();
-            myMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        }
-
         if (mNoteRefsMap.containsKey(marker)) {
             String key = mNoteRefsMap.get(marker);
             Intent intent = new Intent(getContext(), DiaryActivity.class);
