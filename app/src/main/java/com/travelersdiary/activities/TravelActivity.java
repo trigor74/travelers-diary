@@ -172,7 +172,9 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Override
     protected void onDrawerOpened(View drawerView) {
-        finishActionMode(mTabLayout.getSelectedTabPosition());
+        if (mTabLayout.getSelectedTabPosition() < 2) {
+            finishActionMode(mTabLayout.getSelectedTabPosition());
+        }
         super.onDrawerOpened(drawerView);
     }
 
