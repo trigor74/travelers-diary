@@ -38,6 +38,7 @@ import com.travelersdiary.models.ReminderItem;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.Bind;
@@ -146,8 +147,9 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
                 if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
                     // remind at time
                     long time = model.getTime();
-                    String timeText = SimpleDateFormat.getDateTimeInstance().format(time);
-                    holder.info.setText(timeText);
+                    String date = SimpleDateFormat.getDateInstance().format(time);
+                    String timeText = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(time);
+                    holder.info.setText(String.format("%s %s", date, timeText));
                     holder.typeIcon.setImageResource(R.drawable.ic_alarm_black_24dp);
                 } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
                     // remind at location

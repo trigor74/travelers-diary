@@ -205,7 +205,7 @@ public class Utils {
     public static String getMediumDate(long timestamp) {
         String date = SimpleDateFormat.getDateInstance().format(timestamp);
         String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(timestamp);
-        return date + ", " + time;
+        return date + " " + time;
 
     }
 
