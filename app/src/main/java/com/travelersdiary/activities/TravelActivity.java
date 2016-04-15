@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -32,6 +33,7 @@ import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.ui.FABScrollBehavior;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -138,7 +140,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
                 mViewPager.setCurrentItem(tab.getPosition());
 
                 if (tab.getPosition() == 2) {
-                    mTravelActivityFab.setVisibility(View.GONE);
+                    hideFloatingActionButton(true);
                 }
             }
 
@@ -149,7 +151,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
                 }
 
                 if (tab.getPosition() == 2) {
-                    mTravelActivityFab.setVisibility(View.VISIBLE);
+                    hideFloatingActionButton(false);
                 }
             }
 
@@ -303,9 +305,14 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Override
     public void hideFloatingActionButton(boolean hide) {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mTravelActivityFab.getLayoutParams();
         if (hide) {
+            params.setBehavior(null);
+            mTravelActivityFab.setLayoutParams(params);
             mTravelActivityFab.hide();
         } else {
+            params.setBehavior(new FABScrollBehavior());
+            mTravelActivityFab.setLayoutParams(params);
             mTravelActivityFab.show();
         }
     }
