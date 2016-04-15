@@ -53,6 +53,7 @@ public class BaseActivity extends AppCompatActivity implements
     private ValueEventListener mActiveTravelListener;
 
     private SharedPreferences mSharedPreferences;
+//    private boolean isTrackingStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -287,6 +288,9 @@ public class BaseActivity extends AppCompatActivity implements
             Glide.with(this).load(profileImageUrl).into(mProfileImage);
         }
 
+        boolean isTrackingStarted = mSharedPreferences.getBoolean(Constants.KEY_IS_TRACKING_STARTED, false);
+        switchStartStop(isTrackingStarted);
+
         mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
         mAccountEmail.setText(mSharedPreferences.getString(Constants.KEY_EMAIL, null));
     }
@@ -394,13 +398,14 @@ public class BaseActivity extends AppCompatActivity implements
                     })
                     .show();
 
+            mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, false).apply();
             switchStartStop(false);
             return;
         }
         Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
         intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
         startService(intentStartTracking);
-
+        mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, true).apply();
         switchStartStop(true);
     }
 
@@ -409,6 +414,7 @@ public class BaseActivity extends AppCompatActivity implements
         intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
         startService(intentStopTracking);
 
+        mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, false).apply();
         switchStartStop(false);
     }
 
@@ -422,19 +428,6 @@ public class BaseActivity extends AppCompatActivity implements
     }
 
     public void setCheckedItem(int id) {
-
         mNavigationView.setCheckedItem(id);
-
-//        switch (id) {
-//            case 0:
-//                mNavigationView.setCheckedItem(R.id.nav_travels);
-//                break;
-//            case 1:
-//                mNavigationView.setCheckedItem(R.id.nav_diary);
-//                break;
-//            case 2:
-//                mNavigationView.setCheckedItem(R.id.nav_reminder);
-//                break;
-//        }
     }
 }
