@@ -8,6 +8,10 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class FABScrollBehavior extends FloatingActionButton.Behavior {
+    public FABScrollBehavior() {
+        super();
+    }
+
     public FABScrollBehavior(Context context, AttributeSet attrs) {
         super();
     }

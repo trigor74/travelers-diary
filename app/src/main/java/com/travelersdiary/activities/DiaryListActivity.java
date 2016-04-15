@@ -2,20 +2,30 @@ package com.travelersdiary.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.travelersdiary.R;
 import com.travelersdiary.fragments.DiaryListFragment;
+import com.travelersdiary.interfaces.IActionModeFinishCallback;
+import com.travelersdiary.interfaces.IFABCallback;
+import com.travelersdiary.ui.FABScrollBehavior;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class DiaryListActivity extends BaseActivity {
+public class DiaryListActivity extends BaseActivity implements IFABCallback {
     private static final String DIARY_LIST_FRAGMENT_TAG = "DIARY_LIST_FRAGMENT_TAG";
 
     @Bind(R.id.main_activity_toolbar)
     Toolbar mToolbar;
+
+    @Bind(R.id.main_activity_fab)
+    FloatingActionButton mDiaryListActivityFab;
 
     @OnClick(R.id.main_activity_fab)
     public void onFabClick() {
@@ -64,5 +74,32 @@ public class DiaryListActivity extends BaseActivity {
     @Override
     protected boolean useDrawerToggle() {
         return true;
+    }
+
+    @Override
+    protected void onDrawerOpened(View drawerView) {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(DIARY_LIST_FRAGMENT_TAG);
+        try {
+            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
+            actionModeFinishCallback.finishActionMode();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.toString()
+                    + " must implement IActionModeFinishCallback");
+        }
+        super.onDrawerOpened(drawerView);
+    }
+
+    @Override
+    public void hideFloatingActionButton(boolean hide) {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mDiaryListActivityFab.getLayoutParams();
+        if (hide) {
+            params.setBehavior(null);
+            mDiaryListActivityFab.setLayoutParams(params);
+            mDiaryListActivityFab.hide();
+        } else {
+            params.setBehavior(new FABScrollBehavior());
+            mDiaryListActivityFab.setLayoutParams(params);
+            mDiaryListActivityFab.show();
+        }
     }
 }
