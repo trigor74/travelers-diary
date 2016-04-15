@@ -9,6 +9,7 @@ import android.support.annotation.LayoutRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -237,11 +238,38 @@ public class BaseActivity extends AppCompatActivity implements
     public void setupNavigationView(Toolbar toolbar) {
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        if (useDrawerToggle()) {
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
-            mDrawerLayout.setDrawerListener(mDrawerToggle);
-            mDrawerToggle.syncState();
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                BaseActivity.this.onDrawerOpened(drawerView);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                BaseActivity.this.onDrawerClosed(drawerView);
+            }
+        };
+
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+
+        ActionBar supportActionBar = getSupportActionBar();
+        if (supportActionBar != null) {
+            if (!useDrawerToggle()) {
+                mDrawerToggle.setDrawerIndicatorEnabled(false);
+                supportActionBar.setDisplayHomeAsUpEnabled(true);
+                supportActionBar.setHomeButtonEnabled(true);
+                mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onBackPressed();
+                    }
+                });
+            }
         }
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
 
         View headerView = mNavigationView.getHeaderView(0);
         ImageView mCoverImage = (ImageView) headerView.findViewById(R.id.profile_cover_image);
@@ -265,6 +293,12 @@ public class BaseActivity extends AppCompatActivity implements
 
     protected boolean useDrawerToggle() {
         return false;
+    }
+
+    protected void onDrawerOpened(View drawerView) {
+    }
+
+    protected void onDrawerClosed(View drawerView) {
     }
 
     @Override

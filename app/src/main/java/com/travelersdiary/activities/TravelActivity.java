@@ -30,6 +30,7 @@ import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
+import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.models.Travel;
 
 import java.text.SimpleDateFormat;
@@ -38,7 +39,7 @@ import java.util.Locale;
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class TravelActivity extends BaseActivity {
+public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Bind(R.id.travel_activity_toolbar)
     Toolbar mToolbar;
@@ -144,14 +145,7 @@ public class TravelActivity extends BaseActivity {
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
                 if (tab.getPosition() < 2) {
-                    Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tab.getPosition());
-                    try {
-                        IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
-                        actionModeFinishCallback.finishActionMode();
-                    } catch (ClassCastException e) {
-                        throw new ClassCastException(fragment.toString()
-                                + " must implement IActionModeFinishCallback");
-                    }
+                    finishActionMode(tab.getPosition());
                 }
 
                 if (tab.getPosition() == 2) {
@@ -163,6 +157,23 @@ public class TravelActivity extends BaseActivity {
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
+    }
+
+    private void finishActionMode(int tabPosition) {
+        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tabPosition);
+        try {
+            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
+            actionModeFinishCallback.finishActionMode();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.toString()
+                    + " must implement IActionModeFinishCallback");
+        }
+    }
+
+    @Override
+    protected void onDrawerOpened(View drawerView) {
+        finishActionMode(mTabLayout.getSelectedTabPosition());
+        super.onDrawerOpened(drawerView);
     }
 
     @Override
@@ -184,7 +195,6 @@ public class TravelActivity extends BaseActivity {
         return super.onPrepareOptionsMenu(menu);
     }
 
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -289,4 +299,12 @@ public class TravelActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void hideFloatingActionButton(boolean hide) {
+        if (hide) {
+            mTravelActivityFab.hide();
+        } else {
+            mTravelActivityFab.show();
+        }
+    }
 }
