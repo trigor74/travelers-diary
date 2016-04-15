@@ -62,9 +62,6 @@ public class TravelActivity extends BaseActivity {
     private long mTravelCreationTime;
     private boolean isTravelActive;
 
-    private Menu mMenu;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,9 +97,11 @@ public class TravelActivity extends BaseActivity {
                     Travel travel = dataSnapshot.getValue(Travel.class);
 
                     if (travel != null) {
-                        getSupportActionBar().setTitle(travel.getTitle());
-                        isTravelActive = travel.isActive();
+                        if (getSupportActionBar() != null) {
+                            getSupportActionBar().setTitle(travel.getTitle());
+                        }
 
+                        isTravelActive = travel.isActive();
                         mTravelCreationTime = travel.getCreationTime();
                         mTravelStartTime = travel.getStart();
                         mTravelStopTime = travel.getStop();
@@ -169,7 +168,6 @@ public class TravelActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.travel_activity_menu, menu);
-        mMenu = menu;
         return true;
     }
 
