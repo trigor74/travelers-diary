@@ -9,10 +9,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.R;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IFABCallback;
+import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
 
 import butterknife.Bind;
@@ -38,6 +41,7 @@ public class DiaryListActivity extends BaseActivity implements IFABCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_list);
+        BusProvider.bus().register(this);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -101,5 +105,16 @@ public class DiaryListActivity extends BaseActivity implements IFABCallback {
             mDiaryListActivityFab.setLayoutParams(params);
             mDiaryListActivityFab.show();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        BusProvider.bus().unregister(this);
+        super.onDestroy();
+    }
+
+    @Subscribe
+    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+        switchStartStop(event.isTrackingEnabled);
     }
 }

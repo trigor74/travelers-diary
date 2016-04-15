@@ -20,10 +20,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.services.LocationTrackingService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +63,7 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_travel);
+        BusProvider.bus().register(this);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -262,6 +266,17 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
                 "://" + getResources().getResourcePackageName(R.drawable.travel_cover_1)
                 + '/' + getResources().getResourceTypeName(R.drawable.travel_cover_1)
                 + '/' + "travel_cover_" + imageNumber;
+    }
+
+    @Override
+    protected void onDestroy() {
+        BusProvider.bus().unregister(this);
+        super.onDestroy();
+    }
+
+    @Subscribe
+    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+        switchStartStop(event.isTrackingEnabled);
     }
 
 }

@@ -9,8 +9,11 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.R;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.TravelsListFragment;
+import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.services.SyncService;
 
 import butterknife.Bind;
@@ -32,6 +35,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        BusProvider.bus().register(this);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -81,4 +85,16 @@ public class MainActivity extends BaseActivity {
         }
         return false;
     }
+
+    @Override
+    protected void onDestroy() {
+        BusProvider.bus().unregister(this);
+        super.onDestroy();
+    }
+
+    @Subscribe
+    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+        switchStartStop(event.isTrackingEnabled);
+    }
+
 }

@@ -23,16 +23,19 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.adapters.ViewPagerAdapter;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.models.Travel;
+import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
 
 import java.text.SimpleDateFormat;
@@ -69,6 +72,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_travel);
+        BusProvider.bus().register(this);
 
         mTravelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
         mTravelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
@@ -316,4 +320,16 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
             mTravelActivityFab.show();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        BusProvider.bus().unregister(this);
+        super.onDestroy();
+    }
+
+    @Subscribe
+    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+        switchStartStop(event.isTrackingEnabled);
+    }
+
 }

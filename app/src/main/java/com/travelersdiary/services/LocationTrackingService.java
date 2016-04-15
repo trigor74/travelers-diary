@@ -21,18 +21,24 @@ import com.travelersdiary.Utils;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.LocationPoint;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class LocationTrackingService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    public class CheckTrackingEvent {
+        public boolean isTrackingEnabled;
+
+        public CheckTrackingEvent(boolean isTrackingEnabled) {
+            this.isTrackingEnabled = isTrackingEnabled;
+        }
+    }
+
     private static final String TAG = "LocationTrackingService";
     public static final String ACTION_START_TRACK = "ACTION_START_TRACK";
     public static final String ACTION_STOP_TRACK = "ACTION_STOP_TRACK";
     public static final String ACTION_GET_CURRENT_LOCATION = "ACTION_GET_CURRENT_LOCATION";
+    public static final String ACTION_CHECK_TRACKING = "ACTION_CHECK_TRACKING";
 
     private boolean isRequestingLocationUpdates = false;
     private boolean isTrackingEnabled = false;
@@ -151,6 +157,9 @@ public class LocationTrackingService extends Service implements
                 if (mGoogleApiClient.isConnected() && !isSingleRequestLocation && isRequestingLocationUpdates) {
                     stopLocationUpdates();
                 }
+                break;
+            case ACTION_CHECK_TRACKING:
+                BusProvider.bus().post(new CheckTrackingEvent(isTrackingEnabled));
                 break;
             default:
         }

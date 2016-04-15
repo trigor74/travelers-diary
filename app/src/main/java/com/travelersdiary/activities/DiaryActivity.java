@@ -2,9 +2,12 @@ package com.travelersdiary.activities;
 
 import android.os.Bundle;
 
+import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
+import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryFragment;
+import com.travelersdiary.services.LocationTrackingService;
 
 public class DiaryActivity extends BaseActivity {
 
@@ -14,6 +17,7 @@ public class DiaryActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary);
+        BusProvider.bus().register(this);
 
         boolean isNewNote = getIntent().getBooleanExtra(DiaryActivity.NEW_DIARY_NOTE, false);
 
@@ -51,6 +55,17 @@ public class DiaryActivity extends BaseActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        BusProvider.bus().unregister(this);
+        super.onDestroy();
+    }
+
+    @Subscribe
+    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+        switchStartStop(event.isTrackingEnabled);
     }
 
 }

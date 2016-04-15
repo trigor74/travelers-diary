@@ -53,11 +53,11 @@ public class BaseActivity extends AppCompatActivity implements
     private ValueEventListener mActiveTravelListener;
 
     private SharedPreferences mSharedPreferences;
-//    private boolean isTrackingStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        BusProvider.bus().register(this);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -288,12 +288,18 @@ public class BaseActivity extends AppCompatActivity implements
             Glide.with(this).load(profileImageUrl).into(mProfileImage);
         }
 
-        boolean isTrackingStarted = mSharedPreferences.getBoolean(Constants.KEY_IS_TRACKING_STARTED, false);
-        switchStartStop(isTrackingStarted);
+        Intent intentCheckTracking = new Intent(this, LocationTrackingService.class);
+        intentCheckTracking.setAction(LocationTrackingService.ACTION_CHECK_TRACKING);
+        startService(intentCheckTracking);
 
         mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
         mAccountEmail.setText(mSharedPreferences.getString(Constants.KEY_EMAIL, null));
     }
+
+//    @Subscribe
+//    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
+//        switchStartStop(event.isTrackingEnabled);
+//    }
 
     protected boolean useDrawerToggle() {
         return false;
@@ -398,14 +404,13 @@ public class BaseActivity extends AppCompatActivity implements
                     })
                     .show();
 
-            mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, false).apply();
             switchStartStop(false);
             return;
         }
         Intent intentStartTracking = new Intent(this, LocationTrackingService.class);
         intentStartTracking.setAction(LocationTrackingService.ACTION_START_TRACK);
         startService(intentStartTracking);
-        mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, true).apply();
+
         switchStartStop(true);
     }
 
@@ -414,7 +419,6 @@ public class BaseActivity extends AppCompatActivity implements
         intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
         startService(intentStopTracking);
 
-        mSharedPreferences.edit().putBoolean(Constants.KEY_IS_TRACKING_STARTED, false).apply();
         switchStartStop(false);
     }
 
@@ -422,7 +426,7 @@ public class BaseActivity extends AppCompatActivity implements
         mMenu.findItem(R.id.nav_start_tracking).setEnabled(enable);
     }
 
-    private void switchStartStop(boolean isStarted) {
+    public void switchStartStop(boolean isStarted) {
         mMenu.findItem(R.id.nav_start_tracking).setVisible(!isStarted);
         mMenu.findItem(R.id.nav_stop_tracking).setVisible(isStarted);
     }
@@ -430,4 +434,5 @@ public class BaseActivity extends AppCompatActivity implements
     public void setCheckedItem(int id) {
         mNavigationView.setCheckedItem(id);
     }
+
 }
