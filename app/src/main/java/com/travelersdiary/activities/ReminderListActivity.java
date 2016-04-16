@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
@@ -13,15 +13,13 @@ import com.squareup.otto.Subscribe;
 import com.travelersdiary.R;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.ReminderListFragment;
-import com.travelersdiary.interfaces.IActionModeFinishCallback;
-import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class ReminderListActivity extends BaseActivity implements IFABCallback {
+public class ReminderListActivity extends BaseActivity {
     private static final String REMINDER_LIST_FRAGMENT_TAG = "REMINDER_LIST_FRAGMENT_TAG";
 
     @Bind(R.id.main_activity_toolbar)
@@ -35,6 +33,8 @@ public class ReminderListActivity extends BaseActivity implements IFABCallback {
         Intent intent = new Intent(this, ReminderItemActivity.class);
         startActivity(intent);
     }
+
+    private ActionMode mActionMode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,29 +81,39 @@ public class ReminderListActivity extends BaseActivity implements IFABCallback {
 
     @Override
     protected void onDrawerOpened(View drawerView) {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(REMINDER_LIST_FRAGMENT_TAG);
-        try {
-            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
-            actionModeFinishCallback.finishActionMode();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(fragment.toString()
-                    + " must implement IActionModeFinishCallback");
+        if (mActionMode != null) {
+            mActionMode.finish();
+            mActionMode = null;
         }
         super.onDrawerOpened(drawerView);
     }
 
-    @Override
-    public void hideFloatingActionButton(boolean hide) {
+    private void hideFloatingActionButton() {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mReminderListActivityFab.getLayoutParams();
-        if (hide) {
-            params.setBehavior(null);
-            mReminderListActivityFab.setLayoutParams(params);
-            mReminderListActivityFab.hide();
-        } else {
-            params.setBehavior(new FABScrollBehavior());
-            mReminderListActivityFab.setLayoutParams(params);
-            mReminderListActivityFab.show();
-        }
+        params.setBehavior(null);
+        mReminderListActivityFab.setLayoutParams(params);
+        mReminderListActivityFab.hide();
+    }
+
+    private void showFloatingActionButton() {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mReminderListActivityFab.getLayoutParams();
+        params.setBehavior(new FABScrollBehavior());
+        mReminderListActivityFab.setLayoutParams(params);
+        mReminderListActivityFab.show();
+    }
+
+    @Override
+    public void onSupportActionModeStarted(ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
+        mActionMode = mode;
+        hideFloatingActionButton();
+    }
+
+    @Override
+    public void onSupportActionModeFinished(ActionMode mode) {
+        super.onSupportActionModeFinished(mode);
+        showFloatingActionButton();
+        mActionMode = null;
     }
 
     @Override

@@ -8,9 +8,9 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,8 +32,6 @@ import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
-import com.travelersdiary.interfaces.IActionModeFinishCallback;
-import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
@@ -44,7 +42,7 @@ import java.util.Locale;
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class TravelActivity extends BaseActivity implements IFABCallback {
+public class TravelActivity extends BaseActivity {
 
     @Bind(R.id.travel_activity_toolbar)
     Toolbar mToolbar;
@@ -67,6 +65,8 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
     private long mTravelStopTime;
     private long mTravelCreationTime;
     private boolean isTravelActive;
+
+    private ActionMode mActionMode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,20 +143,20 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
 
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                    mActionMode = null;
+                }
+
                 if (tab.getPosition() == 2) {
-                    hideFloatingActionButton(true);
+                    hideFloatingActionButton();
+                } else {
+                    showFloatingActionButton();
                 }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                if (tab.getPosition() < 2) {
-                    finishActionMode(tab.getPosition());
-                }
-
-                if (tab.getPosition() == 2) {
-                    hideFloatingActionButton(false);
-                }
             }
 
             @Override
@@ -165,21 +165,11 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         });
     }
 
-    private void finishActionMode(int tabPosition) {
-        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tabPosition);
-        try {
-            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
-            actionModeFinishCallback.finishActionMode();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(fragment.toString()
-                    + " must implement IActionModeFinishCallback");
-        }
-    }
-
     @Override
     protected void onDrawerOpened(View drawerView) {
-        if (mTabLayout.getSelectedTabPosition() < 2) {
-            finishActionMode(mTabLayout.getSelectedTabPosition());
+        if (mActionMode != null) {
+            mActionMode.finish();
+            mActionMode = null;
         }
         super.onDrawerOpened(drawerView);
     }
@@ -307,24 +297,40 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         }
     }
 
-    @Override
-    public void hideFloatingActionButton(boolean hide) {
+    private void hideFloatingActionButton() {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mTravelActivityFab.getLayoutParams();
-        if (hide) {
-            params.setBehavior(null);
-            mTravelActivityFab.setLayoutParams(params);
-            mTravelActivityFab.hide();
-        } else {
-            params.setBehavior(new FABScrollBehavior());
-            mTravelActivityFab.setLayoutParams(params);
-            mTravelActivityFab.show();
-        }
+        params.setBehavior(null);
+        mTravelActivityFab.setLayoutParams(params);
+        mTravelActivityFab.hide();
+    }
+
+    private void showFloatingActionButton() {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mTravelActivityFab.getLayoutParams();
+        params.setBehavior(new FABScrollBehavior());
+        mTravelActivityFab.setLayoutParams(params);
+        mTravelActivityFab.show();
     }
 
     @Override
     protected void onDestroy() {
         BusProvider.bus().unregister(this);
         super.onDestroy();
+    }
+
+    @Override
+    public void onSupportActionModeStarted(ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
+        mActionMode = mode;
+        hideFloatingActionButton();
+    }
+
+    @Override
+    public void onSupportActionModeFinished(ActionMode mode) {
+        super.onSupportActionModeFinished(mode);
+        if (mTabLayout.getSelectedTabPosition() != 2) {
+            showFloatingActionButton();
+        }
+        mActionMode = null;
     }
 
     @Subscribe

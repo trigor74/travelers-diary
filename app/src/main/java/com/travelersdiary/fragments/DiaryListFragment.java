@@ -1,7 +1,5 @@
 package com.travelersdiary.fragments;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -31,8 +29,6 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
-import com.travelersdiary.interfaces.IActionModeFinishCallback;
-import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.DiaryNote;
 import com.travelersdiary.models.Photo;
@@ -44,7 +40,7 @@ import java.util.Locale;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class DiaryListFragment extends Fragment implements IActionModeFinishCallback {
+public class DiaryListFragment extends Fragment {
 
     @Bind(R.id.diary_list)
     RecyclerView mDiaryList;
@@ -52,14 +48,10 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private static IFABCallback mFABCallback = null;
     private static ActionMode mDeleteMode = null;
     private static ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            if (mFABCallback != null) {
-                mFABCallback.hideFloatingActionButton(true);
-            }
             mode.getMenuInflater().inflate(R.menu.diary_list_context, menu);
             return true;
         }
@@ -87,23 +79,8 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
             mAdapter.setSelectable(false);
             mAdapter.clearSelections();
             mDeleteMode = null;
-            if (mFABCallback != null) {
-                mFABCallback.hideFloatingActionButton(false);
-            }
         }
     };
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Activity activity = getActivity();
-        try {
-            this.mFABCallback = (IFABCallback) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement IFABCallback");
-        }
-    }
 
     @Nullable
     @Override
@@ -126,13 +103,6 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
     }
 
     @Override
-    public void finishActionMode() {
-        if (mDeleteMode != null) {
-            mDeleteMode.finish();
-        }
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         setupAdapter();
@@ -140,7 +110,9 @@ public class DiaryListFragment extends Fragment implements IActionModeFinishCall
 
     @Override
     public void onPause() {
-        finishActionMode();
+        if (mDeleteMode != null) {
+            mDeleteMode.finish();
+        }
         super.onPause();
     }
 

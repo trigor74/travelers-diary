@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
@@ -13,15 +13,13 @@ import com.squareup.otto.Subscribe;
 import com.travelersdiary.R;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryListFragment;
-import com.travelersdiary.interfaces.IActionModeFinishCallback;
-import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class DiaryListActivity extends BaseActivity implements IFABCallback {
+public class DiaryListActivity extends BaseActivity {
     private static final String DIARY_LIST_FRAGMENT_TAG = "DIARY_LIST_FRAGMENT_TAG";
 
     @Bind(R.id.main_activity_toolbar)
@@ -36,6 +34,8 @@ public class DiaryListActivity extends BaseActivity implements IFABCallback {
         intent.putExtra(DiaryActivity.NEW_DIARY_NOTE, true);
         startActivity(intent);
     }
+
+    private ActionMode mActionMode = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,29 +82,39 @@ public class DiaryListActivity extends BaseActivity implements IFABCallback {
 
     @Override
     protected void onDrawerOpened(View drawerView) {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(DIARY_LIST_FRAGMENT_TAG);
-        try {
-            IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
-            actionModeFinishCallback.finishActionMode();
-        } catch (ClassCastException e) {
-            throw new ClassCastException(fragment.toString()
-                    + " must implement IActionModeFinishCallback");
+        if (mActionMode != null) {
+            mActionMode.finish();
+            mActionMode = null;
         }
         super.onDrawerOpened(drawerView);
     }
 
-    @Override
-    public void hideFloatingActionButton(boolean hide) {
+    private void hideFloatingActionButton() {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mDiaryListActivityFab.getLayoutParams();
-        if (hide) {
-            params.setBehavior(null);
-            mDiaryListActivityFab.setLayoutParams(params);
-            mDiaryListActivityFab.hide();
-        } else {
-            params.setBehavior(new FABScrollBehavior());
-            mDiaryListActivityFab.setLayoutParams(params);
-            mDiaryListActivityFab.show();
-        }
+        params.setBehavior(null);
+        mDiaryListActivityFab.setLayoutParams(params);
+        mDiaryListActivityFab.hide();
+    }
+
+    private void showFloatingActionButton() {
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mDiaryListActivityFab.getLayoutParams();
+        params.setBehavior(new FABScrollBehavior());
+        mDiaryListActivityFab.setLayoutParams(params);
+        mDiaryListActivityFab.show();
+    }
+
+    @Override
+    public void onSupportActionModeStarted(ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
+        mActionMode = mode;
+        hideFloatingActionButton();
+    }
+
+    @Override
+    public void onSupportActionModeFinished(ActionMode mode) {
+        super.onSupportActionModeFinished(mode);
+        showFloatingActionButton();
+        mActionMode = null;
     }
 
     @Override

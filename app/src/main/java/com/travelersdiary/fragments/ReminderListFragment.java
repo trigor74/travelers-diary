@@ -1,7 +1,5 @@
 package com.travelersdiary.fragments;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
@@ -33,8 +31,6 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
-import com.travelersdiary.interfaces.IActionModeFinishCallback;
-import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
 
@@ -47,7 +43,7 @@ import java.util.Map;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class ReminderListFragment extends Fragment implements IActionModeFinishCallback {
+public class ReminderListFragment extends Fragment {
 
     @Bind(R.id.reminder_list)
     RecyclerView mReminderList;
@@ -55,14 +51,10 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
     private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private static IFABCallback mFABCallback = null;
     private static ActionMode mDeleteMode = null;
     private static ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            if (mFABCallback != null) {
-                mFABCallback.hideFloatingActionButton(true);
-            }
             mode.getMenuInflater().inflate(R.menu.reminder_list_item_context, menu);
             return true;
         }
@@ -90,23 +82,8 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
             mAdapter.setSelectable(false);
             mAdapter.clearSelections();
             mDeleteMode = null;
-            if (mFABCallback != null) {
-                mFABCallback.hideFloatingActionButton(false);
-            }
         }
     };
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        Activity activity = getActivity();
-        try {
-            this.mFABCallback = (IFABCallback) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement IFABCallback");
-        }
-    }
 
     @Nullable
     @Override
@@ -194,15 +171,10 @@ public class ReminderListFragment extends Fragment implements IActionModeFinishC
     }
 
     @Override
-    public void finishActionMode() {
+    public void onPause() {
         if (mDeleteMode != null) {
             mDeleteMode.finish();
         }
-    }
-
-    @Override
-    public void onPause() {
-        finishActionMode();
         super.onPause();
     }
 
