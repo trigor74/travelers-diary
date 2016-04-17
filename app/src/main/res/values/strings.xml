@@ -142,4 +142,11 @@
     <string name="info_dialog_start_text">Start:</string>
     <string name="info_dialog_end_text">End:</string>
     <string name="info_dialog_created_text">Created:</string>
+
+    <string name="map_show_tracks_text">Show tracks</string>
+    <string name="map_hide_tracks_text">Hide tracks</string>
+    <string name="map_show_diary_notes_text">Show notes</string>
+    <string name="map_hide_diary_notes_text">Hide notess</string>
+    <string name="map_show_reminder_items_text">Show reminder</string>
+    <string name="map_hide_reminder_items_text">Hide reminder</string>
 </resources>

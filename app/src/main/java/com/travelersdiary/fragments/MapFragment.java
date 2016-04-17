@@ -21,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -53,7 +54,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
     private String mTravelId = null;
 
     private GoogleMap mMap;
-    private MapView mMapView;
 
     private LatLngBounds.Builder mLatLngBoundsBuilder = new LatLngBounds.Builder();
     private boolean mHasLatLngBoundsBuilderPoints = false;
@@ -72,9 +72,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
 
         mTravelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
-        mMapView = (MapView) view.findViewById(R.id.map_container);
-        mMapView.onCreate(savedInstanceState);
-        mMapView.getMapAsync(this);
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_container);
+        mapFragment.getMapAsync(this);
 
         return view;
     }
@@ -82,7 +82,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
     @Override
     public void onResume() {
         super.onResume();
-        mMapView.onResume();
     }
 
     @Override
@@ -93,7 +92,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
         if (reminderQuery != null && reminderListener != null)
             reminderQuery.removeEventListener(reminderListener);
 
-        mMapView.onPause();
         super.onPause();
     }
 
@@ -130,7 +128,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
 
     @Override
     public void onDestroyView() {
-        mMapView.onDestroy();
         ButterKnife.unbind(this);
         super.onDestroyView();
     }
@@ -138,13 +135,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mMapView.onLowMemory();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mMapView.onSaveInstanceState(outState);
     }
 
     ValueEventListener listener;

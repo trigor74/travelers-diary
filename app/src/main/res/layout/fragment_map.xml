@@ -1,12 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <com.google.android.gms.maps.MapView
+    <fragment
         android:id="@+id/map_container"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"
+        android:layout_marginRight="11dp"
+        android:layout_marginTop="60dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/map_show_hide_tracks_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="11dp"
+            android:background="@drawable/map_button"
+            android:text="@string/map_show_tracks_text"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/map_show_hide_diary_notes_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="11dp"
+            android:background="@drawable/map_button"
+            android:text="@string/map_show_diary_notes_text"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/map_show_hide_reminder_items_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="11dp"
+            android:background="@drawable/map_button"
+            android:text="@string/map_show_reminder_items_text"
+            android:textColor="@color/black" />
+
+        <ToggleButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="11dp"
+            android:background="@drawable/map_togglebutton_selector"
+            android:checked="true"
+            android:textOff=""
+            android:textOn="" />
+
+        <ToggleButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="right"
+            android:layout_marginBottom="11dp"
+            android:background="@drawable/map_togglebutton_selector"
+            android:checked="false"
+            android:textOff=""
+            android:textOn="" />
+
+    </LinearLayout>
+
+</FrameLayout>
