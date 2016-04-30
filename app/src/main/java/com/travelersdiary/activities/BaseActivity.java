@@ -325,18 +325,21 @@ public class BaseActivity extends AppCompatActivity implements
                 intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(MainActivity.KEY_FRAGMENT, MainActivity.TRAVELS_LIST_FRAGMENT_TAG);
                 startActivity(intent);
                 return true;
             case R.id.nav_diary:
-                intent = new Intent(this, DiaryListActivity.class);
+                intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(MainActivity.KEY_FRAGMENT, MainActivity.DIARY_LIST_FRAGMENT_TAG);
                 startActivity(intent);
                 return true;
             case R.id.nav_reminder:
-                intent = new Intent(this, ReminderListActivity.class);
+                intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(MainActivity.KEY_FRAGMENT, MainActivity.REMINDER_LIST_FRAGMENT_TAG);
                 startActivity(intent);
                 return true;
             case R.id.nav_start_tracking:

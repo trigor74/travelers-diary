@@ -125,6 +125,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-plus:8.4.0'
     compile 'com.google.android.gms:play-services-maps:8.4.0'
     compile 'com.google.android.gms:play-services-location:8.4.0'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 
     /*Serialization*/
     compile 'com.google.code.gson:gson:2.4'

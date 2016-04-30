@@ -30,6 +30,11 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d8d1756cffd2e4a36efbab0dcae68cdaf8c323d6" />
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <activity
             android:name=".activities.LoginActivity"
@@ -44,12 +49,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".activities.DiaryListActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.ReminderListActivity"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TravelActivity"
             android:screenOrientation="portrait" />
@@ -101,5 +100,4 @@
             android:name=".services.ReminderService"
             android:exported="false" />
     </application>
-
 </manifest>
