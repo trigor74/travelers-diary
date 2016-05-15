@@ -16,9 +16,10 @@ import com.travelersdiary.fragments.ReminderItemFragment;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ReminderService extends Service {
+public class NotificationService extends Service {
+    // TODO: 15.05.16 change to IntentService
 
-    final static String tag = "Reminder Service";
+    final static String tag = "Notification Service";
 
     @Nullable
     @Override
@@ -29,7 +30,7 @@ public class ReminderService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //TODO: new extras not showing in notification when item saved
-        int id = intent.getIntExtra(ReminderItemFragment.KEY_HASH, 0);
+        int id = intent.getIntExtra(ReminderItemFragment.KEY_UID, 0);
         String title = intent.getStringExtra(ReminderItemFragment.KEY_TITLE);
         long time = intent.getLongExtra(ReminderItemFragment.KEY_TIME, System.currentTimeMillis());
 

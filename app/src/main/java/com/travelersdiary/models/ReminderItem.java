@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReminderItem implements Serializable {
+    private int UID; // unique identifier of item for notifications and pendingIntent
     private String travelId;
     private String travelTitle;
     private String title;
@@ -26,10 +27,12 @@ public class ReminderItem implements Serializable {
     public ReminderItem() {
     }
 
-    public ReminderItem(String travelId, String travelTitle, String title, ArrayList<TodoTask> task, boolean viewAsCheckboxes,
+    public ReminderItem(int UID, String travelId, String travelTitle, String title,
+                        ArrayList<TodoTask> task, boolean viewAsCheckboxes,
                         boolean completed, boolean active,
                         String type, long time, long interval,
                         Waypoint waypoint, int distance, boolean repeat) {
+        this.UID = UID;
         this.travelId = travelId;
         this.travelTitle = travelTitle;
         this.title = title;
@@ -43,6 +46,14 @@ public class ReminderItem implements Serializable {
         this.waypoint = waypoint;
         this.distance = distance;
         this.repeat = repeat;
+    }
+
+    public int getUID() {
+        return UID;
+    }
+
+    public void setUID(int UID) {
+        this.UID = UID;
     }
 
     public String getTravelId() {

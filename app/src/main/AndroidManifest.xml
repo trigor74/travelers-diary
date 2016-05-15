@@ -97,7 +97,7 @@
             android:name=".services.WeatherIntentService"
             android:exported="false" />
         <service
-            android:name=".services.ReminderService"
+            android:name=".services.NotificationService"
             android:exported="false" />
     </application>
 </manifest>
