@@ -31,6 +31,7 @@ import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.login.LoginActivity;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
 

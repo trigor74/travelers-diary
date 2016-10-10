@@ -32,7 +32,7 @@
             android:value="d8d1756cffd2e4a36efbab0dcae68cdaf8c323d6" />
 
         <activity
-            android:name=".activities.LoginActivity"
+            android:name=".login.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.FullScreen" />
         <activity

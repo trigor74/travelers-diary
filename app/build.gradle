@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.22.0'
     }
 }
 apply plugin: 'com.android.application'
@@ -17,6 +17,11 @@ repositories {
 apply plugin: 'android-apt'
 
 android {
+
+    dataBinding {
+        enabled true
+    }
+
     signingConfigs {
 // release keystore not ready yet
 //        release {
@@ -39,8 +44,8 @@ android {
         applicationId "com.travelersdiary"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0-a.1"
     }
 
     buildTypes {
@@ -140,7 +145,7 @@ dependencies {
     /*Firebase*/
     compile 'com.firebase:firebase-client-android:2.5.2'
     compile 'com.firebaseui:firebase-ui:0.3.1'
-    compile 'com.firebase:geofire:1.1.+'
+    compile 'com.firebase:geofire:1.1.1'
 
     /*Others*/
     compile 'com.jakewharton:butterknife:7.0.1'
