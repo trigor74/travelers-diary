@@ -25,7 +25,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
         viewModel = new LoginViewModel(this);
 
         binding.setViewModel(viewModel);
-//
+
         viewModel.init(this);
     }
 
@@ -65,11 +65,11 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
 
     @Override
     public void showAuthProgressDialog() {
-        authProgressDialog = (ProgressDialog) new ProgressDialog.Builder(this)
-                .setTitle(getString(R.string.login_activity_progress_dialog_title))
-                .setMessage(getString(R.string.login_activity_progress_dialog_message))
-                .setCancelable(false)
-                .show();
+        authProgressDialog = new ProgressDialog(this);
+        authProgressDialog.setTitle(getString(R.string.login_activity_progress_dialog_title));
+        authProgressDialog.setMessage(getString(R.string.login_activity_progress_dialog_message));
+        authProgressDialog.setCancelable(false);
+        authProgressDialog.show();
     }
 
     @Override

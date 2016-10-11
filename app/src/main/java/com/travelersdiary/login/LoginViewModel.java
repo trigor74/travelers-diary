@@ -82,7 +82,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     public void init(AppCompatActivity activity) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
         firebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
