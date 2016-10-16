@@ -70,10 +70,6 @@ public class ReminderListFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.menu_item_delete) {
-//                for (Firebase ref :
-//                        (List<Firebase>) mAdapter.getSelectedItemsRef()) {
-//                    ref.removeValue();
-//                }
                 for (int key :
                         (List<Integer>) mAdapter.getSelectedItems()) {
                     ReminderItem reminderItem = (ReminderItem) mAdapter.getItem(key);

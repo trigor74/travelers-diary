@@ -792,14 +792,12 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
             // update item
             if (mRemindItem.getUID() == 0) {
                 // TODO: 15.05.16 remove this after database upgrade
-                //mRemindItem.setUID((int) System.currentTimeMillis());
                 mRemindItem.setUID(mItemKey.hashCode());
             }
             Firebase updateItemRef = firebaseRef.child(mItemKey);
             updateItemRef.setValue(mRemindItem);
         } else {
             // create item
-            //mRemindItem.setUID((int) System.currentTimeMillis());
             Firebase newItemRef = firebaseRef.push();
             mItemKey = newItemRef.getKey();
             mRemindItem.setUID(mItemKey.hashCode());

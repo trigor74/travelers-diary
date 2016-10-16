@@ -33,6 +33,7 @@ import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.services.ReminderOnBootSetterService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +73,10 @@ public class BaseActivity extends AppCompatActivity implements
                 }
             }
         };
+
+        //load and set all reminder alarms
+        Intent service = new Intent(getApplicationContext(), ReminderOnBootSetterService.class);
+        getApplicationContext().startService(service);
 
         mActiveTravelListener = new ValueEventListener() {
             @Override

@@ -56,6 +56,9 @@ public class AlarmSetterService extends IntentService {
                 final String title = intent.getStringExtra(EXTRA_TITLE);
                 final long time = intent.getLongExtra(EXTRA_TIME, System.currentTimeMillis());
                 handleSetAlarm(time, createTimePendingIntent(id, title, time));
+            } else if (ACTION_SET_GEOFENCE.equals(action)) {
+                // TODO: 16.10.16 handle geofences
+                handleSetGeofence();
             } else if (ACTION_CANCEL_ALARM_GEOFENCE.equals(action)) {
                 final int id = intent.getIntExtra(EXTRA_UID, 0);
                 handleCancelAlarmGeofence(createTimePendingIntent(id, "", 0));
@@ -68,13 +71,17 @@ public class AlarmSetterService extends IntentService {
         intent.putExtra(NotificationIntentService.KEY_UID, uid);
         intent.putExtra(NotificationIntentService.KEY_TITLE, title);
         intent.putExtra(NotificationIntentService.KEY_TIME, time);
-        PendingIntent pendingIntent = PendingIntent.getService(this, uid, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(this, uid, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return pendingIntent;
     }
 
     private void handleSetAlarm(long time, PendingIntent pendingIntent) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+    }
+
+    private void handleSetGeofence() {
+        // TODO: 16.10.16 handle geofences
     }
 
     private void handleCancelAlarmGeofence(PendingIntent pendingIntent) {
