@@ -42,6 +42,7 @@ import java.util.Map;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import timber.log.Timber;
 
 
 public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnConnectionFailedListener {
@@ -82,9 +83,6 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     public void init(AppCompatActivity activity) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        firebaseRef = new Firebase(Constants.FIREBASE_URL);
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                 .requestScopes(new Scope(Scopes.PLUS_ME))
@@ -123,6 +121,9 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     public void start(Context context) {
         this.context = context;
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        firebaseRef = new Firebase(Constants.FIREBASE_URL);
+
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient);
         if (opr.isDone()) {
             /**
@@ -152,7 +153,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
-        Log.d("Login", "onConnectionFailed:" + connectionResult);
+        Timber.d("onConnectionFailed: %s", connectionResult);
     }
 
     private void handleGoogleSignInResult(GoogleSignInResult result) {
@@ -208,7 +209,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                 try {
                     coverUrl = getCoverImageUrl(googleId);
                 } catch (Exception e) {
-                    Log.e("Login", e.getLocalizedMessage(), e);
+                    Timber.e(e, e.getLocalizedMessage());
                 }
 
                 result.put("token", token);
