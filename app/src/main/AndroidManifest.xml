@@ -30,8 +30,10 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d8d1756cffd2e4a36efbab0dcae68cdaf8c323d6" />
-        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+        <!--
+             ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
+        -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -97,7 +99,11 @@
             android:name=".services.WeatherIntentService"
             android:exported="false" />
         <service
-            android:name=".services.NotificationService"
+            android:name=".services.NotificationIntentService"
             android:exported="false" />
+        <service
+            android:name=".services.AlarmSetterService"
+            android:exported="false"></service>
     </application>
+
 </manifest>

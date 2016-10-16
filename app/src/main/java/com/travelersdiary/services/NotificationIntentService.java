@@ -1,38 +1,33 @@
 package com.travelersdiary.services;
 
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Intent;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 
 import com.travelersdiary.R;
 import com.travelersdiary.activities.MainActivity;
-import com.travelersdiary.fragments.ReminderItemFragment;
 
 import java.util.Calendar;
 import java.util.Locale;
 
-public class NotificationService extends Service {
-    // TODO: 15.05.16 change to IntentService
+public class NotificationIntentService extends IntentService {
 
-    final static String tag = "Notification Service";
+    public static final String KEY_UID = "KEY_UID";
+    public static final String KEY_TITLE = "KEY_TITLE";
+    public static final String KEY_TIME = "KEY_TIME";
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    public NotificationIntentService() {
+        super("NotificationService");
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        //TODO: new extras not showing in notification when item saved
-        int id = intent.getIntExtra(ReminderItemFragment.KEY_UID, 0);
-        String title = intent.getStringExtra(ReminderItemFragment.KEY_TITLE);
-        long time = intent.getLongExtra(ReminderItemFragment.KEY_TIME, System.currentTimeMillis());
+    protected void onHandleIntent(Intent intent) {
+        int id = intent.getIntExtra(KEY_UID, 0);
+        String title = intent.getStringExtra(KEY_TITLE);
+        long time = intent.getLongExtra(KEY_TIME, System.currentTimeMillis());
 
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(time);
@@ -51,9 +46,5 @@ public class NotificationService extends Service {
                 .build();
 
         notificationManager.notify(id, notification);
-
-        stopSelf();
-        return START_NOT_STICKY;
     }
-
 }

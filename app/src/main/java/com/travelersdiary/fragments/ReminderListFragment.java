@@ -1,5 +1,6 @@
 package com.travelersdiary.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
@@ -33,6 +34,7 @@ import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
+import com.travelersdiary.services.AlarmSetterService;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -51,6 +53,7 @@ public class ReminderListFragment extends Fragment {
     private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
 
+    private static Context mContext;
     private static ActionMode mDeleteMode = null;
     private static ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
         @Override
@@ -67,8 +70,15 @@ public class ReminderListFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.menu_item_delete) {
-                for (Firebase ref :
-                        (List<Firebase>) mAdapter.getSelectedItemsRef()) {
+//                for (Firebase ref :
+//                        (List<Firebase>) mAdapter.getSelectedItemsRef()) {
+//                    ref.removeValue();
+//                }
+                for (int key :
+                        (List<Integer>) mAdapter.getSelectedItems()) {
+                    ReminderItem reminderItem = (ReminderItem) mAdapter.getItem(key);
+                    AlarmSetterService.cancelAlarmGeofence(mContext, reminderItem);
+                    Firebase ref = mAdapter.getRef(key);
                     ref.removeValue();
                 }
                 mode.finish();
@@ -97,6 +107,8 @@ public class ReminderListFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mContext = getActivity().getApplicationContext();
 
         // LayoutManager
         mLayoutManager = new LinearLayoutManager(getContext());

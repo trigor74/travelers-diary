@@ -1,8 +1,6 @@
 package com.travelersdiary.fragments;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -55,7 +53,7 @@ import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.models.TodoTask;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
-import com.travelersdiary.services.NotificationService;
+import com.travelersdiary.services.AlarmSetterService;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
@@ -100,10 +98,6 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
     AppCompatCheckBox mCompletedCheckBox;
     @Bind(R.id.remind_item_task)
     RecyclerView mTodoItemTask;
-
-    public static final String KEY_UID = "hash";
-    public static final String KEY_TITLE = "title";
-    public static final String KEY_TIME = "time";
 
     private static final float PERCENTAGE_TO_SHOW_TITLE_AT_TOOLBAR = 0.3f;
     private static final int ALPHA_ANIMATIONS_DURATION = 200;
@@ -796,34 +790,34 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
         if (mItemKey != null && !mItemKey.isEmpty()) {
             // update item
-            if (mRemindItem.getUID() <= 0) {
+            if (mRemindItem.getUID() == 0) {
                 // TODO: 15.05.16 remove this after database upgrade
-                mRemindItem.setUID((int) System.currentTimeMillis());
+                //mRemindItem.setUID((int) System.currentTimeMillis());
+                mRemindItem.setUID(mItemKey.hashCode());
             }
             Firebase updateItemRef = firebaseRef.child(mItemKey);
             updateItemRef.setValue(mRemindItem);
         } else {
             // create item
-            mRemindItem.setUID((int) System.currentTimeMillis());
+            //mRemindItem.setUID((int) System.currentTimeMillis());
             Firebase newItemRef = firebaseRef.push();
-            newItemRef.setValue(mRemindItem);
             mItemKey = newItemRef.getKey();
+            mRemindItem.setUID(mItemKey.hashCode());
+            newItemRef.setValue(mRemindItem);
         }
 
         if (mRemindItem.isActive()) {
-            Intent myIntent = new Intent(getActivity().getApplicationContext(), NotificationService.class);
-            int uid = mRemindItem.getUID();
-            myIntent.putExtra(KEY_UID, uid);
-            myIntent.putExtra(KEY_TITLE, mRemindItem.getTitle());
-            myIntent.putExtra(KEY_TIME, mRemindItem.getTime());
-
-            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-            PendingIntent pendingIntent = PendingIntent.getService(getActivity().getApplicationContext(), uid, myIntent, 0);
-            if (mRemindItem.getTime() != 0 && mRemindItem.getTime() > System.currentTimeMillis()) {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, mRemindItem.getTime(), pendingIntent);
+            if (!mRemindItem.isCompleted()
+                    && (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType()) ||
+                    Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType()))
+                    && mRemindItem.getTime() != 0
+                    && mRemindItem.getTime() > System.currentTimeMillis()) {
+                AlarmSetterService.setAlarm(getActivity().getApplicationContext(), mRemindItem);
             } else {
-                alarmManager.cancel(pendingIntent);
+                AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
             }
+        } else {
+            AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         }
 
         return true;
@@ -832,7 +826,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
     private void delete() {
         Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
         firebaseRef.removeValue();
-        // TODO: 15.05.16 cancel alarm manager
+        AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         getActivity().finish();
         Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
