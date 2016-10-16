@@ -1,83 +1,97 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="192dp"
-    android:foreground="?android:attr/selectableItemBackground">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/travel_background"
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.travelersdiary.travel.list.TravelListItemViewModel" />
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/travel_cover_1"
-        android:tint="#22000000" />
-
-    <ImageView
-        android:id="@+id/active_travel_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:padding="16dp"
-        android:src="@drawable/ic_explore_black_24dp"
-        android:tint="@color/white" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/travel_title"
-            style="@style/TextShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxLines="3"
-            android:text="Great Britain"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/travel_date"
-            style="@style/TextShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxLines="1"
-            android:paddingTop="6dp"
-            android:text="Dec 14 - Jan 28, 2015"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/travel_selected_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:background="#80000000"
-        android:visibility="invisible">
+        android:layout_height="192dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:onClick="@{() -> viewModel.onItemClick()}">
 
         <ImageView
+            android:id="@+id/travel_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/travel_cover_1"
+            android:tint="#22000000"
+            bind:travelImage="@{viewModel.travel}" />
+
+        <ImageView
+            android:id="@+id/active_travel_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
+            android:layout_gravity="end"
             android:padding="16dp"
-            android:src="@drawable/ic_tick_circle_green"
-            android:tint="@color/white" />
+            android:src="@drawable/ic_explore_black_24dp"
+            android:tint="@color/white"
+            android:visibility="@{viewModel.active}" />
 
-    </RelativeLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <!--separator-->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom"
-        android:background="@color/white" />
-</FrameLayout>
+            <TextView
+                android:id="@+id/travel_title"
+                style="@style/TextShadow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="3"
+                android:text="@{viewModel.title}"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/travel_date"
+                style="@style/TextShadow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingTop="6dp"
+                android:text="@{viewModel.date}"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:visibility="@{viewModel.dateVisibility}" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/travel_selected_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:background="#80000000"
+            android:visibility="invisible">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:padding="16dp"
+                android:src="@drawable/ic_tick_circle_green"
+                android:tint="@color/white" />
+
+        </RelativeLayout>
+
+        <!--separator-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/white" />
+    </FrameLayout>
+</layout>

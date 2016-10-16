@@ -6,12 +6,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.travelersdiary.R;
-import com.travelersdiary.activities.MainActivity;
-import com.travelersdiary.activities.TravelActivity;
-import com.travelersdiary.fragments.DiaryListFragment;
-import com.travelersdiary.fragments.MapFragment;
-import com.travelersdiary.fragments.ReminderListFragment;
-import com.travelersdiary.fragments.TravelsListFragment;
 
 import java.util.ArrayList;
 import java.util.List;

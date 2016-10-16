@@ -1,4 +1,4 @@
-package com.travelersdiary.activities;
+package com.travelersdiary.travel;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -27,6 +27,10 @@ import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
+import com.travelersdiary.activities.BaseActivity;
+import com.travelersdiary.activities.DiaryActivity;
+import com.travelersdiary.activities.EditTravelActivity;
+import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.fragments.DiaryListFragment;

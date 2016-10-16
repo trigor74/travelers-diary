@@ -34,6 +34,7 @@ import com.travelersdiary.Utils;
 import com.travelersdiary.login.LoginActivity;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.travel.list.TravelListActivity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -323,7 +324,7 @@ public class BaseActivity extends AppCompatActivity implements
         Intent intent;
         switch (item.getItemId()) {
             case R.id.nav_travels:
-                intent = new Intent(this, MainActivity.class);
+                intent = new Intent(this, TravelListActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
