@@ -106,6 +106,9 @@
             android:name=".services.AlarmSetterService"
             android:exported="false" />
         <service
+            android:name=".services.GeofenceSetterService"
+            android:exported="false" />
+        <service
             android:name=".services.ReminderOnBootSetterService"
             android:exported="false" />
 
