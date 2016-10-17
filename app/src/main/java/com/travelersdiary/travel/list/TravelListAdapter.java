@@ -1,6 +1,5 @@
 package com.travelersdiary.travel.list;
 
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -29,7 +28,7 @@ public class TravelListAdapter extends FirebaseRecyclerAdapter<Travel, TravelLis
         public ViewHolder(View v) {
             super(v);
             binding = DataBindingUtil.bind(v);
-//            v.setLongClickable(true);
+            v.setLongClickable(true);
         }
 
         void bindTravel(Travel travel, String key) {

@@ -20,8 +20,8 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+
         viewModel = new LoginViewModel(this);
 
         binding.setViewModel(viewModel);

@@ -1,6 +1,7 @@
 package com.travelersdiary.travel.list;
 
 import android.content.Intent;
+import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.BindingAdapter;
 import android.databinding.ObservableBoolean;
@@ -18,7 +19,7 @@ import com.travelersdiary.travel.TravelActivity;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class TravelListItemViewModel {
+public class TravelListItemViewModel extends BaseObservable {
 
     public ObservableBoolean dateVisibility = new ObservableBoolean(false);
 

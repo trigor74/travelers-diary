@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="192dp"
         android:foreground="?android:attr/selectableItemBackground"
-        android:onClick="@{() -> viewModel.onItemClick()}">
+        android:onClick="@{(v) -> viewModel.onItemClick(v)}">
 
         <ImageView
             android:id="@+id/travel_background"

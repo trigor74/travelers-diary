@@ -62,15 +62,8 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
     @Bind(R.id.travel_activity_fab)
     FloatingActionButton mTravelActivityFab;
 
-    private String mTravelTitle;
-    private String mTravelId;
-    private String mTravelDescription;
-    private String mTravelDefaultCover;
-    private String mTravelUserCover;
-    private long mTravelStartTime;
-    private long mTravelStopTime;
-    private long mTravelCreationTime;
-    private boolean isTravelActive;
+    private Travel travel;
+    private String travelId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,15 +71,8 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         setContentView(R.layout.activity_travel);
         BusProvider.bus().register(this);
 
-        mTravelTitle = getIntent().getStringExtra(Constants.KEY_TRAVEL_TITLE);
-        mTravelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
-        mTravelDescription = getIntent().getStringExtra(Constants.KEY_TRAVEL_DESCRIPTION);
-        mTravelDefaultCover = getIntent().getStringExtra(Constants.KEY_TRAVEL_DEFAULT_COVER);
-        mTravelUserCover = getIntent().getStringExtra(Constants.KEY_TRAVEL_USER_COVER);
-        isTravelActive = getIntent().getBooleanExtra(Constants.KEY_TRAVEL_IS_ACTIVE, false);
-        mTravelCreationTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_CREATION_TIME, -1);
-        mTravelStartTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_START_TIME, -1);
-        mTravelStopTime = getIntent().getLongExtra(Constants.KEY_TRAVEL_STOP_TIME, -1);
+        travel = (Travel) getIntent().getSerializableExtra("Travel");
+        travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
         setSupportActionBar(mToolbar);
         setupNavigationView(mToolbar);
@@ -94,28 +80,25 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
-            supportActionBar.setTitle(mTravelTitle);
+            supportActionBar.setTitle(travel.getTitle());
         }
 
         setupViewPager();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-        if (mTravelId != null) {
-            new Firebase(Utils.getFirebaseUserTravelsUrl(userUID)).child(mTravelId).addValueEventListener(new ValueEventListener() {
+        if (travelId != null) {
+            new Firebase(Utils.getFirebaseUserTravelsUrl(userUID)).child(travelId).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Travel travel = dataSnapshot.getValue(Travel.class);
+                    Travel newTravel = dataSnapshot.getValue(Travel.class);
 
-                    if (travel != null) {
+                    if (newTravel != null) {
+                        travel = newTravel;
+
                         if (getSupportActionBar() != null) {
                             getSupportActionBar().setTitle(travel.getTitle());
                         }
-
-                        isTravelActive = travel.isActive();
-                        mTravelCreationTime = travel.getCreationTime();
-                        mTravelStartTime = travel.getStart();
-                        mTravelStopTime = travel.getStop();
                     }
                 }
 
@@ -196,7 +179,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (isTravelActive) {
+        if (travel.isActive()) {
             menu.findItem(R.id.action_travel_start).setVisible(false);
             menu.findItem(R.id.action_travel_stop).setVisible(true);
         } else {
@@ -213,25 +196,22 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
                 finish();
                 return true;
             case R.id.action_travel_start:
-                Utils.startTravel(this, mTravelId, getString(R.string.default_travel_title));
+                Utils.startTravel(this, travelId, getString(R.string.default_travel_title));
                 return true;
             case R.id.action_travel_stop:
-                Utils.stopTravel(this, mTravelId);
+                Utils.stopTravel(this, travelId);
                 return true;
             case R.id.action_travel_edit:
                 Intent editIntent = new Intent(this, EditTravelActivity.class);
-                editIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
-                editIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
-                editIntent.putExtra(Constants.KEY_TRAVEL_DESCRIPTION, mTravelDescription);
-                editIntent.putExtra(Constants.KEY_TRAVEL_DEFAULT_COVER, mTravelDefaultCover);
-                editIntent.putExtra(Constants.KEY_TRAVEL_USER_COVER, mTravelUserCover);
+                editIntent.putExtra("Travel", travel);
+                editIntent.putExtra(Constants.KEY_TRAVEL_REF, travelId);
                 startActivity(editIntent);
                 return true;
             case R.id.action_travel_info:
                 showInfo();
                 return true;
             case R.id.action_travel_delete:
-                Utils.deleteTravel(this, mTravelId);
+                Utils.deleteTravel(this, travelId);
                 return true;
             default:
         }
@@ -244,36 +224,36 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         dialog.setTitle("Travel info");
 
         TextView title = (TextView) dialog.findViewById(R.id.travel_title_info);
-        title.setText(mTravelTitle);
+        title.setText(travel.getTitle());
         TextView description = (TextView) dialog.findViewById(R.id.travel_description_info);
-        description.setText(mTravelDescription);
+        description.setText(travel.getDescription());
 
         LinearLayout startLayout = (LinearLayout) dialog.findViewById(R.id.start_time_layout);
         TextView start = (TextView) dialog.findViewById(R.id.travel_start_time);
-        if (mTravelStartTime != -1) {
+        if (travel.getStart() != -1) {
             startLayout.setVisibility(View.VISIBLE);
-            start.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelStartTime),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelStartTime)));
+            start.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getStart()),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getStart())));
         } else {
             startLayout.setVisibility(View.GONE);
         }
 
         LinearLayout stopLayout = (LinearLayout) dialog.findViewById(R.id.end_time_layout);
         TextView stop = (TextView) dialog.findViewById(R.id.travel_stop_time);
-        if (mTravelStopTime != -1) {
+        if (travel.getStop() != -1) {
             stopLayout.setVisibility(View.VISIBLE);
-            stop.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelStopTime),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelStopTime)));
+            stop.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getStop()),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getStop())));
         } else {
             stopLayout.setVisibility(View.GONE);
         }
 
         LinearLayout creationLayout = (LinearLayout) dialog.findViewById(R.id.creation_time_layout);
         TextView creation = (TextView) dialog.findViewById(R.id.travel_creation_time);
-        if (mTravelCreationTime != -1) {
+        if (travel.getCreationTime() != -1) {
             creationLayout.setVisibility(View.VISIBLE);
-            creation.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(mTravelCreationTime),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(mTravelCreationTime)));
+            creation.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getCreationTime()),
+                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getCreationTime())));
         } else {
             creationLayout.setVisibility(View.GONE);
         }
@@ -295,14 +275,14 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
             case 0: // Diary Tab
                 Intent diaryIntent = new Intent(this, DiaryActivity.class);
                 diaryIntent.putExtra(DiaryActivity.NEW_DIARY_NOTE, true);
-                diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
-                diaryIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
+                diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, travel.getTitle());
+                diaryIntent.putExtra(Constants.KEY_TRAVEL_REF, travelId);
                 startActivity(diaryIntent);
                 break;
             case 1: // Reminder Tab
                 Intent remindItemIntent = new Intent(this, ReminderItemActivity.class);
-                remindItemIntent.putExtra(Constants.KEY_TRAVEL_TITLE, mTravelTitle);
-                remindItemIntent.putExtra(Constants.KEY_TRAVEL_REF, mTravelId);
+                remindItemIntent.putExtra(Constants.KEY_TRAVEL_TITLE, travel.getTitle());
+                remindItemIntent.putExtra(Constants.KEY_TRAVEL_REF, travelId);
                 startActivity(remindItemIntent);
                 break;
             case 2: // Map Tab
