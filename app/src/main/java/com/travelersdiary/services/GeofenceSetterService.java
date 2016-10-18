@@ -2,6 +2,7 @@ package com.travelersdiary.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -17,7 +18,9 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.travelersdiary.Constants;
 import com.travelersdiary.models.LocationPoint;
+import com.travelersdiary.models.ReminderItem;
 
 public class GeofenceSetterService extends Service implements
         GoogleApiClient.ConnectionCallbacks,
@@ -45,6 +48,23 @@ public class GeofenceSetterService extends Service implements
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public static void setGeofence(Context context, ReminderItem reminderItem) {
+        Intent intent = new Intent(context, GeofenceSetterService.class);
+        intent.setAction(ACTION_SET_GEOFENCE);
+        intent.putExtra(EXTRA_UID, reminderItem.getUID());
+        intent.putExtra(EXTRA_TITLE, reminderItem.getTitle());
+        intent.putExtra(EXTRA_LOCATION_TITLE, reminderItem.getWaypoint().getTitle());
+        intent.putExtra(EXTRA_LOCATION_POINT, reminderItem.getWaypoint().getLocation());
+        context.startService(intent);
+    }
+
+    public static void cancelGeofence(Context context, ReminderItem reminderItem) {
+        Intent intent = new Intent(context, GeofenceSetterService.class);
+        intent.setAction(ACTION_CANCEL_GEOFENCE);
+        intent.putExtra(EXTRA_UID, reminderItem.getUID());
+        context.startService(intent);
     }
 
     @Override
@@ -78,7 +98,6 @@ public class GeofenceSetterService extends Service implements
             return START_STICKY;
         }
 
-        // TODO: 18.10.16 !!! add CHECK GoogleApiConnection and add logic for not connected client
         final int uid = intent.getIntExtra(EXTRA_UID, 0);
 
         switch (action) {
@@ -87,11 +106,18 @@ public class GeofenceSetterService extends Service implements
                 String locationTitle = intent.getStringExtra(EXTRA_LOCATION_TITLE);
                 LocationPoint locationPoint = (LocationPoint) intent.getSerializableExtra(GeofenceSetterService.EXTRA_LOCATION_POINT);
                 int radius = intent.getIntExtra(EXTRA_RADIUS, DEFAULT_RADIUS);
-
-                addGeofence(uid, title, locationTitle, locationPoint, radius);
+                if (mGoogleApiClient.isConnected()) {
+                    addGeofence(uid, title, locationTitle, locationPoint, radius);
+                } else {
+                    // TODO: 18.10.16 add logic when GoogleApiClient not connected
+                }
                 break;
             case ACTION_CANCEL_GEOFENCE:
-                removeGeofence(uid);
+                if (mGoogleApiClient.isConnected()) {
+                    removeGeofence(uid);
+                } else {
+                    // TODO: 18.10.16 add logic when GoogleApiClient not connected
+                }
                 break;
         }
 
@@ -100,9 +126,10 @@ public class GeofenceSetterService extends Service implements
 
     private PendingIntent getGeofencePendingIntent(int uid, String title, String locationTitle) {
         Intent intent = new Intent(this, NotificationIntentService.class);
+        intent.putExtra(NotificationIntentService.KEY_UID, uid);
+        intent.putExtra(NotificationIntentService.KEY_TYPE, Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
         intent.putExtra(NotificationIntentService.KEY_TITLE, title);
-        // TODO: 18.10.16 add extra logic for geofences to NotificationIntentService
-        //intent.putExtra(NotificationIntentService.KEY_LOCATION_TITLE, locationTitle);
+        intent.putExtra(NotificationIntentService.KEY_LOCATION_TITLE, locationTitle);
         return PendingIntent.getService(this, uid, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

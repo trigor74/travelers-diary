@@ -35,6 +35,7 @@ import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.services.AlarmSetterService;
+import com.travelersdiary.services.GeofenceSetterService;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -73,7 +74,16 @@ public class ReminderListFragment extends Fragment {
                 for (int key :
                         (List<Integer>) mAdapter.getSelectedItems()) {
                     ReminderItem reminderItem = (ReminderItem) mAdapter.getItem(key);
-                    AlarmSetterService.cancelAlarmGeofence(mContext, reminderItem);
+
+//                    mode.getCustomView().getContext();
+//                    item.getActionView().getContext();
+                    Utils.disableAlarmGeofence(item.getActionView().getContext(), reminderItem);
+
+//                    if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
+//                        AlarmSetterService.cancelAlarm(mContext, reminderItem);
+//                    } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
+//                        GeofenceSetterService.cancelGeofence(mContext, reminderItem);
+//                    }
                     Firebase ref = mAdapter.getRef(key);
                     ref.removeValue();
                 }
@@ -132,7 +142,7 @@ public class ReminderListFragment extends Fragment {
                 ReminderListFragment.ViewHolder.class,
                 query) {
             @Override
-            protected void populateViewHolder(final ReminderListFragment.ViewHolder holder, ReminderItem model, final int position) {
+            protected void populateViewHolder(final ReminderListFragment.ViewHolder holder, final ReminderItem model, final int position) {
 
                 holder.completedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -142,8 +152,10 @@ public class ReminderListFragment extends Fragment {
                         getRef(position).updateChildren(map);
 
                         if (isChecked) {
+                            Utils.disableAlarmGeofence(getContext(), model);
                             holder.title.setPaintFlags(holder.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         } else {
+                            Utils.enableAlarmGeofence(getContext(), model);
                             holder.title.setPaintFlags(holder.title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                         }
                     }

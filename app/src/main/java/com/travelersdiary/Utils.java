@@ -34,6 +34,9 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.travelersdiary.activities.BaseActivity;
 import com.travelersdiary.models.Photo;
+import com.travelersdiary.models.ReminderItem;
+import com.travelersdiary.services.AlarmSetterService;
+import com.travelersdiary.services.GeofenceSetterService;
 import com.travelersdiary.services.LocationTrackingService;
 
 import java.io.File;
@@ -346,4 +349,19 @@ public class Utils {
                 .show();
     }
 
+    public static void disableAlarmGeofence(Context context, ReminderItem reminderItem) {
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
+            AlarmSetterService.cancelAlarm(context, reminderItem);
+        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
+            GeofenceSetterService.cancelGeofence(context, reminderItem);
+        }
+    }
+
+    public static void enableAlarmGeofence(Context context, ReminderItem reminderItem) {
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
+            AlarmSetterService.setAlarm(context, reminderItem);
+        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
+            GeofenceSetterService.setGeofence(context, reminderItem);
+        }
+    }
 }

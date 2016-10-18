@@ -44,13 +44,8 @@ public class ReminderOnBootSetterService extends Service {
                             ReminderItem reminderItem = child.getValue(ReminderItem.class);
                             if (!reminderItem.getType().isEmpty()
                                     && !reminderItem.isCompleted()
-                                    && (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType()) ||
-                                    Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType()))
-                                    && reminderItem.getTime() != 0
-                                    && reminderItem.getTime() > System.currentTimeMillis()
                                     && reminderItem.getUID() != 0) {
-                                // TODO: 16.10.16 add geofence and remove check time
-                                AlarmSetterService.setAlarm(context.getApplicationContext(), reminderItem);
+                                Utils.enableAlarmGeofence(context.getApplicationContext(), reminderItem);
                             }
                         }
                     }

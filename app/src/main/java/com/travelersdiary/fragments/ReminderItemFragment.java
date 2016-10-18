@@ -804,18 +804,10 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
             newItemRef.setValue(mRemindItem);
         }
 
-        if (mRemindItem.isActive()) {
-            if (!mRemindItem.isCompleted()
-                    && (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(mRemindItem.getType()) ||
-                    Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(mRemindItem.getType()))
-                    && mRemindItem.getTime() != 0
-                    && mRemindItem.getTime() > System.currentTimeMillis()) {
-                AlarmSetterService.setAlarm(getActivity().getApplicationContext(), mRemindItem);
-            } else {
-                AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
-            }
+        if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
+            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         } else {
-            AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
+            Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         }
 
         return true;
@@ -824,7 +816,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
     private void delete() {
         Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
         firebaseRef.removeValue();
-        AlarmSetterService.cancelAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
+        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         getActivity().finish();
         Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }
