@@ -37,6 +37,9 @@ public class NotificationIntentService extends IntentService {
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
             // TODO: 18.10.16 geofence notification
             String locationTitle = intent.getStringExtra(KEY_LOCATION_TITLE);
+            text = String.format(Locale.getDefault(), "Enter geofence, %s", locationTitle);
+            pendingIntent = PendingIntent.getActivity(getApplicationContext(), uid,
+                    new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
             // TODO: 18.10.16 alarm notification

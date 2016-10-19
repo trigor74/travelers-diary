@@ -75,15 +75,7 @@ public class ReminderListFragment extends Fragment {
                         (List<Integer>) mAdapter.getSelectedItems()) {
                     ReminderItem reminderItem = (ReminderItem) mAdapter.getItem(key);
 
-//                    mode.getCustomView().getContext();
-//                    item.getActionView().getContext();
-                    Utils.disableAlarmGeofence(item.getActionView().getContext(), reminderItem);
-
-//                    if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
-//                        AlarmSetterService.cancelAlarm(mContext, reminderItem);
-//                    } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
-//                        GeofenceSetterService.cancelGeofence(mContext, reminderItem);
-//                    }
+                    Utils.disableAlarmGeofence(mContext, reminderItem);
                     Firebase ref = mAdapter.getRef(key);
                     ref.removeValue();
                 }

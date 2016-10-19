@@ -39,6 +39,7 @@ public class GeofenceSetterService extends Service implements
     private static final String EXTRA_RADIUS = "EXTRA_RADIUS";
 
     private static final int DEFAULT_RADIUS = 500;
+    private static final int DEFAULT_NOTIFICATION_RESPONSIVENESS = 2000; // 2 second
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -57,6 +58,7 @@ public class GeofenceSetterService extends Service implements
         intent.putExtra(EXTRA_TITLE, reminderItem.getTitle());
         intent.putExtra(EXTRA_LOCATION_TITLE, reminderItem.getWaypoint().getTitle());
         intent.putExtra(EXTRA_LOCATION_POINT, reminderItem.getWaypoint().getLocation());
+        intent.putExtra(EXTRA_RADIUS, reminderItem.getDistance());
         context.startService(intent);
     }
 
@@ -139,6 +141,7 @@ public class GeofenceSetterService extends Service implements
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .setCircularRegion(latitude, longitude, (float) radius)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setNotificationResponsiveness(DEFAULT_NOTIFICATION_RESPONSIVENESS)
                 .build();
     }
 

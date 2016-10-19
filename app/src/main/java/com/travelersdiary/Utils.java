@@ -350,11 +350,8 @@ public class Utils {
     }
 
     public static void disableAlarmGeofence(Context context, ReminderItem reminderItem) {
-        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
-            AlarmSetterService.cancelAlarm(context, reminderItem);
-        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
-            GeofenceSetterService.cancelGeofence(context, reminderItem);
-        }
+        AlarmSetterService.cancelAlarm(context, reminderItem);
+        GeofenceSetterService.cancelGeofence(context, reminderItem);
     }
 
     public static void enableAlarmGeofence(Context context, ReminderItem reminderItem) {
