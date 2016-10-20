@@ -50,6 +50,7 @@ public class GeofenceSetterService extends Service implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private boolean isLocationUpdates = false;
 
     private Map<PendingIntent, GeofencingRequest> mGeofencingRequestsMap = new HashMap<>();
 
@@ -179,6 +180,14 @@ public class GeofenceSetterService extends Service implements
         if (!mGeofencingRequestsMap.containsKey(pendingIntent)) {
             mGeofencingRequestsMap.put(pendingIntent, geofencingRequest);
             if (mGoogleApiClient.isConnected()) {
+
+                if (!isLocationUpdates) {
+                    // requestLocationUpdates for getting current position
+                    LocationServices.FusedLocationApi.requestLocationUpdates(
+                            mGoogleApiClient, mLocationRequest, this);
+                    isLocationUpdates = true;
+                }
+
                 LocationServices.GeofencingApi.addGeofences(
                         mGoogleApiClient,
                         geofencingRequest,
@@ -196,13 +205,13 @@ public class GeofenceSetterService extends Service implements
                         mGoogleApiClient,
                         pendingIntent
                 ).setResultCallback(this);
+
+                if (mGeofencingRequestsMap.isEmpty() && isLocationUpdates) {
+                    LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+                    isLocationUpdates = false;
+                    stopSelf();
+                }
             }
-        }
-        if (mGeofencingRequestsMap.isEmpty()) {
-            if (mGoogleApiClient.isConnected()) {
-                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            }
-            stopSelf();
         }
     }
 
@@ -213,6 +222,7 @@ public class GeofenceSetterService extends Service implements
             // requestLocationUpdates for getting current position
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, mLocationRequest, this);
+            isLocationUpdates = true;
 
             for (Map.Entry<PendingIntent, GeofencingRequest> entry :
                     mGeofencingRequestsMap.entrySet()) {
