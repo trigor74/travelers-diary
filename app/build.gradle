@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        maven { url 'https://maven.fabric.io/public' }
+        maven { url 'http://s3.amazonaws.com/fabric-artifacts/public' }
     }
 
     dependencies {
@@ -11,7 +11,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
-    maven { url 'https://maven.fabric.io/public' }
+    maven { url 'http://s3.amazonaws.com/fabric-artifacts/public' }
 }
 
 apply plugin: 'android-apt'
@@ -133,7 +133,7 @@ dependencies {
 
     /*Custom views*/
     compile 'de.hdodenhof:circleimageview:2.0.0'
-    compile 'com.1gravity:android-rteditor:1.4.0'
+    compile 'com.1gravity:android-rteditor:1.6.2'
     compile 'com.commit451:PhotoView:1.2.4'
     compile 'com.wdullaer:materialdatetimepicker:2.1.1'
     compile 'com.github.markushi:circlebutton:1.1'
@@ -141,7 +141,6 @@ dependencies {
     /*Firebase*/
     compile 'com.firebase:firebase-client-android:2.5.2'
     compile 'com.firebaseui:firebase-ui:0.3.1'
-    compile 'com.firebase:geofire:1.1.+'
 
     /*Others*/
     compile 'com.jakewharton:butterknife:7.0.1'
@@ -153,7 +152,7 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.0.1'
     compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
     compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }
 
