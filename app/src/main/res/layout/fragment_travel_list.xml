@@ -1,4 +1,5 @@
-<layout xmlns:bind="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -7,16 +8,16 @@
             type="com.travelersdiary.travel.list.TravelListViewModel" />
     </data>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
         <com.travelersdiary.recyclerview.FirebaseContextMenuRecyclerView
             android:id="@+id/travels_list"
-            bind:adapter="@{viewModel.adapter}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical"
+            bind:adapter="@{viewModel.adapter}" />
     </LinearLayout>
 </layout>

@@ -3,21 +3,19 @@ package com.travelersdiary.travel;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -28,11 +26,11 @@ import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
 import com.travelersdiary.activities.BaseActivity;
-import com.travelersdiary.activities.DiaryActivity;
 import com.travelersdiary.activities.EditTravelActivity;
-import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.ViewPagerAdapter;
 import com.travelersdiary.bus.BusProvider;
+import com.travelersdiary.databinding.ActivityTravelBinding;
+import com.travelersdiary.databinding.DialogInfoBinding;
 import com.travelersdiary.fragments.DiaryListFragment;
 import com.travelersdiary.fragments.MapFragment;
 import com.travelersdiary.fragments.ReminderListFragment;
@@ -42,40 +40,31 @@ import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.ui.FABScrollBehavior;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import timber.log.Timber;
 
-import butterknife.Bind;
-import butterknife.OnClick;
-
-public class TravelActivity extends BaseActivity implements IFABCallback {
-
-    @Bind(R.id.travel_activity_toolbar)
-    Toolbar mToolbar;
-
-    @Bind(R.id.travel_tab_layout)
-    TabLayout mTabLayout;
-
-    @Bind(R.id.travel_view_pager)
-    ViewPager mViewPager;
-
-    @Bind(R.id.travel_activity_fab)
-    FloatingActionButton mTravelActivityFab;
+public class TravelActivity extends BaseActivity implements IFABCallback, TravelView {
 
     private Travel travel;
     private String travelId;
 
+    private ActivityTravelBinding binding;
+    private TravelViewModel viewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_travel);
-        BusProvider.bus().register(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_travel);
 
         travel = (Travel) getIntent().getSerializableExtra("Travel");
         travelId = getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
 
-        setSupportActionBar(mToolbar);
-        setupNavigationView(mToolbar);
+        viewModel = new TravelViewModel(this, travel);
+        binding.setViewModel(viewModel);
+
+        BusProvider.bus().register(this);
+
+        setSupportActionBar((Toolbar) binding.travelActivityToolbar);
+        setupNavigationView((Toolbar) binding.travelActivityToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
@@ -83,7 +72,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
             supportActionBar.setTitle(travel.getTitle());
         }
 
-        setupViewPager();
+        setupViewPager(binding.travelTabLayout, binding.travelViewPager);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
@@ -104,31 +93,32 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
 
                 @Override
                 public void onCancelled(FirebaseError firebaseError) {
-
+                    Timber.e("Firebase error: %s", firebaseError.getMessage());
                 }
             });
         }
     }
 
-    public void setupViewPager() {
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.diary_text));
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.reminder_text));
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.map_text));
-        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+    public void setupViewPager(TabLayout tabLayout, final ViewPager viewPager) {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.diary_text));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.reminder_text));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.map_text));
+
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPagerAdapter adapter = new ViewPagerAdapter
-                (getSupportFragmentManager(), TravelActivity.this, mTabLayout.getTabCount());
+                (getSupportFragmentManager(), TravelActivity.this, tabLayout.getTabCount());
 
         adapter.addFragment(new DiaryListFragment());
         adapter.addFragment(new ReminderListFragment());
         adapter.addFragment(new MapFragment());
 
-        mViewPager.setAdapter(adapter);
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
-        mTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                mViewPager.setCurrentItem(tab.getPosition());
+                viewPager.setCurrentItem(tab.getPosition());
 
                 if (tab.getPosition() == 2) {
                     hideFloatingActionButton(true);
@@ -153,7 +143,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
     }
 
     private void finishActionMode(int tabPosition) {
-        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getItem(tabPosition);
+        Fragment fragment = ((ViewPagerAdapter) binding.travelViewPager.getAdapter()).getItem(tabPosition);
         try {
             IActionModeFinishCallback actionModeFinishCallback = (IActionModeFinishCallback) fragment;
             actionModeFinishCallback.finishActionMode();
@@ -165,8 +155,8 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
 
     @Override
     protected void onDrawerOpened(View drawerView) {
-        if (mTabLayout.getSelectedTabPosition() < 2) {
-            finishActionMode(mTabLayout.getSelectedTabPosition());
+        if (binding.travelTabLayout.getSelectedTabPosition() < 2) {
+            finishActionMode(binding.travelTabLayout.getSelectedTabPosition());
         }
         super.onDrawerOpened(drawerView);
     }
@@ -190,6 +180,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         return super.onPrepareOptionsMenu(menu);
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -208,7 +199,7 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
                 startActivity(editIntent);
                 return true;
             case R.id.action_travel_info:
-                showInfo();
+                showInfoDialog();
                 return true;
             case R.id.action_travel_delete:
                 Utils.deleteTravel(this, travelId);
@@ -218,48 +209,16 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showInfo() {
+    @Override
+    public void showInfoDialog() {
         final Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_info);
+
+        DialogInfoBinding binding = DataBindingUtil.inflate(LayoutInflater.from(dialog.getContext()), R.layout.dialog_info, null, false);
+        setContentView(binding.getRoot());
+
         dialog.setTitle("Travel info");
 
-        TextView title = (TextView) dialog.findViewById(R.id.travel_title_info);
-        title.setText(travel.getTitle());
-        TextView description = (TextView) dialog.findViewById(R.id.travel_description_info);
-        description.setText(travel.getDescription());
-
-        LinearLayout startLayout = (LinearLayout) dialog.findViewById(R.id.start_time_layout);
-        TextView start = (TextView) dialog.findViewById(R.id.travel_start_time);
-        if (travel.getStart() != -1) {
-            startLayout.setVisibility(View.VISIBLE);
-            start.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getStart()),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getStart())));
-        } else {
-            startLayout.setVisibility(View.GONE);
-        }
-
-        LinearLayout stopLayout = (LinearLayout) dialog.findViewById(R.id.end_time_layout);
-        TextView stop = (TextView) dialog.findViewById(R.id.travel_stop_time);
-        if (travel.getStop() != -1) {
-            stopLayout.setVisibility(View.VISIBLE);
-            stop.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getStop()),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getStop())));
-        } else {
-            stopLayout.setVisibility(View.GONE);
-        }
-
-        LinearLayout creationLayout = (LinearLayout) dialog.findViewById(R.id.creation_time_layout);
-        TextView creation = (TextView) dialog.findViewById(R.id.travel_creation_time);
-        if (travel.getCreationTime() != -1) {
-            creationLayout.setVisibility(View.VISIBLE);
-            creation.setText(String.format("%s %s", SimpleDateFormat.getDateInstance().format(travel.getCreationTime()),
-                    new SimpleDateFormat("HH:mm", Locale.getDefault()).format(travel.getCreationTime())));
-        } else {
-            creationLayout.setVisibility(View.GONE);
-        }
-
-        Button closeDialog = (Button) dialog.findViewById(R.id.btn_close_info);
-        closeDialog.setOnClickListener(new View.OnClickListener() {
+        binding.btnCloseInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
@@ -269,39 +228,22 @@ public class TravelActivity extends BaseActivity implements IFABCallback {
         dialog.show();
     }
 
-    @OnClick(R.id.travel_activity_fab)
-    public void onFabClick() {
-        switch (mViewPager.getCurrentItem()) {
-            case 0: // Diary Tab
-                Intent diaryIntent = new Intent(this, DiaryActivity.class);
-                diaryIntent.putExtra(DiaryActivity.NEW_DIARY_NOTE, true);
-                diaryIntent.putExtra(Constants.KEY_TRAVEL_TITLE, travel.getTitle());
-                diaryIntent.putExtra(Constants.KEY_TRAVEL_REF, travelId);
-                startActivity(diaryIntent);
-                break;
-            case 1: // Reminder Tab
-                Intent remindItemIntent = new Intent(this, ReminderItemActivity.class);
-                remindItemIntent.putExtra(Constants.KEY_TRAVEL_TITLE, travel.getTitle());
-                remindItemIntent.putExtra(Constants.KEY_TRAVEL_REF, travelId);
-                startActivity(remindItemIntent);
-                break;
-            case 2: // Map Tab
-                break;
-            default:
-        }
+    @Override
+    public int getPagerCurrentItem() {
+        return binding.travelViewPager.getCurrentItem();
     }
 
     @Override
     public void hideFloatingActionButton(boolean hide) {
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mTravelActivityFab.getLayoutParams();
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) binding.travelActivityFab.getLayoutParams();
         if (hide) {
             params.setBehavior(null);
-            mTravelActivityFab.setLayoutParams(params);
-            mTravelActivityFab.hide();
+            binding.travelActivityFab.setLayoutParams(params);
+            binding.travelActivityFab.hide();
         } else {
             params.setBehavior(new FABScrollBehavior());
-            mTravelActivityFab.setLayoutParams(params);
-            mTravelActivityFab.show();
+            binding.travelActivityFab.setLayoutParams(params);
+            binding.travelActivityFab.show();
         }
     }
 

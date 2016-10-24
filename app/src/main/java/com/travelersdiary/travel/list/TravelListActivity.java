@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
@@ -14,32 +15,26 @@ import com.travelersdiary.R;
 import com.travelersdiary.activities.BaseActivity;
 import com.travelersdiary.activities.EditTravelActivity;
 import com.travelersdiary.bus.BusProvider;
+import com.travelersdiary.databinding.ActivityTravelsListBinding;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.services.SyncService;
-
-import butterknife.Bind;
-import butterknife.OnClick;
 
 public class TravelListActivity extends BaseActivity {
     public static final String TRAVELS_LIST_FRAGMENT_TAG = "TRAVELS_LIST_FRAGMENT_TAG";
 
-    @Bind(R.id.main_activity_toolbar)
-    Toolbar mToolbar;
-
-    @OnClick(R.id.main_activity_fab)
-    public void onFabClick() {
-        Intent travelIntent = new Intent(this, EditTravelActivity.class);
-        startActivity(travelIntent);
-    }
+    private ActivityTravelsListBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_travels_list);
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_travels_list);
+        binding.setViewModel(this);
+
         BusProvider.bus().register(this);
 
-        setSupportActionBar(mToolbar);
-        setupNavigationView(mToolbar);
+        setSupportActionBar((Toolbar) binding.travelListActivityToolbar);
+        setupNavigationView((Toolbar) binding.travelListActivityToolbar);
 
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
@@ -75,6 +70,11 @@ public class TravelListActivity extends BaseActivity {
     @Override
     protected boolean useDrawerToggle() {
         return true;
+    }
+
+    public void onFabClick() {
+        Intent travelIntent = new Intent(this, EditTravelActivity.class);
+        startActivity(travelIntent);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

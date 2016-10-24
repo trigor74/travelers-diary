@@ -1,110 +1,126 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="16dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView
-        android:id="@+id/travel_title_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:text="@string/travel_title_text"
-        android:textColor="@color/black"
-        android:textSize="18sp" />
+    <data>
 
-    <TextView
-        android:id="@+id/travel_description_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Description" />
+        <variable
+            name="travel"
+            type="com.travelersdiary.models.Travel" />
+
+        <variable
+            name="viewModel"
+            type="com.travelersdiary.travel.TravelViewModel" />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingBottom="16dp"
-        android:paddingTop="24dp">
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp">
 
-        <LinearLayout
-            android:id="@+id/start_time_layout"
+        <TextView
+            android:id="@+id/travel_title_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:paddingBottom="8dp"
+            android:text="@{travel.title}"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="4dp"
-                android:text="@string/info_dialog_start_text"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/travel_start_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="16 April, 2016" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/end_time_layout"
+        <TextView
+            android:id="@+id/travel_description_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="4dp"
-                android:text="@string/info_dialog_end_text"
-                android:textColor="@color/black" />
-
-            <TextView
-                android:id="@+id/travel_stop_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="17 April, 2016" />
-        </LinearLayout>
+            android:text="@{travel.description}" />
 
         <LinearLayout
-            android:id="@+id/creation_time_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="8dp">
+            android:orientation="vertical"
+            android:paddingBottom="16dp"
+            android:paddingTop="24dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/start_time_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingRight="4dp"
-                android:text="@string/info_dialog_created_text"
-                android:textColor="@color/black" />
+                android:orientation="horizontal"
+                android:visibility="@{travel.getStart() != -1}">
 
-            <TextView
-                android:id="@+id/travel_creation_time"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="4dp"
+                    android:text="@string/info_dialog_start_text"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/travel_start_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.start}" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/end_time_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="15 April, 2016 20:15" />
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+                android:visibility="@{travel.getStop() != -1}">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="4dp"
+                    android:text="@string/info_dialog_end_text"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/travel_stop_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.stop}" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/creation_time_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+                android:visibility="@{travel.getCreationTime() != -1}">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="4dp"
+                    android:text="@string/info_dialog_created_text"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/travel_creation_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.creationTime}" />
+            </LinearLayout>
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:alpha=".2"
+            android:background="@color/black" />
+
+        <Button
+            android:id="@+id/btn_close_info"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:text="@string/close"
+            android:textSize="16sp" />
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:alpha=".2"
-        android:background="@color/black" />
-
-    <Button
-        android:id="@+id/btn_close_info"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:text="@string/close"
-        android:textSize="16sp" />
-</LinearLayout>
+</layout>
