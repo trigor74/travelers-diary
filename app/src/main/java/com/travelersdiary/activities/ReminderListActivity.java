@@ -16,6 +16,7 @@ import com.travelersdiary.fragments.ReminderListFragment;
 import com.travelersdiary.interfaces.IActionModeFinishCallback;
 import com.travelersdiary.interfaces.IFABCallback;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.travel.list.TravelListActivity;
 import com.travelersdiary.ui.FABScrollBehavior;
 
 import butterknife.Bind;
@@ -67,7 +68,7 @@ public class ReminderListActivity extends BaseActivity implements IFABCallback {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, TravelListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("Exit me", true);
         startActivity(intent);

@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
 import com.firebase.client.AuthData;
@@ -31,7 +30,7 @@ import com.travelersdiary.BaseViewModel;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
-import com.travelersdiary.activities.MainActivity;
+import com.travelersdiary.travel.list.TravelListActivity;
 
 import org.json.JSONObject;
 
@@ -42,6 +41,7 @@ import java.util.Map;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import timber.log.Timber;
 
 
 public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnConnectionFailedListener {
@@ -82,9 +82,6 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     public void init(AppCompatActivity activity) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        firebaseRef = new Firebase(Constants.FIREBASE_URL);
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                 .requestScopes(new Scope(Scopes.PLUS_ME))
@@ -103,7 +100,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                 view.hideAuthProgressDialog();
 
                 /**
-                 * If there is a valid session to be restored, start MainActivity.
+                 * If there is a valid session to be restored, start TravelListActivity.
                  * No need to pass data via SharedPreferences because app
                  * already holds userName/provider data from the latest session
                  */
@@ -114,14 +111,12 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
         };
     }
 
-    @BindingAdapter({"signIn"})
-    public static void onSignInClick(SignInButton button, View.OnClickListener listener) {
-        button.setOnClickListener(listener);
-    }
-
     @Override
     public void start(Context context) {
         this.context = context;
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        firebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient);
         if (opr.isDone()) {
@@ -152,7 +147,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
-        Log.d("Login", "onConnectionFailed:" + connectionResult);
+        Timber.d("onConnectionFailed: %s", connectionResult);
     }
 
     private void handleGoogleSignInResult(GoogleSignInResult result) {
@@ -208,7 +203,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                 try {
                     coverUrl = getCoverImageUrl(googleId);
                 } catch (Exception e) {
-                    Log.e("Login", e.getLocalizedMessage(), e);
+                    Timber.e(e, e.getLocalizedMessage());
                 }
 
                 result.put("token", token);
@@ -286,7 +281,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     private void startMainActivity() {
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, TravelListActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         view.startActivityAndFinish(intent);
     }
@@ -295,6 +290,11 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     public void stop() {
         this.context = null;
         firebaseRef.removeAuthStateListener(authStateListener);
+    }
+
+    @BindingAdapter({"signIn"})
+    public static void onSignInClick(SignInButton button, View.OnClickListener listener) {
+        button.setOnClickListener(listener);
     }
 
 }

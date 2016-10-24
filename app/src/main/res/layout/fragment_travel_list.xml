@@ -1,13 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+<layout xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <com.travelersdiary.recyclerview.FirebaseContextMenuRecyclerView
-        android:id="@+id/travels_list"
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.travelersdiary.travel.list.TravelListViewModel" />
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+        android:orientation="vertical">
 
-</LinearLayout>
+        <com.travelersdiary.recyclerview.FirebaseContextMenuRecyclerView
+            android:id="@+id/travels_list"
+            bind:adapter="@{viewModel.adapter}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+</layout>

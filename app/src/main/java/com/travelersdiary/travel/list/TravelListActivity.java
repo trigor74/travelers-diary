@@ -1,4 +1,4 @@
-package com.travelersdiary.activities;
+package com.travelersdiary.travel.list;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -11,15 +11,16 @@ import android.support.v7.widget.Toolbar;
 
 import com.squareup.otto.Subscribe;
 import com.travelersdiary.R;
+import com.travelersdiary.activities.BaseActivity;
+import com.travelersdiary.activities.EditTravelActivity;
 import com.travelersdiary.bus.BusProvider;
-import com.travelersdiary.fragments.TravelsListFragment;
 import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.services.SyncService;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity {
+public class TravelListActivity extends BaseActivity {
     public static final String TRAVELS_LIST_FRAGMENT_TAG = "TRAVELS_LIST_FRAGMENT_TAG";
 
     @Bind(R.id.main_activity_toolbar)
@@ -34,7 +35,7 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_travels_list);
         BusProvider.bus().register(this);
 
         setSupportActionBar(mToolbar);
@@ -50,7 +51,7 @@ public class MainActivity extends BaseActivity {
         boolean syncServiceEnabled = sharedPreferences.getBoolean("sync_service_check_box", false);
 
         if (savedInstanceState == null) {
-            TravelsListFragment fragment = new TravelsListFragment();
+            TravelListFragment fragment = new TravelListFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_container, fragment, TRAVELS_LIST_FRAGMENT_TAG)
                     .commit();

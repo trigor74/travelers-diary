@@ -10,7 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.NotificationCompat;
 
 import com.travelersdiary.R;
-import com.travelersdiary.activities.MainActivity;
+import com.travelersdiary.travel.list.TravelListActivity;
 import com.travelersdiary.fragments.ReminderItemFragment;
 
 import java.util.Calendar;
@@ -46,7 +46,7 @@ public class ReminderService extends Service {
                 .setVibrate(new long[]{300, 300, 300, 300, 300})
                 .setSmallIcon(R.drawable.ic_bell_white_24dp)
                 .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0,
-                        new Intent(getApplicationContext(), MainActivity.class), 0)) //TODO: open specific reminder item
+                        new Intent(getApplicationContext(), TravelListActivity.class), 0)) //TODO: open specific reminder item
                 .build();
 
         notificationManager.notify(id, notification);
