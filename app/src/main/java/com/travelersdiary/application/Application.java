@@ -1,5 +1,8 @@
 package com.travelersdiary.application;
 
+import android.support.multidex.MultiDex;
+import android.content.Context;
+
 import com.crashlytics.android.Crashlytics;
 import com.firebase.client.Firebase;
 import com.onegravity.rteditor.fonts.FontManager;
@@ -21,4 +24,9 @@ public class Application extends android.app.Application {
         FontManager.preLoadFonts(this);
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 }

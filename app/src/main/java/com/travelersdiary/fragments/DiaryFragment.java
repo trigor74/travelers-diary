@@ -53,6 +53,8 @@ import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -95,7 +97,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChangedListener {
+public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChangedListener, OnMapReadyCallback {
 
     @Bind(R.id.fab_edit_diary_note)
     FloatingActionButton mFabEditDiaryNote;
@@ -1105,37 +1107,52 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     }
 
     private Marker mMarker = null;
+    private MarkerOptions mMarkerOptions = null;
 
     private void putMarker(LatLng coordinates) {
-        if (mMarker == null) {
-            mMarker = mMap.addMarker(new MarkerOptions().position(coordinates));
-        } else {
-            mMarker.setPosition(coordinates);
+        mMarkerOptions = new MarkerOptions().position(coordinates);
+        putMarker();
+    }
+
+    private void putMarker() {
+        if (mMap != null && mMarkerOptions != null) {
+            if (mMarker == null) {
+                mMarker = mMap.addMarker(mMarkerOptions);
+            } else {
+                mMarker.setPosition(mMarkerOptions.getPosition());
+            }
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mMarkerOptions.getPosition(), 17f));
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 17f));
     }
 
     private void setupMap() {
         if (mMap == null) {
             mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.diary_note_map_fragment);
-            mMap = mMapFragment.getMap();
-            mMap.getUiSettings().setScrollGesturesEnabled(false);
-            mMap.getUiSettings().setZoomGesturesEnabled(false);
-
-            final View mapView = mMapFragment.getView();
-            mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-
-                    ViewGroup.LayoutParams params = mapView.getLayoutParams();
-                    params.height = mapView.getWidth();
-                    mapView.setLayoutParams(params);
-
-                    getChildFragmentManager().beginTransaction().hide(mMapFragment).commit();
-                }
-            });
+            mMapFragment.getMapAsync(this);
         }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.getUiSettings().setScrollGesturesEnabled(false);
+        mMap.getUiSettings().setZoomGesturesEnabled(false);
+
+        final View mapView = mMapFragment.getView();
+        mapView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                mapView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+
+                ViewGroup.LayoutParams params = mapView.getLayoutParams();
+                params.height = mapView.getWidth();
+                mapView.setLayoutParams(params);
+
+                getChildFragmentManager().beginTransaction().hide(mMapFragment).commit();
+            }
+        });
+
+        putMarker();
     }
 
     @OnClick(R.id.btn_hide_warning)
@@ -1181,7 +1198,6 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             }
         }
     }
-
 
 
 }
