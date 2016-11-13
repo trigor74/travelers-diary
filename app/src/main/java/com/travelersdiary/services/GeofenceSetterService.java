@@ -44,6 +44,7 @@ public class GeofenceSetterService extends Service implements
     private static final String EXTRA_LOCATION_POINT = "EXTRA_LOCATION_POINT";
     private static final String EXTRA_LOCATION_TITLE = "EXTRA_LOCATION_TITLE";
     private static final String EXTRA_RADIUS = "EXTRA_RADIUS";
+    private static final String EXTRA_ITEM_KEY = "EXTRA_ITEM_KEY";
 
     private static final int DEFAULT_RADIUS = 500;
     private static final int DEFAULT_NOTIFICATION_RESPONSIVENESS = 2000; // 2 second
@@ -62,7 +63,7 @@ public class GeofenceSetterService extends Service implements
         return null;
     }
 
-    public static void setGeofence(Context context, ReminderItem reminderItem) {
+    public static void setGeofence(Context context, ReminderItem reminderItem, String itemKey) {
         Intent intent = new Intent(context, GeofenceSetterService.class);
         intent.setAction(ACTION_SET_GEOFENCE);
         intent.putExtra(EXTRA_UID, reminderItem.getUID());
@@ -70,6 +71,7 @@ public class GeofenceSetterService extends Service implements
         intent.putExtra(EXTRA_LOCATION_TITLE, reminderItem.getWaypoint().getTitle());
         intent.putExtra(EXTRA_LOCATION_POINT, reminderItem.getWaypoint().getLocation());
         intent.putExtra(EXTRA_RADIUS, reminderItem.getDistance());
+        intent.putExtra(EXTRA_ITEM_KEY, itemKey);
         context.startService(intent);
     }
 
@@ -127,7 +129,8 @@ public class GeofenceSetterService extends Service implements
                 String locationTitle = intent.getStringExtra(EXTRA_LOCATION_TITLE);
                 LocationPoint locationPoint = (LocationPoint) intent.getSerializableExtra(GeofenceSetterService.EXTRA_LOCATION_POINT);
                 int radius = intent.getIntExtra(EXTRA_RADIUS, DEFAULT_RADIUS);
-                PendingIntent pendingIntent = getGeofencePendingIntent(uid, title, locationTitle);
+                String itemKey = intent.getStringExtra(EXTRA_ITEM_KEY);
+                PendingIntent pendingIntent = getGeofencePendingIntent(uid, title, locationTitle, itemKey);
                 GeofencingRequest geofencingRequest = getGeofencingRequest(getGeofence(uid, locationPoint.getLatitude(), locationPoint.getLongitude(), radius));
                 try {
                     addGeofence(pendingIntent, geofencingRequest);
@@ -137,7 +140,7 @@ public class GeofenceSetterService extends Service implements
                 }
                 break;
             case ACTION_CANCEL_GEOFENCE:
-                PendingIntent pendingIntentRemove = getGeofencePendingIntent(uid, null, null);
+                PendingIntent pendingIntentRemove = getGeofencePendingIntent(uid, null, null, null);
                 try {
                     removeGeofence(pendingIntentRemove);
                 } catch (SecurityException securityException) {
@@ -150,12 +153,13 @@ public class GeofenceSetterService extends Service implements
         return START_STICKY;
     }
 
-    private PendingIntent getGeofencePendingIntent(int uid, String title, String locationTitle) {
+    private PendingIntent getGeofencePendingIntent(int uid, String title, String locationTitle, String itemKey) {
         Intent intent = new Intent(this, NotificationIntentService.class);
         intent.putExtra(NotificationIntentService.KEY_UID, uid);
         intent.putExtra(NotificationIntentService.KEY_TYPE, Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
         intent.putExtra(NotificationIntentService.KEY_TITLE, title);
         intent.putExtra(NotificationIntentService.KEY_LOCATION_TITLE, locationTitle);
+        intent.putExtra(NotificationIntentService.KEY_ITEM_KEY, itemKey);
         return PendingIntent.getService(this, uid, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

@@ -19,13 +19,13 @@ public class ReminderItemActivity extends BaseActivity {
         BusProvider.bus().register(this);
 
         if (savedInstanceState == null) {
-            String key = getIntent().getStringExtra(Constants.KEY_REMINDER_ITEM_REF);
+            String key = getIntent().getStringExtra(Constants.KEY_REMINDER_ITEM_KEY);
 
             ReminderItemFragment reminderItemFragment = new ReminderItemFragment();
 
             if (key != null && !key.isEmpty()) {
                 Bundle bundle = new Bundle();
-                bundle.putString(Constants.KEY_REMINDER_ITEM_REF, key);
+                bundle.putString(Constants.KEY_REMINDER_ITEM_KEY, key);
                 reminderItemFragment.setArguments(bundle);
             }
 

@@ -140,8 +140,8 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         Bundle args = getArguments();
-        if (args != null && args.containsKey(Constants.KEY_REMINDER_ITEM_REF)) {
-            mItemKey = getArguments().getString(Constants.KEY_REMINDER_ITEM_REF, null);
+        if (args != null && args.containsKey(Constants.KEY_REMINDER_ITEM_KEY)) {
+            mItemKey = getArguments().getString(Constants.KEY_REMINDER_ITEM_KEY, null);
         }
 
         isNewItem = mItemKey == null || mItemKey.isEmpty();
@@ -804,7 +804,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
         }
 
         if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
-            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
+            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem, mItemKey);
         } else {
             Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         }

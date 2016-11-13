@@ -123,7 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
         if (mTodoRefsMap.containsKey(marker)) {
             String key = mTodoRefsMap.get(marker);
             Intent intent = new Intent(getContext(), ReminderItemActivity.class);
-            intent.putExtra(Constants.KEY_REMINDER_ITEM_REF, key);
+            intent.putExtra(Constants.KEY_REMINDER_ITEM_KEY, key);
             getContext().startActivity(intent);
         }
     }

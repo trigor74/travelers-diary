@@ -354,11 +354,11 @@ public class Utils {
         GeofenceSetterService.cancelGeofence(context, reminderItem);
     }
 
-    public static void enableAlarmGeofence(Context context, ReminderItem reminderItem) {
+    public static void enableAlarmGeofence(Context context, ReminderItem reminderItem, String itemKey) {
         if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(reminderItem.getType())) {
-            AlarmSetterService.setAlarm(context, reminderItem);
+            AlarmSetterService.setAlarm(context, reminderItem, itemKey);
         } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(reminderItem.getType())) {
-            GeofenceSetterService.setGeofence(context, reminderItem);
+            GeofenceSetterService.setGeofence(context, reminderItem, itemKey);
         }
     }
 }

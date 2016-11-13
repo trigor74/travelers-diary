@@ -145,7 +145,7 @@ public class ReminderListFragment extends Fragment {
                             Utils.disableAlarmGeofence(getContext(), model);
                             holder.title.setPaintFlags(holder.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         } else {
-                            Utils.enableAlarmGeofence(getContext(), model);
+                            Utils.enableAlarmGeofence(getContext(), model, getRef(position).getKey());
                             holder.title.setPaintFlags(holder.title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                         }
                     }
@@ -203,7 +203,7 @@ public class ReminderListFragment extends Fragment {
                 String key = mAdapter.getRef(position).getKey();
 
                 Intent intent = new Intent(view.getContext(), ReminderItemActivity.class);
-                intent.putExtra(Constants.KEY_REMINDER_ITEM_REF, key);
+                intent.putExtra(Constants.KEY_REMINDER_ITEM_KEY, key);
                 view.getContext().startActivity(intent);
             } else {
                 if (mDeleteMode != null) {
