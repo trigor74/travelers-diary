@@ -1,7 +1,7 @@
 package com.travelersdiary.application;
 
-import android.support.multidex.MultiDex;
 import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.client.Firebase;

@@ -2,7 +2,6 @@ package com.travelersdiary.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
-import android.view.View;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;

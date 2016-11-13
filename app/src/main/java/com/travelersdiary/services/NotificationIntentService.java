@@ -1,11 +1,10 @@
 package com.travelersdiary.services;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.support.v7.app.NotificationCompat;
+import android.support.v7.app.NotificationCompat.Builder;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
@@ -56,20 +55,24 @@ public class NotificationIntentService extends IntentService {
             pendingIntent = PendingIntent.getActivity(getApplicationContext(), uid,
                     new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         }
-        sendNotification(uid, title, text, pendingIntent);
+        sendNotification(type, uid, title, text, pendingIntent);
     }
 
-    private void sendNotification(int uid, String title, String text, PendingIntent pendingIntent) {
+    private void sendNotification(String type, int uid, String title, String text, PendingIntent pendingIntent) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        Notification notification = new NotificationCompat.Builder(getApplicationContext())
+        Builder notificationBuilder = (Builder) new Builder(getApplicationContext())
                 .setContentTitle(title)
                 .setContentText(text)
                 .setVibrate(new long[]{300, 300, 300, 300, 300})
-                .setSmallIcon(R.drawable.ic_bell_white_24dp)
-                .setContentIntent(pendingIntent)
-                .build();
+                .setContentIntent(pendingIntent);
 
-        notificationManager.notify(uid, notification);
+        if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION.equals(type)) {
+            notificationBuilder.setSmallIcon(R.drawable.ic_location_notify_white);
+        } else if (Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_TIME.equals(type)) {
+            notificationBuilder.setSmallIcon(R.drawable.ic_bell_white_24dp);
+        }
+
+        notificationManager.notify(uid, notificationBuilder.build());
     }
 }

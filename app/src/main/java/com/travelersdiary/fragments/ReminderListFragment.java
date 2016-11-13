@@ -34,8 +34,6 @@ import com.travelersdiary.activities.ReminderItemActivity;
 import com.travelersdiary.adapters.FirebaseMultiSelectRecyclerAdapter;
 import com.travelersdiary.interfaces.IOnItemClickListener;
 import com.travelersdiary.models.ReminderItem;
-import com.travelersdiary.services.AlarmSetterService;
-import com.travelersdiary.services.GeofenceSetterService;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

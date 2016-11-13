@@ -3,8 +3,8 @@ package com.travelersdiary.services;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.models.ReminderItem;

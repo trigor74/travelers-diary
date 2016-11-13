@@ -53,7 +53,6 @@ import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.models.TodoTask;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.Waypoint;
-import com.travelersdiary.services.AlarmSetterService;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
