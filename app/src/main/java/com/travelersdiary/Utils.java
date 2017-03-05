@@ -84,7 +84,7 @@ public class Utils {
         Window window = activity.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(activity.getResources().getColor(color));
+        window.setStatusBarColor(color);
     }
 
     public static void clearImageCache(final Context context) {

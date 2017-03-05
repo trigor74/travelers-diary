@@ -312,7 +312,7 @@ public class DiaryListFragment extends Fragment {
         }
     };
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.diary_selected_overlay)
         RelativeLayout selectedOverlay;
         @Bind(R.id.diary_note_list_image)

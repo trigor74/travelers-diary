@@ -40,7 +40,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -120,7 +119,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     AppBarLayout mAppBarLayout;
 
     @Bind(R.id.big_title_layout)
-    RelativeLayout mBigTitleLayout;
+    LinearLayout mBigTitleLayout;
 
     @Bind(R.id.diary_note_content)
     NestedScrollView mContentScrollView;

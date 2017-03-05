@@ -366,6 +366,14 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
     }
 
     @Override
+    public void onStop() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
+        super.onStop();
+    }
+
+    @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int offset) {
         int maxScroll = appBarLayout.getTotalScrollRange();
         float percentage = (float) Math.abs(offset) / (float) maxScroll;

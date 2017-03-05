@@ -237,7 +237,7 @@ public class ReminderListFragment extends Fragment {
         }
     };
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.reminder_selected_overlay)
         RelativeLayout selectedOverlay;
         @Bind(R.id.reminder_card_view)
