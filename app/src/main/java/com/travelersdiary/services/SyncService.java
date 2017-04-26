@@ -263,7 +263,7 @@ public class SyncService extends Service {
                     int statusCode = response.code();
                     ResponseBody errorBody = response.errorBody();
                     try {
-                        Log.d(TAG, "Picasa create album onResponse: " + errorBody.string() + statusCode);
+                        Log.d(TAG, "Picasa create album onResponse: " + errorBody.string() + ", code: " + statusCode);
                     } catch (IOException e) {
                         Log.d(TAG, "Picasa create album onResponse: failed");
                     }
