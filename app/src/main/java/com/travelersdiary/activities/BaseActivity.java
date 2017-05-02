@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -28,6 +29,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -49,7 +51,8 @@ public class BaseActivity extends AppCompatActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
 
     private Firebase mFirebaseRef;
-    private Firebase.AuthStateListener mAuthListener;
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private Query mActiveTravelQuery = null;
     private ValueEventListener mActiveTravelListener;
 
@@ -64,11 +67,10 @@ public class BaseActivity extends AppCompatActivity implements
 
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
-        mAuthListener = new Firebase.AuthStateListener() {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
-            public void onAuthStateChanged(AuthData authData) {
-                /* The user has been logged out */
-                if (authData == null) {
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() == null) {
                     takeUserToLoginScreenOnUnAuth();
                 }
             }
@@ -211,7 +213,7 @@ public class BaseActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        mFirebaseRef.addAuthStateListener(mAuthListener);
+        auth.addAuthStateListener(mAuthListener);
         String userUID = mSharedPreferences.getString(Constants.KEY_USER_UID, null);
         if (userUID != null) {
             mActiveTravelQuery = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
@@ -364,7 +366,7 @@ public class BaseActivity extends AppCompatActivity implements
 
     @Override
     protected void onPause() {
-        mFirebaseRef.removeAuthStateListener(mAuthListener);
+        auth.removeAuthStateListener(mAuthListener);
         if (mActiveTravelQuery != null) {
             mActiveTravelQuery.removeEventListener(mActiveTravelListener);
         }
