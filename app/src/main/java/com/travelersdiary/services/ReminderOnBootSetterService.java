@@ -42,7 +42,8 @@ public class ReminderOnBootSetterService extends Service {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
                             ReminderItem reminderItem = child.getValue(ReminderItem.class);
-                            if (!reminderItem.getType().isEmpty()
+                            if (reminderItem != null && reminderItem.getType() != null
+                                    && !reminderItem.getType().isEmpty()
                                     && !reminderItem.isCompleted()
                                     && reminderItem.getUID() != 0) {
                                 Utils.enableAlarmGeofence(context.getApplicationContext(), reminderItem, child.getKey());
