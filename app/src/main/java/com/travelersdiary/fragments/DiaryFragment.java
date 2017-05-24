@@ -1176,6 +1176,8 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     mEdtDiaryNoteTitle.requestFocus();
                     mEdtDiaryNoteTitle.setSelection(position);
                 }
+
+                mEdtDiaryNoteTitle.setVisibility(View.VISIBLE);
                 isTitleVisible = true;
             }
         } else {
@@ -1192,6 +1194,8 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     mBigTitle.requestFocus();
                     mBigTitle.setSelection(position);
                 }
+
+                mEdtDiaryNoteTitle.setVisibility(View.GONE);
                 isTitleVisible = false;
             }
         }

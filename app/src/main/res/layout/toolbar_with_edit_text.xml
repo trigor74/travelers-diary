@@ -16,6 +16,7 @@
         android:inputType="textAutoCorrect|textCapSentences|textNoSuggestions"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:visibility="gone" />
 
 </android.support.v7.widget.Toolbar>

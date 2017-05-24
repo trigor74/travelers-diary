@@ -396,6 +396,8 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
                     mRemindItemTitleEditText.requestFocus();
                     mRemindItemTitleEditText.setSelection(position);
                 }
+
+                mRemindItemTitleEditText.setVisibility(View.VISIBLE);
                 isTitleVisible = true;
             }
         } else {
@@ -412,6 +414,8 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
                     mBigTitle.requestFocus();
                     mBigTitle.setSelection(position);
                 }
+
+                mRemindItemTitleEditText.setVisibility(View.GONE);
                 isTitleVisible = false;
             }
         }
