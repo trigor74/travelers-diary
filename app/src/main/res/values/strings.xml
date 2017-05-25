@@ -142,4 +142,5 @@
     <string name="info_dialog_start_text">Start:</string>
     <string name="info_dialog_end_text">End:</string>
     <string name="info_dialog_created_text">Created:</string>
+    <string name="attachment_error">Attachment error</string>
 </resources>

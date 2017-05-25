@@ -87,6 +87,7 @@
             android:name=".activities.EditTravelActivity"
             android:screenOrientation="portrait" />
 
+        <service android:name=".services.UploadPhotoService" />
         <service
             android:name=".services.SyncService"
             android:exported="false" />

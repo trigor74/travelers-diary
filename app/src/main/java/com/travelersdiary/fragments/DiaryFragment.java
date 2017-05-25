@@ -2,6 +2,7 @@ package com.travelersdiary.fragments;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -28,7 +28,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -83,10 +83,11 @@ import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.WeatherInfo;
 import com.travelersdiary.services.GeocoderIntentService;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.services.UploadPhotoService;
 import com.travelersdiary.services.WeatherIntentService;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,6 +95,8 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.travelersdiary.Utils.getRealPathFromURI;
 
 public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChangedListener, OnMapReadyCallback {
 
@@ -178,7 +181,8 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     private ActionBar mSupportActionBar;
     private EditText mEdtDiaryNoteTitle;
     private ArrayList<Photo> mImages = new ArrayList<>();
-    private String mImagePath;
+    //    private String mImagePath;
+    private Uri mImageUri;
 
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
@@ -348,42 +352,56 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Photo photo = new Photo(mImagePath);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
+                String path = getRealPathFromURI(getContext(), mImageUri);
+
+                if (TextUtils.isEmpty(path)) {
+                    Toast.makeText(getContext(), R.string.attachment_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Photo photo = new Photo(path); //todo
                 mImages.add(0, photo);
 
                 mImagesRecyclerView.setVisibility(View.VISIBLE);
 
                 mImagesRecyclerView.getAdapter().notifyDataSetChanged();
                 mImagesRecyclerView.scrollToPosition(0);
-            } else {
-                new File(mImagePath).delete();
-            }
-        }
-
-        if (requestCode == Constants.GALLERY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<String> path = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
-
-            for (int i = 0; i < path.size(); i++) {
-                mImages.add(0, new Photo(path.get(i)));
             }
 
-            if (!mImages.isEmpty()) {
-                mImagesRecyclerView.setVisibility(View.VISIBLE);
-                mImagesRecyclerView.getAdapter().notifyDataSetChanged();
-                mImagesRecyclerView.scrollToPosition(0);
+            if (requestCode == Constants.GALLERY_REQUEST_CODE) {
+                if (data == null) {
+                    Toast.makeText(getContext(), R.string.attachment_error, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                ArrayList<Uri> uris = data.getParcelableArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
+
+                for (Uri uri : uris) {
+                    String realPath = Utils.getRealPathFromURI(getContext(), uri);
+                    if (realPath == null) continue;
+                    mImages.add(0, new Photo(realPath));
+                }
+
+                if (!mImages.isEmpty()) {
+                    mImagesRecyclerView.setVisibility(View.VISIBLE);
+                    mImagesRecyclerView.getAdapter().notifyDataSetChanged();
+                    mImagesRecyclerView.scrollToPosition(0);
+                }
             }
-        }
 
-        if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            ArrayList<Photo> newImagesList = (ArrayList<Photo>) data.getSerializableExtra(DiaryImagesActivity.IMAGES_AFTER_DELETE);
+            if (requestCode == Constants.IMAGES_DELETE_REQUEST_CODE) {
+                ArrayList<Photo> newImagesList = (ArrayList<Photo>) data.getSerializableExtra(DiaryImagesActivity.IMAGES_AFTER_DELETE);
 
-            mImages.clear();
-            mImages.addAll(newImagesList);
+                mImages.clear();
+                mImages.addAll(newImagesList);
 
-            showSavedToast = false;
-            saveChanges();
+                showSavedToast = false;
+                saveChanges();
+            }
+        } else {
+            new File(URI.create(mImageUri.toString())).delete();
         }
     }
 
@@ -770,63 +788,20 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     }
 
     private void takePhoto() {
-        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePhotoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.e("MyLog", "Error while creating file. " + ex.getMessage());
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePhotoIntent, Constants.REQUEST_IMAGE_CAPTURE);
-            }
-        }
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "Image File name");
+
+        mImageUri = getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        Intent intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+
+        startActivityForResult(intentPicture, Constants.REQUEST_IMAGE_CAPTURE);
     }
 
     private void pickImage() {
         Intent intent = new Intent(getActivity(), GalleryAlbumActivity.class);
         startActivityForResult(intent, Constants.GALLERY_REQUEST_CODE);
-    }
-
-    private File createImageFile() throws IOException {
-        String travelTitle = mDiaryNote.getTravelTitle();
-        travelTitle = travelTitle.replaceAll(" ", "_");
-        travelTitle = travelTitle.toUpperCase();
-
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = travelTitle + "_" + timeStamp;
-        File picturesFolder = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-
-        File appPicturesFolder = new File(picturesFolder, getString(R.string.app_name));
-        if (!appPicturesFolder.exists()) {
-            appPicturesFolder.mkdirs();
-        }
-
-        File travelPicturesFolder = new File(appPicturesFolder, mDiaryNote.getTravelTitle());
-        if (!travelPicturesFolder.exists()) {
-            travelPicturesFolder.mkdirs();
-        }
-
-        File image = File.createTempFile(
-                imageFileName,          /* prefix */
-                ".jpg",                 /* suffix */
-                travelPicturesFolder    /* directory */
-        );
-
-        Uri imageUri = Utils.getImageContentUri(getContext(), image);
-        if (imageUri != null) {
-            mImagePath = imageUri.toString();
-        }
-
-        return image;
     }
 
     private void saveChanges() {
@@ -853,7 +828,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
 
         //save images
-        mDiaryNote.setPhotos(mImages);
+        mDiaryNote.setPhotos(mImages); //todo
 
         if (mKey != null) {
             mItemRef.setValue(mDiaryNote);
@@ -862,6 +837,15 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
             newTravelRef.setValue(mDiaryNote);
             mKey = newTravelRef.getKey();
             addDataChangeListener();
+        }
+
+        if (!mImages.isEmpty()) {
+            Intent uploadIntent = new Intent(getContext(), UploadPhotoService.class);
+
+            uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, mItemRef.toString()); //todo
+            uploadIntent.putExtra(UploadPhotoService.EXTRA_IMAGES, mImages);
+
+            getActivity().startService(uploadIntent);
         }
 
         mRtEditText.resetHasChanged();

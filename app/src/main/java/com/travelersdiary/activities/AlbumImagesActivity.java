@@ -45,7 +45,7 @@ public class AlbumImagesActivity extends AppCompatActivity
     private ArrayList<AlbumsModel> albumsModels;
     private int mPosition;
 
-    public ArrayList<String> mShareImages = new ArrayList<>();
+    public ArrayList<Uri> mShareImages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,13 +143,10 @@ public class AlbumImagesActivity extends AppCompatActivity
         String path = Uri.parse(mAdapter.getAlbumImagesList().get(position)).toString();
         File imageFile = new File(path);
 
-        Uri contentUri = getImageContentUri(imageFile);
 
-        if (contentUri == null) {
-            return;
-        }
-
-        String uri = contentUri.toString();
+        //todo
+        Uri uri = getImageContentUri(imageFile);
+        if (uri == null) return;
 
         if (mAdapter.isSelected(position)) {
             mShareImages.add(uri);
@@ -164,7 +161,7 @@ public class AlbumImagesActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case android.R.id.home:
                 Intent intent = new Intent();
-                intent.putStringArrayListExtra(SELECTED_IMAGES, mShareImages);
+                intent.putParcelableArrayListExtra(SELECTED_IMAGES, mShareImages);
                 setResult(RESULT_OK, intent);
                 finish();
                 return true;
