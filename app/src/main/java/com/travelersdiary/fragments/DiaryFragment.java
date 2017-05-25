@@ -87,7 +87,6 @@ import com.travelersdiary.services.UploadPhotoService;
 import com.travelersdiary.services.WeatherIntentService;
 
 import java.io.File;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,8 +94,6 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static com.travelersdiary.Utils.getRealPathFromURI;
 
 public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChangedListener, OnMapReadyCallback {
 
@@ -181,8 +178,8 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     private ActionBar mSupportActionBar;
     private EditText mEdtDiaryNoteTitle;
     private ArrayList<Photo> mImages = new ArrayList<>();
-    //    private String mImagePath;
-    private Uri mImageUri;
+    private String mImagePath;
+//    private Uri mImageUri;
 
     private Firebase mItemRef;
     private ValueEventListener mValueEventListener;
@@ -354,14 +351,12 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Constants.REQUEST_IMAGE_CAPTURE) {
-                String path = getRealPathFromURI(getContext(), mImageUri);
-
-                if (TextUtils.isEmpty(path)) {
+                if (TextUtils.isEmpty(mImagePath)) {
                     Toast.makeText(getContext(), R.string.attachment_error, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                Photo photo = new Photo(path); //todo
+                Photo photo = new Photo(mImagePath);
                 mImages.add(0, photo);
 
                 mImagesRecyclerView.setVisibility(View.VISIBLE);
@@ -376,12 +371,10 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                     return;
                 }
 
-                ArrayList<Uri> uris = data.getParcelableArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
+                ArrayList<String> paths = data.getStringArrayListExtra(AlbumImagesActivity.SELECTED_IMAGES);
 
-                for (Uri uri : uris) {
-                    String realPath = Utils.getRealPathFromURI(getContext(), uri);
-                    if (realPath == null) continue;
-                    mImages.add(0, new Photo(realPath));
+                for (String path : paths) {
+                    mImages.add(0, new Photo(path));
                 }
 
                 if (!mImages.isEmpty()) {
@@ -401,7 +394,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
                 saveChanges();
             }
         } else {
-            new File(URI.create(mImageUri.toString())).delete();
+            if (mImagePath != null) new File(mImagePath).delete();
         }
     }
 
@@ -791,10 +784,11 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "Image File name");
 
-        mImageUri = getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Uri uri = getContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        if (uri != null) mImagePath = uri.toString();
 
         Intent intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
+        intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
         startActivityForResult(intentPicture, Constants.REQUEST_IMAGE_CAPTURE);
     }
@@ -828,7 +822,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         mDiaryNote.setText(mRtEditText.getText(RTFormat.HTML));
 
         //save images
-        mDiaryNote.setPhotos(mImages); //todo
+        mDiaryNote.setPhotos(mImages);
 
         if (mKey != null) {
             mItemRef.setValue(mDiaryNote);
@@ -842,7 +836,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         if (!mImages.isEmpty()) {
             Intent uploadIntent = new Intent(getContext(), UploadPhotoService.class);
 
-            uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, mItemRef.toString()); //todo
+            uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, mItemRef.toString());
             uploadIntent.putExtra(UploadPhotoService.EXTRA_IMAGES, mImages);
 
             getActivity().startService(uploadIntent);
