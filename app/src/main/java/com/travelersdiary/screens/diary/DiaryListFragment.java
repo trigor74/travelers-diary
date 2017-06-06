@@ -22,8 +22,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -44,8 +47,14 @@ public class DiaryListFragment extends Fragment {
     @Bind(R.id.diary_list)
     RecyclerView mDiaryList;
 
+    @Bind(R.id.empty_view)
+    LinearLayout mEmptyView;
+
     private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    private ValueEventListener eventListener;
+    private Query query;
 
     private static ActionMode mDeleteMode = null;
     private static ActionMode.Callback mDeleteModeCallback = new ActionMode.Callback() {
@@ -99,12 +108,46 @@ public class DiaryListFragment extends Fragment {
 
         // animation
         mDiaryList.setItemAnimator(new DefaultItemAnimator());
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
+
+        Firebase userDiaryRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
+        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
+        if (travelId != null && !travelId.isEmpty()) {
+            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(travelId);
+        } else {
+            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
+        }
+
+        setupAdapter();
+
+        eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null || dataSnapshot.getChildrenCount() == 0) {
+                    mDiaryList.setVisibility(View.GONE);
+                    TextView emptyText = (TextView) mEmptyView.findViewById(R.id.empty_view_text);
+                    emptyText.setText(getString(R.string.empty_diary));
+                    mEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mEmptyView.setVisibility(View.GONE);
+                    mDiaryList.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        };
+
+        query.addValueEventListener(eventListener);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        setupAdapter();
+//        setupAdapter();
     }
 
     @Override
@@ -119,23 +162,11 @@ public class DiaryListFragment extends Fragment {
     public void onDestroyView() {
         ButterKnife.unbind(this);
         mAdapter.cleanup();
+        query.removeEventListener(eventListener);
         super.onDestroyView();
     }
 
     private void setupAdapter() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
-
-        Firebase userDiaryRef = new Firebase(Utils.getFirebaseUserDiaryUrl(userUID));
-        Query query;
-
-        String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
-        if (travelId != null && !travelId.isEmpty()) {
-            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TRAVELID).equalTo(travelId);
-        } else {
-            query = userDiaryRef.orderByChild(Constants.FIREBASE_DIARY_TIME);
-        }
-
         mAdapter = new FirebaseMultiSelectRecyclerAdapter<DiaryNote, DiaryListFragment.ViewHolder>(
                 DiaryNote.class,
                 R.layout.list_item_diary_note,

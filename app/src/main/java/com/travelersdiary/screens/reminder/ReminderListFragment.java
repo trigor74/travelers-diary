@@ -22,11 +22,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
@@ -48,8 +52,14 @@ public class ReminderListFragment extends Fragment {
     @Bind(R.id.reminder_list)
     RecyclerView mReminderList;
 
+    @Bind(R.id.empty_view)
+    LinearLayout mEmptyView;
+
     private static FirebaseMultiSelectRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    private ValueEventListener eventListener;
+    private Query query;
 
     private static Context mContext;
     private static ActionMode mDeleteMode = null;
@@ -115,8 +125,7 @@ public class ReminderListFragment extends Fragment {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-        final Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
-        final Query query;
+        Firebase mFirebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(userUID));
 
         String travelId = getActivity().getIntent().getStringExtra(Constants.KEY_TRAVEL_REF);
         if (travelId != null && !travelId.isEmpty()) {
@@ -177,6 +186,27 @@ public class ReminderListFragment extends Fragment {
         };
 
         mReminderList.setAdapter(mAdapter);
+
+        eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null || dataSnapshot.getChildrenCount() == 0) {
+                    mReminderList.setVisibility(View.GONE);
+                    TextView emptyText = (TextView) mEmptyView.findViewById(R.id.empty_view_text);
+                    emptyText.setText(getString(R.string.empty_reminder));
+                    mEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mEmptyView.setVisibility(View.GONE);
+                    mReminderList.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        };
+
+        query.addValueEventListener(eventListener);
     }
 
     @Override
@@ -191,6 +221,7 @@ public class ReminderListFragment extends Fragment {
     public void onDestroyView() {
         ButterKnife.unbind(this);
         mAdapter.cleanup();
+        query.removeEventListener(eventListener);
         super.onDestroyView();
     }
 
