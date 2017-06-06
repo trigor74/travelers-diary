@@ -24,7 +24,7 @@ public class AlarmSetterService extends IntentService {
     }
 
     public static void setAlarm(Context context, ReminderItem reminderItem, String itemKey) {
-        if (reminderItem.getTime() == 0 || reminderItem.getTime() > System.currentTimeMillis()) {
+        if (reminderItem.getTime() == 0 || reminderItem.getTime() < System.currentTimeMillis()) {
             return;
         }
         Intent intent = new Intent(context, AlarmSetterService.class);
