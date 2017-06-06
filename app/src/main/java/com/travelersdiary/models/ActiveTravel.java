@@ -6,16 +6,8 @@ import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActiveTravel implements Serializable {
-    String activeTravelKey;
-    String activeTravelTitle;
-
-    public ActiveTravel() {
-    }
-
-    public ActiveTravel(String activeTravelKey, String activeTravelTitle) {
-        this.activeTravelKey = activeTravelKey;
-        this.activeTravelTitle = activeTravelTitle;
-    }
+    private String activeTravelKey;
+    private String activeTravelTitle;
 
     public String getActiveTravelKey() {
         return activeTravelKey;

@@ -19,20 +19,6 @@ public class Travel implements Serializable {
     public Travel() {
     }
 
-    public Travel(long creationTime, long start, long stop,
-                  String title, String description, boolean active,
-                  String picasaAlbumId, String defaultCover, String userCover) {
-        this.creationTime = creationTime;
-        this.start = start;
-        this.stop = stop;
-        this.title = title;
-        this.description = description;
-        this.active = active;
-        this.picasaAlbumId = picasaAlbumId;
-        this.defaultCover = defaultCover;
-        this.userCover = userCover;
-    }
-
     public long getCreationTime() {
         return creationTime;
     }

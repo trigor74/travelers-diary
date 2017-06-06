@@ -32,7 +32,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.travelersdiary.activities.BaseActivity;
+import com.travelersdiary.base.BaseActivity;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.ReminderItem;
 import com.travelersdiary.services.AlarmSetterService;

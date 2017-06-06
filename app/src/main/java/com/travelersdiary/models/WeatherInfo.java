@@ -22,23 +22,6 @@ public class WeatherInfo implements Serializable {
     public WeatherInfo() {
     }
 
-    public WeatherInfo(String unit, String weatherMain, String weatherDescription, String weatherIcon,
-                       float temp, float pressure, int humidity, float windSpeed, float windDeg, int clouds,
-                       long sunrise, long sunset) {
-        this.unit = unit;
-        this.weatherMain = weatherMain;
-        this.weatherDescription = weatherDescription;
-        this.weatherIcon = weatherIcon;
-        this.temp = temp;
-        this.pressure = pressure;
-        this.humidity = humidity;
-        this.windSpeed = windSpeed;
-        this.windDeg = windDeg;
-        this.clouds = clouds;
-        this.sunrise = sunrise;
-        this.sunset = sunset;
-    }
-
     public String getUnit() {
         return unit;
     }

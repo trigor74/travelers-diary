@@ -22,24 +22,6 @@ public class AddressDetails implements Serializable {
     public AddressDetails() {
     }
 
-    public AddressDetails(String adminArea, String countryCode, String featureName,
-                          String countryName, String premises, String subAdminArea,
-                          String subLocality, String subThoroughfare, String thoroughfare,
-                          String locality, String phone, String postalCode) {
-        this.adminArea = adminArea;
-        this.countryCode = countryCode;
-        this.featureName = featureName;
-        this.countryName = countryName;
-        this.premises = premises;
-        this.subAdminArea = subAdminArea;
-        this.subLocality = subLocality;
-        this.subThoroughfare = subThoroughfare;
-        this.thoroughfare = thoroughfare;
-        this.locality = locality;
-        this.phone = phone;
-        this.postalCode = postalCode;
-    }
-
     public String getAdminArea() {
         return adminArea;
     }

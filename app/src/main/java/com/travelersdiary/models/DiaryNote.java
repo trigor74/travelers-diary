@@ -23,23 +23,6 @@ public class DiaryNote implements Serializable {
     public DiaryNote() {
     }
 
-    public DiaryNote(String travelId, String travelTitle, String picasaAlbumId, long time,
-                     String title, String text, LocationPoint location, AddressDetails address, WeatherInfo weather,
-                     ArrayList<Photo> photos, ArrayList<String> audios, ArrayList<String> videos) {
-        this.travelId = travelId;
-        this.travelTitle = travelTitle;
-        this.picasaAlbumId = picasaAlbumId;
-        this.time = time;
-        this.title = title;
-        this.text = text;
-        this.location = location;
-        this.addressDetails = address;
-        this.weather = weather;
-        this.photos = photos;
-        this.audios = audios;
-        this.videos = videos;
-    }
-
     public String getTravelId() {
         return travelId;
     }
