@@ -4,10 +4,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -65,10 +63,7 @@ public class AlbumImagesActivity extends AppCompatActivity
             setToolbarTitle();
         }
 
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
-        }
+        Utils.setStatusBarColor(this, R.color.colorPrimaryDark);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, Constants.PHOTO_SPAN_COUNT));

@@ -324,7 +324,7 @@ public class DiaryListFragment extends Fragment {
             if (mDeleteMode == null) {
                 // colorize status bar when action mode enabled
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    Utils.setStatusBarColor((AppCompatActivity) view.getContext(), R.color.colorPrimaryDark);
+                    Utils.setStatusBarColor(view.getContext(), R.color.colorPrimaryDark);
                 }
                 mDeleteMode = ((AppCompatActivity) view.getContext()).startSupportActionMode(mDeleteModeCallback);
             }

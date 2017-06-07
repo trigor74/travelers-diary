@@ -1,9 +1,7 @@
 package com.travelersdiary.screens.diary;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -68,9 +66,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
             mSupportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.colorPrimaryDark));
-        }
+        Utils.setStatusBarColor(this, R.color.colorPrimaryDark);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mSupportActionBar.hide();

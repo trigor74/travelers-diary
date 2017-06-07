@@ -64,6 +64,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
     private Map<Polyline, Marker> mRouteStartMarksMap = new HashMap<>();
     private Map<Polyline, Marker> mRouteEndMarksMap = new HashMap<>();
 
+    private boolean isFirstStart = true;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,14 +89,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
 
     @Override
     public void onPause() {
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
         if (query != null && listener != null) query.removeEventListener(listener);
         if (diaryQuery != null && diaryListener != null)
             diaryQuery.removeEventListener(diaryListener);
         if (reminderQuery != null && reminderListener != null)
             reminderQuery.removeEventListener(reminderListener);
 
-        mMapView.onPause();
-        super.onPause();
+        super.onDestroy();
     }
 
     @Override
@@ -228,9 +235,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnInfoW
                     }
                 }
 
-                if (mHasLatLngBoundsBuilderPoints) {
+                if (mHasLatLngBoundsBuilderPoints && isFirstStart) {
                     LatLngBounds latLngBounds = mLatLngBoundsBuilder.build();
                     mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBounds, 32));
+                    isFirstStart = false;
                 }
             }
 

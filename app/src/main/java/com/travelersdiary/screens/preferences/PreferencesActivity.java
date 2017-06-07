@@ -1,9 +1,7 @@
 package com.travelersdiary.screens.preferences;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,9 +31,7 @@ public class PreferencesActivity extends AppCompatActivity {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Utils.setStatusBarColor(this, ContextCompat.getColor(this, R.color.settingsColorPrimaryDark));
-        }
+        Utils.setStatusBarColor(this, R.color.settingsColorPrimaryDark);
 
         getFragmentManager().beginTransaction()
                 .replace(R.id.preferences_fragment_container, new PreferencesFragment()).commit();

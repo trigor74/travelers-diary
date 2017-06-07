@@ -220,6 +220,10 @@ public class BaseActivity extends AppCompatActivity implements
             mActiveTravelQuery = new Firebase(Utils.getFirebaseUserActiveTravelUrl(userUID));
             mActiveTravelQuery.addValueEventListener(mActiveTravelListener);
         }
+
+        Intent intentCheckTracking = new Intent(this, LocationTrackingService.class);
+        intentCheckTracking.setAction(LocationTrackingService.ACTION_CHECK_TRACKING);
+        startService(intentCheckTracking);
     }
 
     @Override
@@ -296,18 +300,9 @@ public class BaseActivity extends AppCompatActivity implements
             Glide.with(this).load(profileImageUrl).into(mProfileImage);
         }
 
-        Intent intentCheckTracking = new Intent(this, LocationTrackingService.class);
-        intentCheckTracking.setAction(LocationTrackingService.ACTION_CHECK_TRACKING);
-        startService(intentCheckTracking);
-
         mAccountName.setText(mSharedPreferences.getString(Constants.KEY_DISPLAY_NAME, null));
         mAccountEmail.setText(mSharedPreferences.getString(Constants.KEY_EMAIL, null));
     }
-
-//    @Subscribe
-//    public void checkTracking(LocationTrackingService.CheckTrackingEvent event) {
-//        switchStartStop(event.isTrackingEnabled);
-//    }
 
     protected boolean useDrawerToggle() {
         return false;
