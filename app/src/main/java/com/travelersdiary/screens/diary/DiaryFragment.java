@@ -836,7 +836,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
 
             uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, mItemRef.toString());
             uploadIntent.putExtra(UploadPhotoService.EXTRA_IMAGES, mImages);
-
+            uploadIntent.setAction(UploadPhotoService.ACTION_DIARY);
             getActivity().startService(uploadIntent);
         }
 

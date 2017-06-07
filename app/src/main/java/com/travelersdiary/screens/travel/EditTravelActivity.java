@@ -28,6 +28,7 @@ import com.travelersdiary.base.BaseActivity;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.services.LocationTrackingService;
+import com.travelersdiary.services.UploadPhotoService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -148,6 +149,14 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
         pickImage();
     }
 
+    private void uploadphoto() {
+//        Intent uploadIntent = new Intent(this, UploadPhotoService.class);
+//        uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, mItemRef.toString());
+//        uploadIntent.putExtra(UploadPhotoService.EXTRA_IMAGES, mImages);
+//        uploadIntent.setAction(UploadPhotoService.ACTION_TRAVEL);
+//        startService(uploadIntent);
+    }
+
     private boolean save() {
         long currentTime = System.currentTimeMillis();
 
@@ -162,6 +171,8 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
         }
 
         String description = mTravelDescription.getText().toString();
+
+        Intent uploadIntent = new Intent(this, UploadPhotoService.class);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(EditTravelActivity.this);
         final String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
@@ -178,18 +189,22 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
             travel.setStop(-1);
             travel.setActive(false);
             travel.setDefaultCover(mTravelDefaultCover);
-            travel.setUserCover(mTravelUserCover);
+//            travel.setUserCover(mTravelUserCover);
 
             Firebase newTravelRef = firebaseRef.push();
             newTravelRef.setValue(travel);
+
+            uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, newTravelRef.toString());
         } else {
             // edit
             Map<String, Object> map = new HashMap<>();
             map.put(Constants.FIREBASE_TRAVEL_TITLE, title);
             map.put(Constants.FIREBASE_TRAVEL_DESCRIPTION, description);
-            map.put(Constants.FIREBASE_TRAVEL_USER_COVER, mTravelUserCover);
+//            map.put(Constants.FIREBASE_TRAVEL_USER_COVER, mTravelUserCover);
             Firebase editTravelRef = firebaseRef.child(mTravelKey);
             editTravelRef.updateChildren(map);
+
+            uploadIntent.putExtra(UploadPhotoService.EXTRA_REF, editTravelRef.toString());
 
             // update all notes with new travel title
             final String newTravelTitle = title;
@@ -241,6 +256,10 @@ public class EditTravelActivity extends BaseActivity implements AppBarLayout.OnO
                 activeTravelRef.setValue(activeTravelMap);
             }
         }
+
+        uploadIntent.putExtra(UploadPhotoService.EXTRA_IMAGES, mTravelUserCover);
+        uploadIntent.setAction(UploadPhotoService.ACTION_TRAVEL);
+        startService(uploadIntent);
 
         Toast.makeText(EditTravelActivity.this, R.string.saved, Toast.LENGTH_SHORT).show();
         return true;

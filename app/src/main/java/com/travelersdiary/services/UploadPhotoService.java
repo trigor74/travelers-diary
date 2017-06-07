@@ -40,6 +40,8 @@ import java.util.Map;
 public class UploadPhotoService extends IntentService {
     public static final String EXTRA_REF = "ref";
     public static final String EXTRA_IMAGES = "images";
+    public static final String ACTION_DIARY = "diary_images";
+    public static final String ACTION_TRAVEL = "travel_cover";
 
     public UploadPhotoService() {
         super("UploadPhotoService");
@@ -59,79 +61,120 @@ public class UploadPhotoService extends IntentService {
         if (refString == null) return;
 
         final Firebase itemRef = new Firebase(refString);
-        ArrayList<Photo> images = (ArrayList<Photo>) intent.getSerializableExtra(EXTRA_IMAGES);
+        InputStream stream;
 
-        for (final Photo image : images) {
-            if (!TextUtils.isEmpty(image.getPicasaUri())) continue;
+        switch (intent.getAction()) {
+            case ACTION_TRAVEL:
+                String cover = intent.getStringExtra(EXTRA_IMAGES);
 
-            String path = image.getLocalUri();
-
-            InputStream stream;
-            try {
-                String realPath = Utils.getRealPathFromURI(getApplicationContext(), Uri.parse(path));
-                if (realPath == null) continue;
-                stream = new FileInputStream(realPath);
-            } catch (FileNotFoundException e) {
-                Log.e(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
-                continue;
-            }
-
-            String filename = path.substring(path.lastIndexOf('/') + 1);
-            StorageReference storage = FirebaseStorage.getInstance()
-                    .getReference()
-                    .child(itemRef.getPath().toString())
-                    .child("images")
-                    .child(new Date().getTime() + "_" + filename);
-
-            UploadTask uploadTask = storage.putStream(stream);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
+                try {
+                    stream = getContentResolver().openInputStream(Uri.parse(cover));
+                } catch (FileNotFoundException e) {
+                    Log.e(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
+                    return;
                 }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    @SuppressWarnings("VisibleForTests")
-                    final Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
-                    Log.d(UploadPhotoService.class.getCanonicalName(), "Success:" + downloadUrl);
+                String coverName = cover.substring(cover.lastIndexOf('/') + 1);
+                StorageReference coverStorageRef = FirebaseStorage.getInstance()
+                        .getReference()
+                        .child(itemRef.getPath().toString())
+                        .child(coverName);
 
-                    if (downloadUrl != null) {
-                        itemRef.child(Constants.FIREBASE_DIARY_PHOTOS)
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        GenericTypeIndicator<List<Photo>> t =
-                                                new GenericTypeIndicator<List<Photo>>() {
-                                                };
+                UploadTask coverUploadTask = coverStorageRef.putStream(stream);
+                coverUploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        @SuppressWarnings("VisibleForTests")
+                        final Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
-                                        List<Photo> diaryImages = dataSnapshot.getValue(t);
+                        Log.d(UploadPhotoService.class.getCanonicalName(), "Success:" + downloadUrl);
 
-                                        if (diaryImages != null) {
-                                            for (int i = 0; i < diaryImages.size(); i++) {
-                                                if (diaryImages.get(i).getLocalUri()
-                                                        .equals(image.getLocalUri())) {
+                        if (downloadUrl != null) {
+                            itemRef.child(Constants.FIREBASE_TRAVEL_USER_COVER).setValue(downloadUrl.toString());
+                        }
+                    }
+                });
+                break;
+            case ACTION_DIARY:
+                ArrayList<Photo> images = (ArrayList<Photo>) intent.getSerializableExtra(EXTRA_IMAGES);
+                for (final Photo image : images) {
+                    if (!TextUtils.isEmpty(image.getPicasaUri())) continue;
 
-                                                    Map<String, Object> map = new HashMap<>();
-                                                    map.put(Constants.FIREBASE_PICASA_URI,
-                                                            downloadUrl.toString());
+                    String path = image.getLocalUri();
 
-                                                    itemRef.child(Constants.FIREBASE_DIARY_PHOTOS)
-                                                            .child(String.valueOf(i))
-                                                            .updateChildren(map);
+                    try {
+                        String realPath = Utils.getRealPathFromURI(getApplicationContext(), Uri.parse(path));
+                        if (realPath == null) continue;
+                        stream = new FileInputStream(realPath);
+                    } catch (FileNotFoundException e) {
+                        Log.e(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
+                        continue;
+                    }
+
+                    String filename = path.substring(path.lastIndexOf('/') + 1);
+                    StorageReference storage = FirebaseStorage.getInstance()
+                            .getReference()
+                            .child(itemRef.getPath().toString())
+                            .child("images")
+                            .child(new Date().getTime() + "_" + filename);
+
+                    UploadTask uploadTask = storage.putStream(stream);
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            @SuppressWarnings("VisibleForTests")
+                            final Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                            Log.d(UploadPhotoService.class.getCanonicalName(), "Success:" + downloadUrl);
+
+                            if (downloadUrl != null) {
+                                itemRef.child(Constants.FIREBASE_DIARY_PHOTOS)
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                GenericTypeIndicator<List<Photo>> t =
+                                                        new GenericTypeIndicator<List<Photo>>() {
+                                                        };
+
+                                                List<Photo> diaryImages = dataSnapshot.getValue(t);
+
+                                                if (diaryImages != null) {
+                                                    for (int i = 0; i < diaryImages.size(); i++) {
+                                                        if (diaryImages.get(i).getLocalUri()
+                                                                .equals(image.getLocalUri())) {
+
+                                                            Map<String, Object> map = new HashMap<>();
+                                                            map.put(Constants.FIREBASE_PICASA_URI,
+                                                                    downloadUrl.toString());
+
+                                                            itemRef.child(Constants.FIREBASE_DIARY_PHOTOS)
+                                                                    .child(String.valueOf(i))
+                                                                    .updateChildren(map);
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }
-                                    }
 
-                                    @Override
-                                    public void onCancelled(FirebaseError firebaseError) {
-                                    }
-                                });
-                    }
+                                            @Override
+                                            public void onCancelled(FirebaseError firebaseError) {
+                                            }
+                                        });
+                            }
+                        }
+                    });
                 }
-            });
+                break;
+            default:
         }
     }
 }
