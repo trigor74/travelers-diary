@@ -66,14 +66,16 @@ public class UploadPhotoService extends IntentService {
         switch (intent.getAction()) {
             case ACTION_TRAVEL:
                 String cover = intent.getStringExtra(EXTRA_IMAGES);
+                if (cover == null) return;
 
                 try {
                     stream = getContentResolver().openInputStream(Uri.parse(cover));
-                } catch (FileNotFoundException e) {
+                } catch (Exception e) {
                     Log.e(UploadPhotoService.class.getCanonicalName(), e.getMessage(), e);
                     return;
                 }
 
+                if (stream == null) return;
                 String coverName = cover.substring(cover.lastIndexOf('/') + 1);
                 StorageReference coverStorageRef = FirebaseStorage.getInstance()
                         .getReference()
