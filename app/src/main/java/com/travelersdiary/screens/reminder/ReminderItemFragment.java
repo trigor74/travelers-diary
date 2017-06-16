@@ -524,7 +524,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
         } else {
             mWaypointTitle.setText(R.string.reminder_choose_location_text);
             // TODO: 27.02.16 set default distance from settings
-            mRemindItem.setDistance(100);
+            mRemindItem.setDistance(300);
         }
         setWaypointDistanceSelections();
     }
