@@ -181,23 +181,20 @@ public class GeofenceSetterService extends Service implements
     }
 
     private void addGeofence(PendingIntent pendingIntent, GeofencingRequest geofencingRequest) {
-        if (!mGeofencingRequestsMap.containsKey(pendingIntent)) {
-            mGeofencingRequestsMap.put(pendingIntent, geofencingRequest);
-            if (mGoogleApiClient.isConnected()) {
-
-                if (!isLocationUpdates) {
-                    // requestLocationUpdates for getting current position
-                    LocationServices.FusedLocationApi.requestLocationUpdates(
-                            mGoogleApiClient, mLocationRequest, this);
-                    isLocationUpdates = true;
-                }
-
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        geofencingRequest,
-                        pendingIntent
-                ).setResultCallback(this);
+        mGeofencingRequestsMap.put(pendingIntent, geofencingRequest);
+        if (mGoogleApiClient.isConnected()) {
+            if (!isLocationUpdates) {
+                // requestLocationUpdates for getting current position
+                LocationServices.FusedLocationApi.requestLocationUpdates(
+                        mGoogleApiClient, mLocationRequest, this);
+                isLocationUpdates = true;
             }
+
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    geofencingRequest,
+                    pendingIntent
+            ).setResultCallback(this);
         }
     }
 
@@ -230,7 +227,11 @@ public class GeofenceSetterService extends Service implements
 
             for (Map.Entry<PendingIntent, GeofencingRequest> entry :
                     mGeofencingRequestsMap.entrySet()) {
-                addGeofence(entry.getKey(), entry.getValue());
+                LocationServices.GeofencingApi.addGeofences(
+                        mGoogleApiClient,
+                        entry.getValue(),
+                        entry.getKey()
+                ).setResultCallback(this);
             }
         } catch (SecurityException securityException) {
             // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
@@ -257,7 +258,7 @@ public class GeofenceSetterService extends Service implements
     @Override
     public void onResult(@NonNull Status status) {
         if (status.isSuccess()) {
-            Log.i(TAG, "Geofences added/removed");
+            Log.i("GSSonResult", "Geofences added/removed");
         } else {
             Log.e(TAG, "Error add/remove geofences: GeofenceStatusCode = " + status.getStatusCode());
         }

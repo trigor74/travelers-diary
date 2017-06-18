@@ -7,28 +7,15 @@ import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TravelersDiary implements Serializable {
-    String name;
-    String email;
-    ActiveTravel activeTravel;
-    Map<String, DiaryNote> diary;
-    Map<String, ReminderItem> reminder;
-    Map<String, Travel> travels;
-    Map<String, Map<String, TrackList>> tracks;
+    private String name;
+    private String email;
+    private ActiveTravel activeTravel;
+    private Map<String, DiaryNote> diary;
+    private Map<String, ReminderItem> reminder;
+    private Map<String, Travel> travels;
+    private Map<String, Map<String, TrackList>> tracks;
 
     public TravelersDiary() {
-    }
-
-    public TravelersDiary(String name, String email,
-                          ActiveTravel activeTravel, Map<String, DiaryNote> diary,
-                          Map<String, ReminderItem> reminder, Map<String, Travel> travels,
-                          Map<String, Map<String, TrackList>> tracks) {
-        this.name = name;
-        this.email = email;
-        this.activeTravel = activeTravel;
-        this.diary = diary;
-        this.reminder = reminder;
-        this.travels = travels;
-        this.tracks = tracks;
     }
 
     public String getName() {

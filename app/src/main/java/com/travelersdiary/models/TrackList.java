@@ -17,10 +17,6 @@ public class TrackList implements Serializable {
     public TrackList() {
     }
 
-    public TrackList(Map<Long, LocationPoint> track) {
-        this.track = track;
-    }
-
     public Map<Long, LocationPoint> getTrack() {
         return track;
     }

@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.travelersdiary.Constants;
 import com.travelersdiary.Utils;
@@ -23,9 +24,9 @@ public class ReminderOnBootSetterService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
+    public int onStartCommand(Intent intent, int flags, int startId) {
         setAllAlarms();
+        return START_STICKY;
     }
 
     private void setAllAlarms() {
@@ -34,27 +35,30 @@ public class ReminderOnBootSetterService extends Service {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
-        new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
+        Query query = new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
                 .orderByChild(Constants.FIREBASE_REMINDER_ACTIVE)
-                .equalTo(true)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            ReminderItem reminderItem = child.getValue(ReminderItem.class);
-                            if (reminderItem != null && reminderItem.getType() != null
-                                    && !reminderItem.getType().isEmpty()
-                                    && !reminderItem.isCompleted()
-                                    && reminderItem.getUID() != 0) {
-                                Utils.enableAlarmGeofence(context.getApplicationContext(), reminderItem, child.getKey());
-                            }
-                        }
-                    }
+                .equalTo(true);
 
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    ReminderItem reminderItem = child.getValue(ReminderItem.class);
+                    if (reminderItem != null && reminderItem.getType() != null
+                            && !reminderItem.getType().isEmpty()
+                            && !reminderItem.isCompleted()
+                            && reminderItem.getUID() != 0) {
 
+                        Utils.enableAlarmGeofence(context.getApplicationContext(), reminderItem, child.getKey());
                     }
-                });
+                }
+                stopSelf();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                stopSelf();
+            }
+        });
     }
 }

@@ -143,4 +143,7 @@
     <string name="info_dialog_end_text">End:</string>
     <string name="info_dialog_created_text">Created:</string>
     <string name="attachment_error">Attachment error</string>
+    <string name="empty_diary">Your diary is empty.</string>
+    <string name="empty_reminder">Your reminder is empty.</string>
+    <string name="empty_travel_list">Your travel list is empty.</string>
 </resources>

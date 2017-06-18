@@ -13,8 +13,8 @@ import com.bumptech.glide.Glide;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
-import com.travelersdiary.activities.DiaryImagesActivity;
-import com.travelersdiary.activities.FullScreenImageActivity;
+import com.travelersdiary.screens.diary.DiaryImagesActivity;
+import com.travelersdiary.screens.diary.FullScreenImageActivity;
 import com.travelersdiary.models.Photo;
 
 import java.util.ArrayList;

@@ -12,11 +12,6 @@ public class TrackPoint implements Serializable {
     public TrackPoint() {
     }
 
-    public TrackPoint(long time, LocationPoint location) {
-        this.time = time;
-        this.location = location;
-    }
-
     public long getTime() {
         return time;
     }

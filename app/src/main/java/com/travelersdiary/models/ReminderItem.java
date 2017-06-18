@@ -27,27 +27,6 @@ public class ReminderItem implements Serializable {
     public ReminderItem() {
     }
 
-    public ReminderItem(int UID, String travelId, String travelTitle, String title,
-                        ArrayList<TodoTask> task, boolean viewAsCheckboxes,
-                        boolean completed, boolean active,
-                        String type, long time, long interval,
-                        Waypoint waypoint, int distance, boolean repeat) {
-        this.UID = UID;
-        this.travelId = travelId;
-        this.travelTitle = travelTitle;
-        this.title = title;
-        this.task = task;
-        this.viewAsCheckboxes = viewAsCheckboxes;
-        this.completed = completed;
-        this.active = active;
-        this.type = type;
-        this.time = time;
-        this.interval = interval;
-        this.waypoint = waypoint;
-        this.distance = distance;
-        this.repeat = repeat;
-    }
-
     public int getUID() {
         return UID;
     }

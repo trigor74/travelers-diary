@@ -9,8 +9,8 @@ import android.support.v7.app.NotificationCompat.Builder;
 
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
-import com.travelersdiary.activities.MainActivity;
-import com.travelersdiary.activities.ReminderItemActivity;
+import com.travelersdiary.screens.main.MainActivity;
+import com.travelersdiary.screens.reminder.ReminderItemActivity;
 
 import java.util.Calendar;
 import java.util.Locale;
