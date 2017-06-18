@@ -815,18 +815,20 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
             newItemRef.setValue(mRemindItem);
         }
 
-        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
-        if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
-            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem, mItemKey);
-        }
+        // moved to BaseActivity to mReminderDataChangeListener
+//        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
+//        if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
+//            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem, mItemKey);
+//        }
 
         return true;
     }
 
     private void delete() {
+        // present in reminder data change listener (App.class)
+        //Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
         firebaseRef.removeValue();
-        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         getActivity().finish();
         Toast.makeText(getContext(), R.string.deleted, Toast.LENGTH_SHORT).show();
     }

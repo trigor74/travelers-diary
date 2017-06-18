@@ -82,7 +82,8 @@ public class ReminderListFragment extends Fragment {
                         (List<Integer>) mAdapter.getSelectedItems()) {
                     ReminderItem reminderItem = (ReminderItem) mAdapter.getItem(key);
 
-                    Utils.disableAlarmGeofence(mContext, reminderItem);
+                    // present in reminder data change listener (App.class)
+                    // Utils.disableAlarmGeofence(mContext, reminderItem);
                     Firebase ref = mAdapter.getRef(key);
                     ref.removeValue();
                 }
@@ -150,10 +151,12 @@ public class ReminderListFragment extends Fragment {
                         getRef(position).updateChildren(map);
 
                         if (isChecked) {
-                            Utils.disableAlarmGeofence(getContext(), model);
+                            // present in reminder data change listener (App.class)
+                            //Utils.disableAlarmGeofence(getContext(), model);
                             holder.title.setPaintFlags(holder.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         } else {
-                            Utils.enableAlarmGeofence(getContext(), model, getRef(position).getKey());
+                            // present in reminder data change listener (App.class)
+                            //Utils.enableAlarmGeofence(getContext(), model, getRef(position).getKey());
                             holder.title.setPaintFlags(holder.title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                         }
                     }

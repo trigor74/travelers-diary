@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.travelersdiary.base.BaseActivity;
 import com.travelersdiary.models.Photo;
@@ -300,21 +301,24 @@ public class Utils {
                         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
                         // delete reminder items
-                        new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
+                        Query query = new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
                                 .orderByChild(Constants.FIREBASE_REMINDER_TRAVELID)
-                                .equalTo(travelKey)
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                            child.getRef().removeValue();
-                                        }
-                                    }
+                                .equalTo(travelKey);
+                        query.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                    // remove notifications for current active travel
+                                    Utils.disableAlarmGeofence(context.getApplicationContext(), child.getValue(ReminderItem.class));
 
-                                    @Override
-                                    public void onCancelled(FirebaseError firebaseError) {
-                                    }
-                                });
+                                    child.getRef().removeValue();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(FirebaseError firebaseError) {
+                            }
+                        });
 
                         if (activeTravel != null && activeTravel.equals(travelKey)) {
                             // stop tracking
@@ -322,8 +326,6 @@ public class Utils {
                             intentStopTracking.setAction(LocationTrackingService.ACTION_STOP_TRACK);
                             context.startService(intentStopTracking);
 
-                            // TODO: 06.04.16 remove notifications for current active travel
-                            //
                             sharedPreferences.edit()
                                     .putString(Constants.KEY_ACTIVE_TRAVEL_KEY, null)
                                     .apply();
