@@ -103,7 +103,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
 
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
-    private static int PLACE_PICKER_REQUEST = 1;
+    private static int PLACE_PICKER_REQUEST = 1001;
 
     private static String KEY_IS_NEW_ITEM = "KEY_IS_NEW_ITEM";
     private static String KEY_REMIND_ITEM = "KEY_REMIND_ITEM";
@@ -815,10 +815,9 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
             newItemRef.setValue(mRemindItem);
         }
 
+        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
             Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem, mItemKey);
-        } else {
-            Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         }
 
         return true;
