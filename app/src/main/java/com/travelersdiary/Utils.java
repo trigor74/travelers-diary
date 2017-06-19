@@ -309,7 +309,9 @@ public class Utils {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                                     // remove notifications for current active travel
-                                    Utils.disableAlarmGeofence(context.getApplicationContext(), child.getValue(ReminderItem.class));
+                                    Utils.disableAlarmGeofence(
+                                            context.getApplicationContext(),
+                                            child.getKey());
 
                                     child.getRef().removeValue();
                                 }
@@ -354,9 +356,9 @@ public class Utils {
                 .show();
     }
 
-    public static void disableAlarmGeofence(Context context, ReminderItem reminderItem) {
-        AlarmSetterService.cancelAlarm(context, reminderItem);
-        GeofenceSetterService.cancelGeofence(context, reminderItem);
+    public static void disableAlarmGeofence(Context context, String itemKey) {
+        AlarmSetterService.cancelAlarm(context, itemKey);
+        GeofenceSetterService.cancelGeofence(context, itemKey);
     }
 
     public static void enableAlarmGeofence(Context context, ReminderItem reminderItem, String itemKey) {

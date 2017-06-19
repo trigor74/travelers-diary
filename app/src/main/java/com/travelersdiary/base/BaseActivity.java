@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
+import com.travelersdiary.App;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.screens.login.LoginActivity;
@@ -64,6 +65,10 @@ public class BaseActivity extends AppCompatActivity implements
                 }
             }
         };
+
+        //App.setListeners();
+        ((App) getApplicationContext()).setListeners();
+
     }
 
     @Override

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReminderItem implements Serializable {
-    private int UID; // unique identifier of item for notifications and pendingIntent
     private String travelId;
     private String travelTitle;
     private String title;
@@ -25,14 +24,6 @@ public class ReminderItem implements Serializable {
     private boolean repeat;
 
     public ReminderItem() {
-    }
-
-    public int getUID() {
-        return UID;
-    }
-
-    public void setUID(int UID) {
-        this.UID = UID;
     }
 
     public String getTravelId() {

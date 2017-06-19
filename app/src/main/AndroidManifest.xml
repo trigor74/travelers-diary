@@ -102,7 +102,7 @@
             android:name=".services.WeatherIntentService"
             android:exported="false" />
         <service
-            android:name=".services.NotificationIntentService"
+            android:name=".services.AlarmNotificationIntentService"
             android:exported="false" />
         <service
             android:name=".services.AlarmSetterService"
@@ -120,12 +120,16 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="android.intent.action.REBOOT"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.REBOOT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
+        <service
+            android:name=".services.GeofenceTransitionsIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

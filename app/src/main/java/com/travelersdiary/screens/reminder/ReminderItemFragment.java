@@ -448,6 +448,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
         if (mMenu != null && mRemindItem.isViewAsCheckboxes()) {
             mMenu.findItem(R.id.action_switch_checkboxes_remind_item)
                     .setTitle(R.string.reminder_hide_checkboxes);
+            //noinspection RestrictedApi
             mSupportActionBar.invalidateOptionsMenu();
         }
 
@@ -800,33 +801,19 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
 
         Firebase firebaseRef = new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID));
         if (mItemKey != null && !mItemKey.isEmpty()) {
-            // update item
-            if (mRemindItem.getUID() == 0) {
-                // TODO: 15.05.16 remove this after database upgrade
-                mRemindItem.setUID(mItemKey.hashCode());
-            }
             Firebase updateItemRef = firebaseRef.child(mItemKey);
             updateItemRef.setValue(mRemindItem);
         } else {
             // create item
             Firebase newItemRef = firebaseRef.push();
             mItemKey = newItemRef.getKey();
-            mRemindItem.setUID(mItemKey.hashCode());
             newItemRef.setValue(mRemindItem);
         }
-
-        // moved to BaseActivity to mReminderDataChangeListener
-//        Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
-//        if (mRemindItem.isActive() && !mRemindItem.isCompleted()) {
-//            Utils.enableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem, mItemKey);
-//        }
 
         return true;
     }
 
     private void delete() {
-        // present in reminder data change listener (App.class)
-        //Utils.disableAlarmGeofence(getActivity().getApplicationContext(), mRemindItem);
         Firebase firebaseRef = (new Firebase(Utils.getFirebaseUserReminderUrl(mUserUID))).child(mItemKey);
         firebaseRef.removeValue();
         getActivity().finish();

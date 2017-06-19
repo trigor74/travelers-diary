@@ -4,56 +4,41 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.travelersdiary.Constants;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.ReminderItem;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GeofenceSetterService extends Service implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        ResultCallback<Status>,
-        LocationListener { // for getting current position
+        OnCompleteListener<Void> {
 
     private static final String TAG = "GeofenceSetterService";
 
     private static final String ACTION_SET_GEOFENCE = "ACTION_SET_GEOFENCE";
     private static final String ACTION_CANCEL_GEOFENCE = "ACTION_CANCEL_GEOFENCE";
 
-    private static final String EXTRA_UID = "EXTRA_UID";
-    private static final String EXTRA_TITLE = "EXTRA_TITLE";
     private static final String EXTRA_LOCATION_POINT = "EXTRA_LOCATION_POINT";
-    private static final String EXTRA_LOCATION_TITLE = "EXTRA_LOCATION_TITLE";
     private static final String EXTRA_RADIUS = "EXTRA_RADIUS";
     private static final String EXTRA_ITEM_KEY = "EXTRA_ITEM_KEY";
 
     private static final int DEFAULT_RADIUS = 500;
     private static final int DEFAULT_NOTIFICATION_RESPONSIVENESS = 2000; // 2 second
 
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private boolean isLocationUpdates = false;
-
-    private Map<PendingIntent, GeofencingRequest> mGeofencingRequestsMap = new HashMap<>();
+    private PendingIntent mPendingIntent = null;
+    private GeofencingClient mGeofencingClient;
+    private ArrayList<Geofence> mGeofenceList;
 
     public GeofenceSetterService() {
     }
@@ -66,106 +51,72 @@ public class GeofenceSetterService extends Service implements
     public static void setGeofence(Context context, ReminderItem reminderItem, String itemKey) {
         Intent intent = new Intent(context, GeofenceSetterService.class);
         intent.setAction(ACTION_SET_GEOFENCE);
-        intent.putExtra(EXTRA_UID, reminderItem.getUID());
-        intent.putExtra(EXTRA_TITLE, reminderItem.getTitle());
-        intent.putExtra(EXTRA_LOCATION_TITLE, reminderItem.getWaypoint().getTitle());
+        intent.putExtra(EXTRA_ITEM_KEY, itemKey);
         intent.putExtra(EXTRA_LOCATION_POINT, reminderItem.getWaypoint().getLocation());
         intent.putExtra(EXTRA_RADIUS, reminderItem.getDistance());
-        intent.putExtra(EXTRA_ITEM_KEY, itemKey);
         context.startService(intent);
     }
 
-    public static void cancelGeofence(Context context, ReminderItem reminderItem) {
+    public static void cancelGeofence(Context context, String itemKey) {
         Intent intent = new Intent(context, GeofenceSetterService.class);
         intent.setAction(ACTION_CANCEL_GEOFENCE);
-        intent.putExtra(EXTRA_UID, reminderItem.getUID());
+        intent.putExtra(EXTRA_ITEM_KEY, itemKey);
         context.startService(intent);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        buildGoogleApiClient();
-
-        // LocationRequest for getting current position
-        mLocationRequest = new LocationRequest();
-        // We want a location update every 5 seconds.
-        mLocationRequest.setInterval(5000);
-        // We want the location to be as accurate as possible.
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        if (isGooglePlayServicesAvailable()) {
-            mGoogleApiClient.connect();
-        }
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+        mGeofencingClient = LocationServices.getGeofencingClient(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            if (!mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
-                mGoogleApiClient.connect();
+        if (intent == null || intent.getAction() == null) {
+            stopSelf();
+            return START_NOT_STICKY;
+        } else {
+            String action = intent.getAction();
+            switch (action) {
+                case ACTION_SET_GEOFENCE:
+                    // TODO: 19.06.17 start LocationTracking for activate geofence notification
+                    LocationPoint locationPoint = (LocationPoint) intent.getSerializableExtra(GeofenceSetterService.EXTRA_LOCATION_POINT);
+                    int radius = intent.getIntExtra(EXTRA_RADIUS, DEFAULT_RADIUS);
+                    String itemKey = intent.getStringExtra(EXTRA_ITEM_KEY);
+                    PendingIntent pendingIntent = getGeofencePendingIntent();
+                    GeofencingRequest geofencingRequest = getGeofencingRequest(getGeofence(itemKey, locationPoint.getLatitude(), locationPoint.getLongitude(), radius));
+                    try {
+                        addGeofence(geofencingRequest, pendingIntent);
+                    } catch (SecurityException securityException) {
+                        // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
+                        showSecurityException(securityException);
+                    }
+                    break;
+                case ACTION_CANCEL_GEOFENCE:
+                    String deleteKey = intent.getStringExtra(EXTRA_ITEM_KEY);
+                    try {
+                        removeGeofence(deleteKey);
+                    } catch (SecurityException securityException) {
+                        // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
+                        showSecurityException(securityException);
+                    }
+                    break;
             }
-            return START_STICKY;
         }
-
-        String action = intent.getAction();
-        if (action == null) {
-            return START_STICKY;
-        }
-
-        final int uid = intent.getIntExtra(EXTRA_UID, 0);
-
-        switch (action) {
-            case ACTION_SET_GEOFENCE:
-                String title = intent.getStringExtra(EXTRA_TITLE);
-                String locationTitle = intent.getStringExtra(EXTRA_LOCATION_TITLE);
-                LocationPoint locationPoint = (LocationPoint) intent.getSerializableExtra(GeofenceSetterService.EXTRA_LOCATION_POINT);
-                int radius = intent.getIntExtra(EXTRA_RADIUS, DEFAULT_RADIUS);
-                String itemKey = intent.getStringExtra(EXTRA_ITEM_KEY);
-                PendingIntent pendingIntent = getGeofencePendingIntent(uid, title, locationTitle, itemKey);
-                GeofencingRequest geofencingRequest = getGeofencingRequest(getGeofence(uid, locationPoint.getLatitude(), locationPoint.getLongitude(), radius));
-                try {
-                    addGeofence(pendingIntent, geofencingRequest);
-                } catch (SecurityException securityException) {
-                    // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
-                    showSecurityException(securityException);
-                }
-                break;
-            case ACTION_CANCEL_GEOFENCE:
-                PendingIntent pendingIntentRemove = getGeofencePendingIntent(uid, null, null, null);
-                try {
-                    removeGeofence(pendingIntentRemove);
-                } catch (SecurityException securityException) {
-                    // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
-                    showSecurityException(securityException);
-                }
-                break;
-        }
-
         return START_STICKY;
     }
 
-    private PendingIntent getGeofencePendingIntent(int uid, String title, String locationTitle, String itemKey) {
-        Intent intent = new Intent(this, NotificationIntentService.class);
-        intent.putExtra(NotificationIntentService.KEY_UID, uid);
-        intent.putExtra(NotificationIntentService.KEY_TYPE, Constants.FIREBASE_REMINDER_TASK_ITEM_TYPE_LOCATION);
-        intent.putExtra(NotificationIntentService.KEY_TITLE, title);
-        intent.putExtra(NotificationIntentService.KEY_LOCATION_TITLE, locationTitle);
-        intent.putExtra(NotificationIntentService.KEY_ITEM_KEY, itemKey);
-        return PendingIntent.getService(this, uid, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    private PendingIntent getGeofencePendingIntent() {
+        if (mPendingIntent == null) {
+            Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+            mPendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return mPendingIntent;
     }
 
-    private Geofence getGeofence(int uid, double latitude, double longitude, int radius) {
+    private Geofence getGeofence(String itemKey, double latitude, double longitude, int radius) {
         return new Geofence.Builder()
-                .setRequestId(Integer.toString(uid))
+                .setRequestId(itemKey)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .setCircularRegion(latitude, longitude, (float) radius)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
@@ -180,130 +131,50 @@ public class GeofenceSetterService extends Service implements
                 .build();
     }
 
-    private void addGeofence(PendingIntent pendingIntent, GeofencingRequest geofencingRequest) {
-        mGeofencingRequestsMap.put(pendingIntent, geofencingRequest);
-        if (mGoogleApiClient.isConnected()) {
-            if (!isLocationUpdates) {
-                // requestLocationUpdates for getting current position
-                LocationServices.FusedLocationApi.requestLocationUpdates(
-                        mGoogleApiClient, mLocationRequest, this);
-                isLocationUpdates = true;
-            }
+    private GeofencingRequest getGeofencingRequest(List<Geofence> geofencesList) {
+        return new GeofencingRequest.Builder()
+                .addGeofences(geofencesList)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .build();
+    }
 
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    geofencingRequest,
-                    pendingIntent
-            ).setResultCallback(this);
+
+    private void addGeofence(GeofencingRequest geofencingRequest, PendingIntent pendingIntent) {
+        if (mGeofencingClient != null) {
+            mGeofencingClient.addGeofences(geofencingRequest, pendingIntent)
+                    .addOnCompleteListener(this);
         }
     }
 
-    private void removeGeofence(PendingIntent pendingIntent) {
-        if (mGeofencingRequestsMap.containsKey(pendingIntent)) {
-            mGeofencingRequestsMap.remove(pendingIntent);
-            if (mGoogleApiClient.isConnected()) {
-                LocationServices.GeofencingApi.removeGeofences(
-                        mGoogleApiClient,
-                        pendingIntent
-                ).setResultCallback(this);
+    private void removeGeofence(String itemKey) {
+        if (mGeofencingClient != null) {
+            mGeofencingClient.removeGeofences(new ArrayList<String>(Arrays.asList(itemKey)))
+                    .addOnCompleteListener(this);
+        }
+    }
 
-                if (mGeofencingRequestsMap.isEmpty() && isLocationUpdates) {
-                    LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-                    isLocationUpdates = false;
-                    stopSelf();
-                }
-            }
+    private void removeGeofence(List<String> itemKeyList) {
+        if (mGeofencingClient != null) {
+            mGeofencingClient.removeGeofences(itemKeyList)
+                    .addOnCompleteListener(this);
         }
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.i(TAG, "Connected to GoogleApiClient");
-        try {
-            // requestLocationUpdates for getting current position
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient, mLocationRequest, this);
-            isLocationUpdates = true;
-
-            for (Map.Entry<PendingIntent, GeofencingRequest> entry :
-                    mGeofencingRequestsMap.entrySet()) {
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        entry.getValue(),
-                        entry.getKey()
-                ).setResultCallback(this);
-            }
-        } catch (SecurityException securityException) {
-            // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
-            showSecurityException(securityException);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        // The connection to Google Play services was lost for some reason.
-        Log.i(TAG, "Connection suspended");
-        // onConnected() will be called again automatically when the service reconnects
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // Refer to the javadoc for ConnectionResult to see what error codes might be returned in
-        // onConnectionFailed.
-        Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
-    }
-
-    // Runs when the result of calling addGeofences() and removeGeofences() becomes available.
-    // Either method can complete successfully or with an error.
-    @Override
-    public void onResult(@NonNull Status status) {
-        if (status.isSuccess()) {
-            Log.i("GSSonResult", "Geofences added/removed");
+    public void onComplete(@NonNull Task<Void> task) {
+        if (task.isSuccessful()) {
+            Log.i(TAG, "Geofence added/removed");
         } else {
-            Log.e(TAG, "Error add/remove geofences: GeofenceStatusCode = " + status.getStatusCode());
+            // Get the status code for the error and log it using a user-friendly message.
+            String errorMessage = task.getException().getMessage();
+            Log.w(TAG, "Error add/remove geofence:" + errorMessage);
         }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        // for getting current position
-        Log.v(TAG, "Location Information\n"
-                + "==========\n"
-                + "Provider:\t" + location.getProvider() + "\n"
-                + "Lat & Long:\t" + location.getLatitude() + ", "
-                + location.getLongitude() + "\n"
-                + "Altitude:\t" + location.getAltitude() + "\n"
-                + "Bearing:\t" + location.getBearing() + "\n"
-                + "Speed:\t\t" + location.getSpeed() + "\n"
-                + "Accuracy:\t" + location.getAccuracy() + "\n");
+        stopSelf();
     }
 
     @Override
     public void onDestroy() {
-        try {
-            for (Map.Entry<PendingIntent, GeofencingRequest> entry :
-                    mGeofencingRequestsMap.entrySet()) {
-                removeGeofence(entry.getKey());
-            }
-        } catch (SecurityException securityException) {
-            // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
-            showSecurityException(securityException);
-        }
-        mGeofencingRequestsMap.clear();
-        mGoogleApiClient.disconnect();
         super.onDestroy();
-    }
-
-    private boolean isGooglePlayServicesAvailable() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(getApplicationContext());
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                Log.e(TAG, "Google Play Services not available");
-            }
-            return false;
-        }
-        return true;
     }
 
     private void showSecurityException(SecurityException securityException) {
