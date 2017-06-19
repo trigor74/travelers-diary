@@ -72,6 +72,7 @@ public final class Constants {
     public static final String KEY_ACTIVE_TRAVEL_TITLE = "ACTIVE_TRAVEL_TITLE";
     public static final String KEY_SHOW_WARNING = "SHOW_WARNING";
     public static final String KEY_IS_TRACKING_STARTED = "KEY_IS_TRACKING_STARTED";
+    public static final String KEY_GEOFENCE_SET = "KEY_GEOFENCE_SET";
 
     // travel
     public static final String KEY_TRAVEL_REF = "TRAVEL_REF";

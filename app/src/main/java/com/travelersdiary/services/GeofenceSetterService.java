@@ -4,7 +4,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -14,12 +16,15 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.travelersdiary.Constants;
 import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.ReminderItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GeofenceSetterService extends Service implements
         OnCompleteListener<Void> {
@@ -55,6 +60,16 @@ public class GeofenceSetterService extends Service implements
         intent.putExtra(EXTRA_LOCATION_POINT, reminderItem.getWaypoint().getLocation());
         intent.putExtra(EXTRA_RADIUS, reminderItem.getDistance());
         context.startService(intent);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Set<String> stringHashSet = new HashSet<>();
+        stringHashSet = sharedPreferences.getStringSet(Constants.KEY_GEOFENCE_SET, stringHashSet);
+        stringHashSet.add(itemKey);
+        sharedPreferences.edit().putStringSet(Constants.KEY_GEOFENCE_SET, stringHashSet).apply();
+
+        intent = new Intent(context, LocationTrackingService.class);
+        intent.setAction(LocationTrackingService.ACTION_START_GEOFENCE_LOCATION_UPDATES);
+        context.startService(intent);
     }
 
     public static void cancelGeofence(Context context, String itemKey) {
@@ -62,6 +77,18 @@ public class GeofenceSetterService extends Service implements
         intent.setAction(ACTION_CANCEL_GEOFENCE);
         intent.putExtra(EXTRA_ITEM_KEY, itemKey);
         context.startService(intent);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Set<String> stringHashSet = new HashSet<>();
+        stringHashSet = sharedPreferences.getStringSet(Constants.KEY_GEOFENCE_SET, stringHashSet);
+        stringHashSet.remove(itemKey);
+        sharedPreferences.edit().putStringSet(Constants.KEY_GEOFENCE_SET, stringHashSet).apply();
+
+        if (stringHashSet.isEmpty()) {
+            intent = new Intent(context, LocationTrackingService.class);
+            intent.setAction(LocationTrackingService.ACTION_STOP_GEOFENCE_LOCATION_UPDATES);
+            context.startService(intent);
+        }
     }
 
     @Override
@@ -79,7 +106,6 @@ public class GeofenceSetterService extends Service implements
             String action = intent.getAction();
             switch (action) {
                 case ACTION_SET_GEOFENCE:
-                    // TODO: 19.06.17 start LocationTracking for activate geofence notification
                     LocationPoint locationPoint = (LocationPoint) intent.getSerializableExtra(GeofenceSetterService.EXTRA_LOCATION_POINT);
                     int radius = intent.getIntExtra(EXTRA_RADIUS, DEFAULT_RADIUS);
                     String itemKey = intent.getStringExtra(EXTRA_ITEM_KEY);
