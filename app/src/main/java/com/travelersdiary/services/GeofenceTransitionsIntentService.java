@@ -6,6 +6,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.TaskStackBuilder;
@@ -82,6 +84,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
                             // TODO: 19.06.17 Add Big View styles and actions
                             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+                            Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                                    R.mipmap.ic_launcher);
+
                             NotificationCompat.Builder notificationBuilder =
                                     (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
                                             .setContentTitle(title)
@@ -90,10 +95,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
                                             .setContentIntent(pendingIntent)
                                             .setAutoCancel(true)
                                             .setSmallIcon(R.drawable.ic_location_notify_white)
-                                            .setGroup(NOTIFICATION_GROUP)
-                                            .setGroupSummary(true);
+                                            .setLargeIcon(icon);
                             if (Build.VERSION.SDK_INT >= 21) {
                                 notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+                            }
+                            if (Build.VERSION.SDK_INT >= 24) {
+                                notificationBuilder.setGroup(NOTIFICATION_GROUP)
+                                        .setGroupSummary(true);
                             }
 
                             notificationManager.notify(uid, notificationBuilder.build());

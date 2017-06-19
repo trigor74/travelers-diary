@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
@@ -34,7 +36,6 @@ public class AlarmNotificationIntentService extends IntentService {
         String title = intent.getStringExtra(KEY_TITLE);
         String itemKey = intent.getStringExtra(KEY_ITEM_KEY);
         int uid = itemKey.hashCode();
-        String text = null;
 
         // open Main Activity with Reminder list
         Intent mainIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -57,8 +58,11 @@ public class AlarmNotificationIntentService extends IntentService {
         c.setTimeInMillis(time);
         int hours = c.get(Calendar.HOUR);
         int minutes = c.get(Calendar.MINUTE);
-        text = String.format(Locale.getDefault(), "Today, %02d:%02d", hours, minutes);
+        String text = String.format(Locale.getDefault(), "Today, %02d:%02d", hours, minutes);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                R.mipmap.ic_launcher);
 
         NotificationCompat.Builder notificationBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(getApplicationContext())
                 .setContentTitle(title)
@@ -67,10 +71,13 @@ public class AlarmNotificationIntentService extends IntentService {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_bell_white_24dp)
-                .setGroup(NOTIFICATION_GROUP)
-                .setGroupSummary(true);
+                .setLargeIcon(icon);
         if (Build.VERSION.SDK_INT >= 21) {
             notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+        if (Build.VERSION.SDK_INT >= 24) {
+            notificationBuilder.setGroup(NOTIFICATION_GROUP)
+                    .setGroupSummary(true);
         }
 
         notificationManager.notify(uid, notificationBuilder.build());
