@@ -1,10 +1,12 @@
 package com.travelersdiary.services;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
@@ -29,6 +31,7 @@ import java.util.Locale;
 
 public class GeofenceTransitionsIntentService extends IntentService {
     private static final String TAG = "GeofenceTransitionsIS";
+    private static final String NOTIFICATION_GROUP = "GEOFENCE_TRANSITIONS";
 
     public GeofenceTransitionsIntentService() {
         super(TAG);
@@ -86,7 +89,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
                                             .setVibrate(new long[]{300, 300, 300, 300, 300})
                                             .setContentIntent(pendingIntent)
                                             .setAutoCancel(true)
-                                            .setSmallIcon(R.drawable.ic_location_notify_white);
+                                            .setSmallIcon(R.drawable.ic_location_notify_white)
+                                            .setGroup(NOTIFICATION_GROUP)
+                                            .setGroupSummary(true);
+                            if (Build.VERSION.SDK_INT >= 21) {
+                                notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+                            }
 
                             notificationManager.notify(uid, notificationBuilder.build());
                         }

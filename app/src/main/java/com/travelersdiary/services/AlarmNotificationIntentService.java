@@ -1,9 +1,11 @@
 package com.travelersdiary.services;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 
@@ -17,6 +19,7 @@ import java.util.Locale;
 
 public class AlarmNotificationIntentService extends IntentService {
     private static final String TAG = "AlarmNotificationIS";
+    private static final String NOTIFICATION_GROUP = "ALARM_NOTIFICATIONSS";
 
     public static final String KEY_TITLE = "KEY_TITLE";
     public static final String KEY_TIME = "KEY_TIME";
@@ -63,7 +66,12 @@ public class AlarmNotificationIntentService extends IntentService {
                 .setVibrate(new long[]{300, 300, 300, 300, 300})
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_bell_white_24dp);
+                .setSmallIcon(R.drawable.ic_bell_white_24dp)
+                .setGroup(NOTIFICATION_GROUP)
+                .setGroupSummary(true);
+        if (Build.VERSION.SDK_INT >= 21) {
+            notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
 
         notificationManager.notify(uid, notificationBuilder.build());
     }

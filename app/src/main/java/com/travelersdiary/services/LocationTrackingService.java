@@ -325,6 +325,7 @@ public class LocationTrackingService extends Service implements
                 .setLargeIcon(icon)
                 .setTicker("Start location requests")
                 .setContentIntent(pendingIntent)
+                .setPriority(Notification.PRIORITY_MAX)
                 .build();
     }
 
