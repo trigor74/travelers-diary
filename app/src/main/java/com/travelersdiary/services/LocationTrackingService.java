@@ -80,10 +80,6 @@ public class LocationTrackingService extends Service implements
         mUserUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         buildGoogleApiClient();
-//        if (isGooglePlayServicesAvailable()) {
-//            mGoogleApiClient.connect();
-//        }
-
         createLocationRequest();
     }
 
@@ -163,12 +159,14 @@ public class LocationTrackingService extends Service implements
                 isTrackingEnabled = false;
                 mTrackRef = null;
 
-                if (isForeground && !isGeofenceTrackingEnabled) {
-                    isForeground = false;
-                    stopForeground(true);
-                } else {
-                    // start again for update notification
-                    startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
+                if (isForeground) {
+                    if (isGeofenceTrackingEnabled) {
+                        // start again for update notification
+                        startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
+                    } else {
+                        isForeground = false;
+                        stopForeground(true);
+                    }
                 }
 
                 stopLocationUpdates();
@@ -190,12 +188,14 @@ public class LocationTrackingService extends Service implements
             case ACTION_STOP_GEOFENCE_LOCATION_UPDATES:
                 isGeofenceTrackingEnabled = false;
 
-                if (isForeground && !isTrackingEnabled) {
-                    isForeground = false;
-                    stopForeground(true);
-                } else {
-                    // start again for update notification
-                    startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
+                if (isForeground) {
+                    if (isTrackingEnabled) {
+                        // start again for update notification
+                        startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
+                    } else {
+                        isForeground = false;
+                        stopForeground(true);
+                    }
                 }
 
                 stopLocationUpdates();

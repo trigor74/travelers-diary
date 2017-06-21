@@ -103,7 +103,7 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
 
     private static String DATE_PICKER_DIALOG_TAG = "DatePickerDialog";
     private static String TIME_PICKER_DIALOG_TAG = "TimePickerDialog";
-    private static int PLACE_PICKER_REQUEST = 1001;
+    private static int PLACE_PICKER_REQUEST = 1341;
 
     private static String KEY_IS_NEW_ITEM = "KEY_IS_NEW_ITEM";
     private static String KEY_REMIND_ITEM = "KEY_REMIND_ITEM";
@@ -689,16 +689,15 @@ public class ReminderItemFragment extends Fragment implements AppBarLayout.OnOff
             builder.setLatLngBounds(latLngBounds);
         }
 
-        Intent intent = null;
         try {
-            intent = builder.build(getActivity());
+            Intent intent = builder.build(getActivity());
+            mProgressDialog = ProgressDialog.show(mContext,
+                    getString(R.string.reminder_place_picker_progress_dialog_title),
+                    getString(R.string.reminder_place_picker_progress_dialog_message), true, false);
+            startActivityForResult(intent, PLACE_PICKER_REQUEST);
         } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
             e.printStackTrace();
         }
-        mProgressDialog = ProgressDialog.show(mContext,
-                getString(R.string.reminder_place_picker_progress_dialog_title),
-                getString(R.string.reminder_place_picker_progress_dialog_message), true, false);
-        startActivityForResult(intent, PLACE_PICKER_REQUEST);
     }
 
     @OnClick(R.id.reminder_item_completed_checkbox)

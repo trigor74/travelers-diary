@@ -8,7 +8,7 @@ public class ReminderOnBootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-            Intent service = new Intent(context, ReminderOnBootSetterService.class);
-            context.startService(service);
+        Intent service = new Intent(context, ReminderOnBootSetterService.class);
+        context.startService(service);
     }
 }
