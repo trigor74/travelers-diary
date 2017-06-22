@@ -137,7 +137,6 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="ACTION_TRACKING" />
-                <action android:name="ACTION_SINGLE_LOCATION_REQUEST" />
                 <action android:name="ACTION_GEOFENCE_LOCATION_UPDATES" />
             </intent-filter>
         </receiver>
