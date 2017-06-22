@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -50,6 +51,11 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.firebase.ui.FirebaseListAdapter;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -68,10 +74,8 @@ import com.squareup.otto.Subscribe;
 import com.travelersdiary.Constants;
 import com.travelersdiary.R;
 import com.travelersdiary.Utils;
-import com.travelersdiary.screens.gallery.AlbumImagesActivity;
-import com.travelersdiary.base.BaseActivity;
-import com.travelersdiary.screens.gallery.GalleryAlbumActivity;
 import com.travelersdiary.adapters.DiaryImagesListAdapter;
+import com.travelersdiary.base.BaseActivity;
 import com.travelersdiary.bus.BusProvider;
 import com.travelersdiary.models.AddressDetails;
 import com.travelersdiary.models.DiaryNote;
@@ -79,8 +83,9 @@ import com.travelersdiary.models.LocationPoint;
 import com.travelersdiary.models.Photo;
 import com.travelersdiary.models.Travel;
 import com.travelersdiary.models.WeatherInfo;
+import com.travelersdiary.screens.gallery.AlbumImagesActivity;
+import com.travelersdiary.screens.gallery.GalleryAlbumActivity;
 import com.travelersdiary.services.GeocoderIntentService;
-import com.travelersdiary.services.LocationTrackingService;
 import com.travelersdiary.services.UploadPhotoService;
 import com.travelersdiary.services.WeatherIntentService;
 
@@ -193,10 +198,13 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
 
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
     @Nullable
@@ -336,6 +344,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     @Override
     public void onPause() {
         BusProvider.bus().unregister(this);
+        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
         super.onPause();
     }
 
@@ -522,6 +531,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         setFabVisibility(mFabEditDiaryNote, View.VISIBLE);
 
         //refresh toolbar
+        //noinspection RestrictedApi
         mSupportActionBar.invalidateOptionsMenu();
     }
 
@@ -560,6 +570,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
         setFabVisibility(mFabEditDiaryNote, View.GONE);
 
         //refresh toolbar
+        //noinspection RestrictedApi
         mSupportActionBar.invalidateOptionsMenu();
     }
 
@@ -947,14 +958,33 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
     }
 
     // location
+    private LocationCallback mLocationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            if (locationResult != null) {
+                Location location = locationResult.getLastLocation();
+                putLocation(new LocationPoint(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        location.getAltitude()
+                ));
+            }
+        }
+    };
+
     private void startLocationRetrieval() {
-        Intent intent = new Intent(getContext(), LocationTrackingService.class);
-        intent.setAction(LocationTrackingService.ACTION_GET_CURRENT_LOCATION);
-        getActivity().startService(intent);
+        LocationRequest locationRequest = new LocationRequest()
+                .setSmallestDisplacement(15)
+                .setInterval(10000)
+                .setFastestInterval(2000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setNumUpdates(1);
+
+        mFusedLocationProviderClient
+                .requestLocationUpdates(locationRequest, mLocationCallback, null);
     }
 
-    @Subscribe
-    public void getLocation(LocationPoint location) {
+    public void putLocation(LocationPoint location) {
         if (isNewDiaryNote) {
             mDiaryFooterLayout.setVisibility(View.VISIBLE);
             mLocationLayout.setVisibility(View.VISIBLE);
@@ -1030,6 +1060,7 @@ public class DiaryFragment extends Fragment implements AppBarLayout.OnOffsetChan
 
     @Subscribe
     public void getWeather(WeatherInfo weather) {
+        isWeatherRetrievalInProgress = false;
         if (weather.getWeatherMain() != null) {
             mDiaryNote.setWeather(weather);
             setWeatherViews();

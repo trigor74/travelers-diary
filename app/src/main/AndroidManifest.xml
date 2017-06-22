@@ -122,6 +122,7 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="android.intent.action.REBOOT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
@@ -130,6 +131,16 @@
             android:name=".services.GeofenceTransitionsIntentService"
             android:exported="false" />
 
+        <receiver
+            android:name=".services.OnLocationChangedReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="ACTION_TRACKING" />
+                <action android:name="ACTION_SINGLE_LOCATION_REQUEST" />
+                <action android:name="ACTION_GEOFENCE_LOCATION_UPDATES" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

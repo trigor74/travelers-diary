@@ -11,6 +11,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
@@ -43,16 +44,11 @@ public class LocationTrackingService extends Service implements
     private static final String TAG = "LocationTrackingService";
     public static final String ACTION_START_TRACK = "ACTION_START_TRACK";
     public static final String ACTION_STOP_TRACK = "ACTION_STOP_TRACK";
-    public static final String ACTION_GET_CURRENT_LOCATION = "ACTION_GET_CURRENT_LOCATION";
     public static final String ACTION_CHECK_TRACKING = "ACTION_CHECK_TRACKING";
-    public static final String ACTION_START_GEOFENCE_LOCATION_UPDATES = "ACTION_START_GEOFENCE_LOCATION_UPDATES";
-    public static final String ACTION_STOP_GEOFENCE_LOCATION_UPDATES = "ACTION_STOP_GEOFENCE_LOCATION_UPDATES";
     private static final int ONGOING_NOTIFICATION_ID = 1002;
 
     private boolean isRequestingLocationUpdates = false;
     private boolean isTrackingEnabled = false;
-    private boolean isSingleRequestLocation = false;
-    private boolean isGeofenceTrackingEnabled = false;
     private boolean isForeground = false;
     private String mUserUID;
     private String mTravelId;
@@ -113,9 +109,8 @@ public class LocationTrackingService extends Service implements
         String action = intent.getAction();
 
         switch (action) {
-            case ACTION_GET_CURRENT_LOCATION:
             case ACTION_START_TRACK:
-            case ACTION_START_GEOFENCE_LOCATION_UPDATES:
+            case ACTION_STOP_TRACK:
                 if (isGooglePlayServicesAvailable() && !mGoogleApiClient.isConnecting()) {
                     mGoogleApiClient.connect();
                 }
@@ -124,20 +119,6 @@ public class LocationTrackingService extends Service implements
         }
 
         switch (action) {
-            case ACTION_GET_CURRENT_LOCATION:
-                isSingleRequestLocation = true;
-                if (mGoogleApiClient.isConnected()) {
-                    mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                    mLastUpdateTimestamp = System.currentTimeMillis();
-
-                    if (mCurrentLocation != null) {
-                        isSingleRequestLocation = false;
-                        sendCurrentLocation();
-                    } else {
-                        startLocationUpdates();
-                    }
-                }
-                break;
             case ACTION_START_TRACK:
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 mTravelId = sharedPreferences.getString(Constants.KEY_ACTIVE_TRAVEL_KEY, null);
@@ -160,13 +141,8 @@ public class LocationTrackingService extends Service implements
                 mTrackRef = null;
 
                 if (isForeground) {
-                    if (isGeofenceTrackingEnabled) {
-                        // start again for update notification
-                        startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
-                    } else {
-                        isForeground = false;
-                        stopForeground(true);
-                    }
+                    isForeground = false;
+                    stopForeground(true);
                 }
 
                 stopLocationUpdates();
@@ -174,31 +150,6 @@ public class LocationTrackingService extends Service implements
                 break;
             case ACTION_CHECK_TRACKING:
                 BusProvider.bus().post(new CheckTrackingEvent(isTrackingEnabled));
-                break;
-            case ACTION_START_GEOFENCE_LOCATION_UPDATES:
-                if (!isGeofenceTrackingEnabled) {
-                    isGeofenceTrackingEnabled = true;
-
-                    isForeground = true;
-                    startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
-
-                    startLocationUpdates();
-                }
-                break;
-            case ACTION_STOP_GEOFENCE_LOCATION_UPDATES:
-                isGeofenceTrackingEnabled = false;
-
-                if (isForeground) {
-                    if (isTrackingEnabled) {
-                        // start again for update notification
-                        startForeground(ONGOING_NOTIFICATION_ID, buildForegroundNotification());
-                    } else {
-                        isForeground = false;
-                        stopForeground(true);
-                    }
-                }
-
-                stopLocationUpdates();
                 break;
             default:
                 stopSelf();
@@ -213,17 +164,12 @@ public class LocationTrackingService extends Service implements
         mLastUpdateTimestamp = System.currentTimeMillis();
 
         if (mCurrentLocation != null) {
-            if (isSingleRequestLocation) {
-                sendCurrentLocation();
-                isSingleRequestLocation = false;
-            }
-
             if (isTrackingEnabled) {
                 saveCurrentTrackPoint();
             }
         }
 
-        if (isSingleRequestLocation || isTrackingEnabled || isGeofenceTrackingEnabled) {
+        if (isTrackingEnabled) {
             startLocationUpdates();
         } else {
             stopLocationUpdates();
@@ -232,13 +178,13 @@ public class LocationTrackingService extends Service implements
 
     @Override
     public void onConnectionSuspended(int i) {
-        if (isTrackingEnabled || isSingleRequestLocation || isGeofenceTrackingEnabled) {
+        if (isTrackingEnabled) {
             mGoogleApiClient.connect();
         }
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
     }
 
@@ -263,7 +209,7 @@ public class LocationTrackingService extends Service implements
 
     protected void stopLocationUpdates() {
         if (mGoogleApiClient.isConnected()
-                && !(isSingleRequestLocation || isTrackingEnabled || isGeofenceTrackingEnabled)
+                && !isTrackingEnabled
                 && isRequestingLocationUpdates) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             isRequestingLocationUpdates = false;
@@ -276,29 +222,14 @@ public class LocationTrackingService extends Service implements
         mLastUpdateTimestamp = System.currentTimeMillis();
 
         if (mCurrentLocation != null) {
-            if (isSingleRequestLocation) {
-                sendCurrentLocation();
-                isSingleRequestLocation = false;
-            }
-
             if (isTrackingEnabled) {
                 saveCurrentTrackPoint();
             }
         }
 
-        if (!isSingleRequestLocation || !isTrackingEnabled || !isGeofenceTrackingEnabled) {
+        if (!isTrackingEnabled) {
             stopLocationUpdates();
         }
-    }
-
-    private void sendCurrentLocation() {
-        if (mCurrentLocation != null) {
-            LocationPoint location = new LocationPoint(mCurrentLocation.getLatitude(),
-                    mCurrentLocation.getLongitude(),
-                    mCurrentLocation.getAltitude());
-            BusProvider.bus().post(location);
-        }
-        stopLocationUpdates();
     }
 
     private void saveCurrentTrackPoint() {
@@ -316,14 +247,13 @@ public class LocationTrackingService extends Service implements
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Bitmap icon = BitmapFactory.decodeResource(getResources(),
                 R.mipmap.ic_launcher);
-        String text = isTrackingEnabled ? "Save track" : "";
-        text = text + (isGeofenceTrackingEnabled ? (isTrackingEnabled ? ", t" : "T") + "rack geofence" : "");
+        String text = isTrackingEnabled ? "Location tracking" : "Location not tracking";
         return new Notification.Builder(this)
                 .setContentTitle("Traveler\'s Diary")
                 .setContentText(text)
                 .setSmallIcon(R.drawable.ic_pin_white_24dp)
                 .setLargeIcon(icon)
-                .setTicker("Start location requests")
+                .setTicker("Start location tracking")
                 .setContentIntent(pendingIntent)
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
