@@ -107,9 +107,6 @@
             android:name=".services.AlarmSetterService"
             android:exported="false" />
         <service
-            android:name=".services.GeofenceSetterService"
-            android:exported="false" />
-        <service
             android:name=".services.ReminderOnBootSetterService"
             android:exported="false" />
 
@@ -130,16 +127,6 @@
         <service
             android:name=".services.GeofenceTransitionsIntentService"
             android:exported="false" />
-
-        <receiver
-            android:name=".services.OnLocationChangedReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="ACTION_TRACKING" />
-                <action android:name="ACTION_GEOFENCE_LOCATION_UPDATES" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

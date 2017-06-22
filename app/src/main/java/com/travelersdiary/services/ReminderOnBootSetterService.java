@@ -33,6 +33,10 @@ public class ReminderOnBootSetterService extends Service {
         final Context context = getApplicationContext();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        //clear list of added geofence - possible changed when offline
+        sharedPreferences.edit().remove(Constants.KEY_GEOFENCE_SET).apply();
+
         String userUID = sharedPreferences.getString(Constants.KEY_USER_UID, null);
 
         Query query = new Firebase(Utils.getFirebaseUserReminderUrl(userUID))
